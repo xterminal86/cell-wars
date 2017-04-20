@@ -31,6 +31,12 @@ public class Int2
     _y = (int)v2.y;
   }
 
+  public Int2(Int2 arg)
+  {
+    _x = arg.X;
+    _y = arg.Y;
+  }
+
   public int X
   {
     set { _x = value; }
@@ -41,6 +47,18 @@ public class Int2
   {
     set { _y = value; }
     get { return _y; }
+  }
+
+  public void Set(int x, int y)
+  {
+    _x = x;
+    _y = y;
+  }
+
+  public void Set(Int2 arg)
+  {
+    _x = arg.X;
+    _y = arg.Y;
   }
 
   public static Int2 Zero

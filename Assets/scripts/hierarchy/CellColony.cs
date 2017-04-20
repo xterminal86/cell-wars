@@ -16,6 +16,7 @@ public class CellColony : CellBaseClass
     _timer += Time.smoothDeltaTime;
   }
 
+  Int2 _pos = Int2.Zero;
   void SpawnDrone()
   {
     int lx = Coordinates.X - 1;
@@ -32,7 +33,8 @@ public class CellColony : CellBaseClass
         {
           if (LevelLoader.Instance.Map[x, y].CellHere == null)
           {
-            LevelLoader.Instance.PlaceCell(x, y, GlobalConstants.CellType.DRONE);
+            _pos.Set(x, y);
+            LevelLoader.Instance.PlaceCell(_pos, GlobalConstants.CellType.DRONE);
             return;
           }
         }
