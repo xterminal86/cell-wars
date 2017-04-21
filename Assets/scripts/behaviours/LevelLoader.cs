@@ -17,10 +17,18 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   public readonly int MapSize = 16;
 
+  public int BarracksCount = 0;
+
   Dictionary<int, int> _dronesCountByOwner = new Dictionary<int, int>();
   public Dictionary<int, int> DronesCountByOwner
   {
     get { return _dronesCountByOwner; }
+  }
+
+  Dictionary<int, int> _soldiersCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> SoldiersCountByOwner
+  {
+    get { return _soldiersCountByOwner; }
   }
 
   GridCell[,] _map;
@@ -52,8 +60,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       }
     }
 
+    // FIXME: ownerID magic numbers
+
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
+
+    _soldiersCountByOwner[0] = 0;
+    _soldiersCountByOwner[1] = 0;
 
     Vector3 cameraPos = new Vector3((float)MapSize / 2.0f - 0.5f, (float)MapSize / 2.0f - 0.5f, Camera.main.transform.position.z);
 
@@ -106,6 +119,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
+        BarracksCount++;
+
         break;
 
       case GlobalConstants.CellType.SOLDIER:
@@ -114,6 +129,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         c.Type = GlobalConstants.CellType.SOLDIER;
 
         go = (GameObject)Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        _soldiersCountByOwner[ownerId]++;
 
         break;
     }
@@ -182,7 +199,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
   }
 
-  void TransformDrones(int number, int ownerId)
+  public void TransformDrones(int number, int ownerId)
   {
     int transformedCount = 0;
     for (int x = 0; x < MapSize; x++)
@@ -203,8 +220,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
          && _map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE)
         {
           transformedCount++;
-
-          _dronesCountByOwner[ownerId]--;
 
           _map[x, y].CellHere.BehaviourRef.DestroySelf();
         }

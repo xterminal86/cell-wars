@@ -29,6 +29,8 @@ public class CellSoldier : CellBaseClass
 
     _currentPos.Set(_gridX, _gridY);
     _previousPos.Set(_currentPos);
+
+    LevelLoader.Instance.Map[_currentPos.X, _currentPos.Y].SoldierHere = this;
   }
 
   Vector3 _position = Vector3.zero;
@@ -40,7 +42,9 @@ public class CellSoldier : CellBaseClass
     _magnitude = _heading.magnitude;
     _dir = _heading / _magnitude;
 
-    if (!FindEnemies() && CanOccupy())
+    CanOccupy();
+
+    if (!FindEnemies())
     {      
       _position += (_dir * Time.smoothDeltaTime * 0.5f);
     }
@@ -74,12 +78,12 @@ public class CellSoldier : CellBaseClass
   {
     if ((_currentPos.X != _previousPos.X
       || _currentPos.Y != _previousPos.Y)
-      && LevelLoader.Instance.Map[_currentPos.X, _currentPos.Y].CellHere == null)
-    {
-      _previousPos.Set(_currentPos);
+      && LevelLoader.Instance.Map[_currentPos.X, _currentPos.Y].SoldierHere == null)
+    {      
+      LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldierHere = null;
+      LevelLoader.Instance.Map[_currentPos.X, _currentPos.Y].SoldierHere = this;
 
-      LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].CellHere = null;
-      LevelLoader.Instance.Map[_currentPos.X, _currentPos.Y].CellHere = this;
+      _previousPos.Set(_currentPos);
 
       return true;
     }
@@ -102,11 +106,12 @@ public class CellSoldier : CellBaseClass
         if (x >= 0 && x < LevelLoader.Instance.MapSize
          && y >= 0 && y < LevelLoader.Instance.MapSize)
         {
-          if (LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId)
+          if ((LevelLoader.Instance.Map[x, y].SoldierHere != null && LevelLoader.Instance.Map[x, y].SoldierHere.OwnerId != OwnerId)
+           || (LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
           {           
             _enemyPos.Set(x, y);
 
-            Debug.Log("Enemy found at " + _enemyPos);
+            //Debug.Log("Enemy found at " + _enemyPos);
 
             return true;
           }

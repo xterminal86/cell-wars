@@ -33,7 +33,7 @@ public abstract class CellBaseClass
   }
 
   Int2 _pos = Int2.Zero;
-  protected void SpawnDrone(GlobalConstants.CellType cellType)
+  protected void SpawnCell(GlobalConstants.CellType cellType)
   {
     int lx = Coordinates.X - 1;
     int ly = Coordinates.Y - 1;
@@ -47,7 +47,7 @@ public abstract class CellBaseClass
         if (x >= 0 && x <= LevelLoader.Instance.MapSize
           && y >= 0 && y <= LevelLoader.Instance.MapSize)
         {
-          if (LevelLoader.Instance.Map[x, y].CellHere == null)
+          if (LevelLoader.Instance.Map[x, y].SoldierHere == null && LevelLoader.Instance.Map[x, y].CellHere == null)
           {            
             _pos.Set(x, y);
 

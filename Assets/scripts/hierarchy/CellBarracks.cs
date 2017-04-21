@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CellBarracks : CellBaseClass 
-{
-  // FIXME: soldiers by player
-
-  int _soldiersProduced = 0;
-
+{  
   public CellBarracks()
   {
     Hitpoints = GlobalConstants.CellBarracksHitpoints;
   }
+
+  int _unitsLimit = 0;
 
   float _timer = 0.0f;
   public override void Update()
@@ -24,10 +22,13 @@ public class CellBarracks : CellBaseClass
     {
       _timer = 0.0f;
 
-      if (_soldiersProduced < 1)
-      {
-        _soldiersProduced++;
-        SpawnDrone(GlobalConstants.CellType.SOLDIER);
+      _unitsLimit = LevelLoader.Instance.BarracksCount * GlobalConstants.SoldiersPerBarrack;
+
+      if (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellSoldierHitpoints 
+       && LevelLoader.Instance.SoldiersCountByOwner[OwnerId] < _unitsLimit)
+      {        
+        LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
+        SpawnCell(GlobalConstants.CellType.SOLDIER);
       }
     }
 

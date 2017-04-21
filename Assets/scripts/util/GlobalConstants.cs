@@ -8,6 +8,8 @@ public static class GlobalConstants
   public const float SoldierSpawnTimeSeconds = 3.0f;
   public const float AttackTimeout = 0.5f;
 
+  public const int SoldiersPerBarrack = 2;
+
   public const int ColonyDronesCost = 8;
   public const int BarracksDronesCost = 16;
   public const int BuildRangeDistance = 3;
@@ -16,7 +18,7 @@ public static class GlobalConstants
   public const int CellColonyHitpoints = 8;
   public const int CellBarracksHitpoints = 6;
   public const int CellSoldierHitpoints = 4;
-  public const int CellDroneHitpoints = 2;
+  public const int CellDroneHitpoints = 1;
 
   public static Dictionary<CellType, Color> PlayerColors = new Dictionary<CellType, Color>()
   {

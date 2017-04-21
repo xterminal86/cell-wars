@@ -38,7 +38,11 @@ public class Main : MonoBehaviour
 
     _highlighter.transform.position = _highligherPosition;
 
-    DronesNumber.text = string.Format("Player drones: {0}\nCPU drones: {1}", LevelLoader.Instance.DronesCountByOwner[0], LevelLoader.Instance.DronesCountByOwner[1]);
+    // FIXME: ownerID magic numbers
+
+    DronesNumber.text = string.Format("Player drones: {0}\nCPU drones: {1}\nPlayer soldiers: {2}\nCPU soldiers: {3}", 
+      LevelLoader.Instance.DronesCountByOwner[0], LevelLoader.Instance.DronesCountByOwner[1],
+      LevelLoader.Instance.SoldiersCountByOwner[0], LevelLoader.Instance.SoldiersCountByOwner[1]);
 
     PrintOccupyMap();
 
@@ -54,7 +58,7 @@ public class Main : MonoBehaviour
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {
-        if (LevelLoader.Instance.Map[x, y].CellHere == null)
+        if (LevelLoader.Instance.Map[x, y].SoldierHere == null)
         {
           _occupyMap += "0";
         }
