@@ -4,18 +4,24 @@ using UnityEngine;
 
 public class CellBase : CellBaseClass
 {
+  public CellBase()
+  {
+    Hitpoints = GlobalConstants.CellBaseHitpoints;
+  }
+
   float _timer = 0.0f;
   public override void Update()
   {
-    if (_timer > GlobalConstants.CellBaseSpawnTimeoutSeconds)
+    if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
     {
       _timer = 0.0f;
-      SpawnDrone();
+      SpawnDrone(GlobalConstants.CellType.DRONE);
     }
 
     _timer += Time.smoothDeltaTime;
   }
 
+  /*
   Int2 _pos = Int2.Zero;
   void SpawnDrone()
   {
@@ -42,4 +48,5 @@ public class CellBase : CellBaseClass
       }
     }
   }
+  */
 }

@@ -12,6 +12,7 @@ public class Main : MonoBehaviour
   public Button CancelButton;
 
   public Text DronesNumber;
+  public Text OccupyMap;
 
   GameObject _highlighter;
 
@@ -37,9 +38,36 @@ public class Main : MonoBehaviour
 
     _highlighter.transform.position = _highligherPosition;
 
-    DronesNumber.text = string.Format("Drones: {0}", LevelLoader.Instance.DronesCount);
+    DronesNumber.text = string.Format("Player drones: {0}\nCPU drones: {1}", LevelLoader.Instance.DronesCountByOwner[0], LevelLoader.Instance.DronesCountByOwner[1]);
+
+    PrintOccupyMap();
 
     EnableButtons();
+  }
+
+  string _occupyMap = string.Empty;
+  void PrintOccupyMap()
+  {   
+    _occupyMap = "";
+      
+    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    {
+      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
+      {
+        if (LevelLoader.Instance.Map[x, y].CellHere == null)
+        {
+          _occupyMap += "0";
+        }
+        else
+        {
+          _occupyMap += "1";
+        }
+      }
+
+      _occupyMap += "\n";
+    }
+
+    OccupyMap.text = _occupyMap;
   }
 
   Int2 _cellCoords = Int2.Zero;
@@ -75,16 +103,18 @@ public class Main : MonoBehaviour
   {
     if (_buildMode && _validSpot && Input.GetMouseButtonDown(0))
     {
-      LevelLoader.Instance.Build(_cellCoords, _buildingType);
+      LevelLoader.Instance.Build(_cellCoords, _buildingType, 0);
+
+      _buildMode = false;
     }
   }
 
   void EnableButtons()
   {
-    int drones = LevelLoader.Instance.DronesCount;
+    int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
 
-    BuildColonyButton.interactable = (drones >= GlobalConstants.ColonyDronesCost);
-    BuildBarracksButton.interactable = (drones >= GlobalConstants.BarracksDronesCost);
+    BuildColonyButton.interactable = (dronesPlayer >= GlobalConstants.ColonyDronesCost);
+    BuildBarracksButton.interactable = (dronesPlayer >= GlobalConstants.BarracksDronesCost);
 
     CancelButton.gameObject.SetActive(_buildMode);
   }
@@ -93,6 +123,13 @@ public class Main : MonoBehaviour
   public void BuildColonyHandler()
   {    
     _buildingType = GlobalConstants.CellType.COLONY;
+
+    _buildMode = true;
+  }
+
+  public void BuildBarracksHandler()
+  {
+    _buildingType = GlobalConstants.CellType.BARRACKS;
 
     _buildMode = true;
   }

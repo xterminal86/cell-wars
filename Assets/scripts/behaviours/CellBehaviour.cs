@@ -10,4 +10,13 @@ public class CellBehaviour : MonoBehaviour
 	{
     CellInstance.Update();
 	}
+
+  public void DestroySelf()
+  {
+    Destroy(gameObject);
+
+    //Debug.Log(LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere);
+
+    LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
+  }
 }

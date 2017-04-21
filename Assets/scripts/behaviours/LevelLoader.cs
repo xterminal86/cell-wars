@@ -8,15 +8,19 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellBasePrefab;
   public GameObject CellColonyPrefab;
   public GameObject CellDronePrefab;
+  public GameObject CellBarracksPrefab;
+  public GameObject CellSoldierPrefab;
+
+  public Material CellMaterial;
 
   Transform _gridHolder;
 
   public readonly int MapSize = 16;
 
-  int _dronesCount = 0;
-  public int DronesCount
+  Dictionary<int, int> _dronesCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> DronesCountByOwner
   {
-    get { return _dronesCount; }
+    get { return _dronesCountByOwner; }
   }
 
   GridCell[,] _map;
@@ -48,14 +52,18 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       }
     }
 
+    _dronesCountByOwner[0] = 0;
+    _dronesCountByOwner[1] = 0;
+
     Vector3 cameraPos = new Vector3((float)MapSize / 2.0f - 0.5f, (float)MapSize / 2.0f - 0.5f, Camera.main.transform.position.z);
 
     Camera.main.transform.position = cameraPos;
 
-    PlaceCell(BaseCoordinates, GlobalConstants.CellType.BASE);
+    PlaceCell(BaseCoordinates, GlobalConstants.CellType.BASE, 0);
+    PlaceCell(new Int2(MapSize - 2, MapSize - 2), GlobalConstants.CellType.BASE, 1);
   }    
 
-  public void PlaceCell(Int2 pos, GlobalConstants.CellType cellType)
+  public void PlaceCell(Int2 pos, GlobalConstants.CellType cellType, int ownerId)
   {
     CellBaseClass c = null;
     GameObject go = null;
@@ -78,7 +86,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         go = (GameObject)Instantiate(CellDronePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
-        _dronesCount++;
+        _dronesCountByOwner[ownerId]++;
 
         break;
 
@@ -90,24 +98,48 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         go = (GameObject)Instantiate(CellColonyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
+
+      case GlobalConstants.CellType.BARRACKS:
+        c = new CellBarracks();
+
+        c.Type = GlobalConstants.CellType.BARRACKS;
+
+        go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
+      case GlobalConstants.CellType.SOLDIER:
+        c = new CellSoldier();
+
+        c.Type = GlobalConstants.CellType.SOLDIER;
+
+        go = (GameObject)Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
     }
 
     if (c != null)
-    {      
+    { 
+      Material m = new Material(CellMaterial);
+      m.color = GlobalConstants.ColorsList[ownerId][c.Type];
+
+      go.GetComponent<Renderer>().material = m;
+
       if (c.Type != GlobalConstants.CellType.DRONE && c.Type != GlobalConstants.CellType.SOLDIER)
       {
         _coloniesBuiltCoordinates.Add(new Int2(pos));
       }
 
-      c.OwnerId = 0;
+      c.OwnerId = ownerId;
 
       c.Coordinates.Set(pos);
 
       CellBehaviour b = go.GetComponent<CellBehaviour>();
       b.CellInstance = c;
+      b.CellInstance.BehaviourRef = b;
+      b.CellInstance.InitBehaviour();
 
       _map[pos.X, pos.Y].CellHere = c;
-      _map[pos.X, pos.Y].CellBehaviourHere = go;
     }
   }
 
@@ -134,18 +166,23 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     return (checkCounter != 0);
   }
 
-  public void Build(Int2 pos, GlobalConstants.CellType type)
+  public void Build(Int2 pos, GlobalConstants.CellType type, int ownerId)
   {
     switch (type)
     {
       case GlobalConstants.CellType.COLONY:
-        TransformDrones(GlobalConstants.ColonyDronesCost);
-        PlaceCell(pos, type);
+        TransformDrones(GlobalConstants.ColonyDronesCost, ownerId);
+        PlaceCell(pos, type, ownerId);
+        break;
+
+      case GlobalConstants.CellType.BARRACKS:
+        TransformDrones(GlobalConstants.BarracksDronesCost, ownerId);
+        PlaceCell(pos, type, ownerId);
         break;
     }
   }
 
-  void TransformDrones(int number)
+  void TransformDrones(int number, int ownerId)
   {
     int transformedCount = 0;
     for (int x = 0; x < MapSize; x++)
@@ -162,17 +199,14 @@ public class LevelLoader : MonoSingleton<LevelLoader>
           return;
         }
 
-        if (_map[x, y].CellHere.OwnerId == 0
+        if (_map[x, y].CellHere.OwnerId == ownerId
          && _map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE)
         {
           transformedCount++;
 
-          _dronesCount--;
+          _dronesCountByOwner[ownerId]--;
 
-          Destroy(_map[x, y].CellBehaviourHere);
-
-          _map[x, y].CellBehaviourHere = null;
-          _map[x, y].CellHere = null;
+          _map[x, y].CellHere.BehaviourRef.DestroySelf();
         }
       }
     }

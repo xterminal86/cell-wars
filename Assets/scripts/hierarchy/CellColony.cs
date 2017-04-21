@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class CellColony : CellBaseClass 
 {
+  public CellColony()
+  {
+    Hitpoints = GlobalConstants.CellColonyHitpoints;
+  }
+
   float _timer = 0.0f;
   public override void Update()
   {
-    if (_timer > GlobalConstants.CellBaseSpawnTimeoutSeconds)
+    if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
     {
       _timer = 0.0f;
       SpawnDrone();
@@ -34,7 +39,7 @@ public class CellColony : CellBaseClass
           if (LevelLoader.Instance.Map[x, y].CellHere == null)
           {
             _pos.Set(x, y);
-            LevelLoader.Instance.PlaceCell(_pos, GlobalConstants.CellType.DRONE);
+            LevelLoader.Instance.PlaceCell(_pos, GlobalConstants.CellType.DRONE, OwnerId);
             return;
           }
         }

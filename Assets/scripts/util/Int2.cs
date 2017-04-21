@@ -55,6 +55,12 @@ public class Int2
     _y = y;
   }
 
+  public void Set(float x, float y)
+  {
+    _x = (int)x;
+    _y = (int)y;
+  }
+
   public void Set(Int2 arg)
   {
     _x = arg.X;
