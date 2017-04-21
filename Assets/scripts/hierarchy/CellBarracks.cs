@@ -22,7 +22,7 @@ public class CellBarracks : CellBaseClass
     {
       _timer = 0.0f;
 
-      _unitsLimit = LevelLoader.Instance.BarracksCount * GlobalConstants.SoldiersPerBarrack;
+      _unitsLimit = LevelLoader.Instance.BarracksCountByOwner[OwnerId] * GlobalConstants.SoldiersPerBarrack;
 
       if (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellSoldierHitpoints 
        && LevelLoader.Instance.SoldiersCountByOwner[OwnerId] < _unitsLimit)

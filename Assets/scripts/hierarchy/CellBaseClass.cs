@@ -26,7 +26,7 @@ public abstract class CellBaseClass
   {
     Hitpoints -= amount;
 
-    if (Hitpoints == 0)
+    if (Hitpoints <= 0)
     {
       BehaviourRef.DestroySelf();
     }

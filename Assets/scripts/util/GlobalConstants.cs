@@ -9,11 +9,11 @@ public static class GlobalConstants
   public const float AttackTimeout = 0.5f;
 
   public const int SoldiersPerBarrack = 2;
+  public const int BuildRangeDistance = 3;
 
   public const int ColonyDronesCost = 8;
   public const int BarracksDronesCost = 16;
-  public const int BuildRangeDistance = 3;
- 
+
   public const int CellBaseHitpoints = 12;
   public const int CellColonyHitpoints = 8;
   public const int CellBarracksHitpoints = 6;

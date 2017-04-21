@@ -12,23 +12,37 @@ public class CellBehaviour : MonoBehaviour
 	}
 
   public void DestroySelf()
-  {
+  {    
     if (CellInstance.Type == GlobalConstants.CellType.DRONE)
     {
       LevelLoader.Instance.DronesCountByOwner[CellInstance.OwnerId]--;
-    } else if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
+    }
+    else if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
     {
       LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
-    } 
+      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldierHere = null;
+    }
     else if (CellInstance.Type == GlobalConstants.CellType.BARRACKS)
     {
-      LevelLoader.Instance.BarracksCount--;
+      LevelLoader.Instance.BarracksCountByOwner[CellInstance.OwnerId]--;
+
+      LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
+    }
+    else if (CellInstance.Type == GlobalConstants.CellType.COLONY)
+    {
+      LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
+    }
+
+    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
+    {
+      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
     }
 
     Destroy(gameObject);
 
-    //Debug.Log(LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere);
-
-    LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
+    if (CellInstance.Type == GlobalConstants.CellType.BASE)
+    {
+      LevelLoader.Instance.GameOver(CellInstance.OwnerId);    
+    }
   }
 }

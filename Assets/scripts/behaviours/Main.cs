@@ -87,7 +87,7 @@ public class Main : MonoBehaviour
       _cellCoords.X = (int)hitInfo.collider.gameObject.transform.position.x;
       _cellCoords.Y = (int)hitInfo.collider.gameObject.transform.position.y;
 
-      _validSpot = LevelLoader.Instance.CheckLocationToBuild(_cellCoords);
+      _validSpot = LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 0);
 
       if (_buildMode)
       {

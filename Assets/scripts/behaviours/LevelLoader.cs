@@ -17,7 +17,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   public readonly int MapSize = 16;
 
-  public int BarracksCount = 0;
+  Dictionary<int, int> _barracksCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> BarracksCountByOwner
+  {
+    get { return _barracksCountByOwner; }
+  }
 
   Dictionary<int, int> _dronesCountByOwner = new Dictionary<int, int>();
   public Dictionary<int, int> DronesCountByOwner
@@ -37,9 +41,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _map; }
   }
 
-  List<Int2> _coloniesBuiltCoordinates = new List<Int2>();
+  Dictionary<int, List<Int2>> _buildingsCoordinatesByOwner = new Dictionary<int, List<Int2>>();
+  public Dictionary<int, List<Int2>> BuildingsCoordinatesByOwner
+  {
+    get { return _buildingsCoordinatesByOwner; }
+  }
 
-  public readonly Int2 BaseCoordinates = new Int2(1, 1);
+  Dictionary<int, Int2> _baseCoordinatesByOwner = new Dictionary<int, Int2>();
+  public Dictionary<int, Int2> BaseCoordinatesByOwner
+  {
+    get { return _baseCoordinatesByOwner; }
+  }
 
   public override void Initialize()    
   {    
@@ -62,6 +74,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     // FIXME: ownerID magic numbers
 
+    _buildingsCoordinatesByOwner[0] = new List<Int2>();
+    _buildingsCoordinatesByOwner[1] = new List<Int2>();
+
+    _barracksCountByOwner[0] = 0;
+    _barracksCountByOwner[1] = 0;
+
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
 
@@ -72,8 +90,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     Camera.main.transform.position = cameraPos;
 
-    PlaceCell(BaseCoordinates, GlobalConstants.CellType.BASE, 0);
-    PlaceCell(new Int2(MapSize - 2, MapSize - 2), GlobalConstants.CellType.BASE, 1);
+    _baseCoordinatesByOwner[0] = new Int2(1, 1);
+    _baseCoordinatesByOwner[1] = new Int2(MapSize - 2, MapSize - 2);
+
+    PlaceCell(_baseCoordinatesByOwner[0], GlobalConstants.CellType.BASE, 0);
+    PlaceCell(_baseCoordinatesByOwner[1], GlobalConstants.CellType.BASE, 1);
   }    
 
   public void PlaceCell(Int2 pos, GlobalConstants.CellType cellType, int ownerId)
@@ -119,7 +140,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
-        BarracksCount++;
+        _barracksCountByOwner[ownerId]++;
 
         break;
 
@@ -144,7 +165,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
       if (c.Type != GlobalConstants.CellType.DRONE && c.Type != GlobalConstants.CellType.SOLDIER)
       {
-        _coloniesBuiltCoordinates.Add(new Int2(pos));
+        _buildingsCoordinatesByOwner[ownerId].Add(new Int2(pos));
       }
 
       c.OwnerId = ownerId;
@@ -160,7 +181,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
   }
 
-  public bool CheckLocationToBuild(Int2 posToCheck)
+  public bool CheckLocationToBuild(Int2 posToCheck, int ownerId)
   {
     if (_map[posToCheck.X, posToCheck.Y].CellHere != null)
     {
@@ -170,7 +191,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     int d = 0;
 
     int checkCounter = 0;
-    foreach (var item in _coloniesBuiltCoordinates)
+    foreach (var item in _buildingsCoordinatesByOwner[ownerId])
     {
       d = Utils.BlockDistance(item, posToCheck);
 
@@ -225,5 +246,23 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         }
       }
     }
+  }
+
+  public void RemoveBuildingFromDictionary(int ownerId, Int2 pos)
+  {
+    for (int i = 0; i < _buildingsCoordinatesByOwner[ownerId].Count; i++)
+    {
+      if (_buildingsCoordinatesByOwner[ownerId][i].X == pos.X 
+       && _buildingsCoordinatesByOwner[ownerId][i].Y == pos.Y)
+      {
+        _buildingsCoordinatesByOwner[ownerId].Remove(_buildingsCoordinatesByOwner[ownerId][i]);
+        return;
+      }
+    }
+  }
+
+  public void GameOver(int loserId)
+  {
+    Time.timeScale = 0.0f;
   }
 }
