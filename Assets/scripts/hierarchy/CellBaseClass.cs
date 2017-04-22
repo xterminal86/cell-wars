@@ -13,13 +13,14 @@ public abstract class CellBaseClass
   public GlobalConstants.CellType Type;
 
   public CellBehaviour BehaviourRef;
- 
+  public Transform ModelTransform;
+
   public virtual void Update()
   {
   }
 
   public virtual void InitBehaviour()
-  {
+  {    
   }
 
   public void ReceiveDamage(int amount)

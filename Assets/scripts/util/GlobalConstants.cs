@@ -7,6 +7,7 @@ public static class GlobalConstants
   public const float DroneSpawnTimeSeconds = 1.0f;
   public const float SoldierSpawnTimeSeconds = 3.0f;
   public const float AttackTimeout = 0.5f;
+  public const float BulletSpeed = 2.0f;
 
   public const int SoldiersPerBarrack = 2;
   public const int BuildRangeDistance = 3;

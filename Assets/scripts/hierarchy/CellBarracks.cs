@@ -14,9 +14,9 @@ public class CellBarracks : CellBaseClass
   float _timer = 0.0f;
   public override void Update()
   {
-    BehaviourRef.transform.Rotate(Vector3.right, Time.smoothDeltaTime * 5.0f);
-    BehaviourRef.transform.Rotate(Vector3.up, Time.smoothDeltaTime * 10.0f);
-    BehaviourRef.transform.Rotate(Vector3.down, Time.smoothDeltaTime * 2.5f);
+    ModelTransform.Rotate(Vector3.right, Time.smoothDeltaTime * 10.0f);
+    ModelTransform.Rotate(Vector3.up, Time.smoothDeltaTime * 20.0f);
+    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 5.0f);
 
     if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)
     {

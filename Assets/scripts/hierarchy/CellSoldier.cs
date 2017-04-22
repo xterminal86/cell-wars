@@ -70,9 +70,9 @@ public class CellSoldier : CellBaseClass
 
     Coordinates.Set(_gridX, _gridY);
 
-    BehaviourRef.transform.Rotate(Vector3.right, Time.smoothDeltaTime * 50.0f);
-    BehaviourRef.transform.Rotate(Vector3.up, Time.smoothDeltaTime * 100.0f);
-    BehaviourRef.transform.Rotate(Vector3.down, Time.smoothDeltaTime * 25.0f);
+    ModelTransform.Rotate(Vector3.right, Time.smoothDeltaTime * 50.0f);
+    ModelTransform.Rotate(Vector3.up, Time.smoothDeltaTime * 100.0f);
+    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 25.0f);
 
     BehaviourRef.transform.position = _position;
   }
@@ -187,8 +187,25 @@ exitLoop:
     _target.y = pos.Y;
   }
 
+  Vector3 _enemyPosition3D = Vector3.zero;
   void AttackCell()
   {
+    Vector3 posTmp = Vector3.zero;
+
+    if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere != null)
+    {
+      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere.BehaviourRef.transform.position;
+    }
+    else if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere != null)
+    {
+      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.BehaviourRef.transform.position;
+    }
+      
+    _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
+
+    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D);
+
+    /*
     if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere != null)
     {
       LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere.ReceiveDamage(1);
@@ -197,6 +214,7 @@ exitLoop:
     {
       LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.ReceiveDamage(1);
     }
+    */
 
     //Debug.Log("Attacking " + c + " at " + c.Coordinates); 
   }

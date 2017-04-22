@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelLoader : MonoSingleton<LevelLoader> 
-{
+{  
   public GameObject GridCellPrefab;
   public GameObject CellBasePrefab;
   public GameObject CellColonyPrefab;
@@ -11,9 +11,15 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellBarracksPrefab;
   public GameObject CellSoldierPrefab;
 
+  public GameObject BulletPrefab;
+
   public Material CellMaterial;
 
   Transform _gridHolder;
+  public Transform GridHolder
+  {
+    get { return _gridHolder; }
+  }
 
   public readonly int MapSize = 16;
 
@@ -161,7 +167,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       Material m = new Material(CellMaterial);
       m.color = GlobalConstants.ColorsList[ownerId][c.Type];
 
-      go.GetComponent<Renderer>().material = m;
+      go.GetComponentInChildren<Renderer>().material = m;
 
       if (c.Type != GlobalConstants.CellType.DRONE && c.Type != GlobalConstants.CellType.SOLDIER)
       {
@@ -175,6 +181,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       CellBehaviour b = go.GetComponent<CellBehaviour>();
       b.CellInstance = c;
       b.CellInstance.BehaviourRef = b;
+      b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
       _map[pos.X, pos.Y].CellHere = c;
@@ -264,5 +271,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public void GameOver(int loserId)
   {
     Time.timeScale = 0.0f;
+  }
+
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos)
+  {
+    GameObject bullet = (GameObject)Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
+    bullet.GetComponent<Bullet>().SetTarget(targetPos);
   }
 }

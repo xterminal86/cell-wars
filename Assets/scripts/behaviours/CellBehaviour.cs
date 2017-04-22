@@ -6,8 +6,13 @@ public class CellBehaviour : MonoBehaviour
 {
   public CellBaseClass CellInstance;
   	
+  public TextMesh HpText;
+  public Transform ModelTransform;
+
 	void Update () 
 	{
+    HpText.text = CellInstance.Hitpoints.ToString();
+
     CellInstance.Update();
 	}
 
