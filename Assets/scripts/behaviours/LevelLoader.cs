@@ -21,7 +21,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _gridHolder; }
   }
 
-  public readonly int MapSize = 16;
+  public int MapSize = 32;
 
   Dictionary<int, int> _barracksCountByOwner = new Dictionary<int, int>();
   public Dictionary<int, int> BarracksCountByOwner
@@ -239,7 +239,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
           continue;
         }
 
-        if (transformedCount > number)
+        if (transformedCount >= number)
         {
           return;
         }

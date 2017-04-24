@@ -5,9 +5,11 @@ using UnityEngine;
 public static class GlobalConstants 
 {
   public const float DroneSpawnTimeSeconds = 1.0f;
-  public const float SoldierSpawnTimeSeconds = 3.0f;
+  public const float SoldierSpawnTimeSeconds = 4.0f;
   public const float AttackTimeout = 0.5f;
   public const float BulletSpeed = 2.0f;
+  public const float CameraZoomSpeed = 1.0f;
+  public const float CameraMoveSpeed = 10.0f;
 
   public const int SoldiersPerBarrack = 2;
   public const int BuildRangeDistance = 3;
@@ -20,6 +22,12 @@ public static class GlobalConstants
   public const int CellBarracksHitpoints = 6;
   public const int CellSoldierHitpoints = 4;
   public const int CellDroneHitpoints = 1;
+
+  public static Dictionary<CellType, int> DroneCostByType = new Dictionary<CellType, int>()
+  {
+    { CellType.COLONY, ColonyDronesCost },
+    { CellType.BARRACKS, BarracksDronesCost }
+  };
 
   public static Dictionary<CellType, Color> PlayerColors = new Dictionary<CellType, Color>()
   {
@@ -50,6 +58,7 @@ public static class GlobalConstants
     COLONY,
     DRONE,
     BARRACKS,
-    SOLDIER
+    SOLDIER,
+    NONE
   }
 }

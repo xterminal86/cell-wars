@@ -13,6 +13,7 @@ public class Main : MonoBehaviour
 
   public Text DronesNumber;
   public Text OccupyMap;
+  public Text InfoText;
 
   GameObject _highlighter;
 
@@ -21,12 +22,18 @@ public class Main : MonoBehaviour
   bool _buildMode = false;
   bool _validSpot = false;
 
+  float _cameraLimitX = 0.0f, _cameraLimitY = 0.0f;
   void Start()
   {    
+    InfoText.text = "";
+      
     _highlighter = (GameObject)Instantiate(GridHighlighter, Vector3.zero, Quaternion.identity);
     _highlighterMaterial = _highlighter.GetComponent<Renderer>().material;
 
     LevelLoader.Instance.Initialize();
+
+    _cameraLimitX = LevelLoader.Instance.MapSize;
+    _cameraLimitY = LevelLoader.Instance.MapSize;
   }
 
   Vector3 _mousePosition = Vector3.zero;
@@ -35,6 +42,7 @@ public class Main : MonoBehaviour
   {
     ProcessHighlighter();
     ProcessInput();
+    ControlCamera();
 
     _highlighter.transform.position = _highligherPosition;
 
@@ -44,7 +52,7 @@ public class Main : MonoBehaviour
       LevelLoader.Instance.DronesCountByOwner[0], LevelLoader.Instance.DronesCountByOwner[1],
       LevelLoader.Instance.SoldiersCountByOwner[0], LevelLoader.Instance.SoldiersCountByOwner[1]);
 
-    PrintOccupyMap();
+    //PrintOccupyMap();
 
     EnableButtons();
   }
@@ -104,13 +112,70 @@ public class Main : MonoBehaviour
   }
 
   void ProcessInput()
-  {
+  {    
     if (_buildMode && _validSpot && Input.GetMouseButtonDown(0))
     {
+      if (LevelLoader.Instance.DronesCountByOwner[0] < GlobalConstants.DroneCostByType[_buildingType])
+      {
+        PrintInfoText("Not enough drones!");
+        return;
+      }
+
       LevelLoader.Instance.Build(_cellCoords, _buildingType, 0);
 
       _buildMode = false;
     }
+  }
+
+  Vector3 _cameraPos = Vector3.zero;
+  float _zoom = 0.0f, _cameraMoveSpeed = 0.0f;
+  void ControlCamera()
+  {
+    _cameraPos = Camera.main.transform.position;
+    _zoom = Camera.main.orthographicSize;
+    _cameraMoveSpeed = GlobalConstants.CameraMoveSpeed;
+
+    if (Input.GetKey(KeyCode.LeftShift))
+    {
+      _cameraMoveSpeed *= 2.0f;
+    }
+
+    if (Input.GetKey(KeyCode.A))
+    {
+      _cameraPos.x -= Time.smoothDeltaTime * _cameraMoveSpeed;
+    }
+
+    if (Input.GetKey(KeyCode.D))
+    {
+      _cameraPos.x += Time.smoothDeltaTime * _cameraMoveSpeed;
+    }
+
+    if (Input.GetKey(KeyCode.W))
+    {
+      _cameraPos.y += Time.smoothDeltaTime * _cameraMoveSpeed;
+    }
+
+    if (Input.GetKey(KeyCode.S))
+    {
+      _cameraPos.y -= Time.smoothDeltaTime * _cameraMoveSpeed;
+    }
+
+    if (Input.GetAxis("Mouse ScrollWheel") > 0.0f)
+    {
+      _zoom -= GlobalConstants.CameraZoomSpeed;
+    }
+    else if (Input.GetAxis("Mouse ScrollWheel") < 0.0f)
+    {
+      _zoom += GlobalConstants.CameraZoomSpeed;
+    }
+
+    _cameraPos.x = Mathf.Clamp(_cameraPos.x, 0.0f, _cameraLimitX);
+    _cameraPos.y = Mathf.Clamp(_cameraPos.y, 0.0f, _cameraLimitX);
+
+    _zoom = Mathf.Clamp(_zoom, 2.0f, Mathf.Infinity);
+
+    Camera.main.transform.position = _cameraPos;
+    Camera.main.orthographicSize = _zoom;
   }
 
   void EnableButtons()
@@ -123,23 +188,46 @@ public class Main : MonoBehaviour
     CancelButton.gameObject.SetActive(_buildMode);
   }
 
-  GlobalConstants.CellType _buildingType;
-  public void BuildColonyHandler()
-  {    
-    _buildingType = GlobalConstants.CellType.COLONY;
-
-    _buildMode = true;
-  }
-
-  public void BuildBarracksHandler()
+  GlobalConstants.CellType _buildingType = GlobalConstants.CellType.NONE;
+  public void BuildSelectHandler(int buildingIndex)
   {
-    _buildingType = GlobalConstants.CellType.BARRACKS;
+    switch (buildingIndex)
+    {
+      case 0:
+        _buildingType = GlobalConstants.CellType.COLONY;
+        break;
+
+      case 1:
+        _buildingType = GlobalConstants.CellType.BARRACKS;
+        break;
+    }
 
     _buildMode = true;
   }
 
   public void CancelBuild()
   {    
+    _buildingType = GlobalConstants.CellType.NONE;
     _buildMode = false;
+  }
+
+  public void PrintInfoText(string text)
+  {
+    StartCoroutine(PrintAndFadeTextRoutine(text));
+  }
+
+  IEnumerator PrintAndFadeTextRoutine(string textToShow)
+  {
+    InfoText.text = textToShow;
+
+    float _timer = 0.0f;
+    while (_timer < 3.0f)
+    {
+      _timer += Time.smoothDeltaTime;
+
+      yield return null;
+    }
+
+    InfoText.text = "";
   }
 }
