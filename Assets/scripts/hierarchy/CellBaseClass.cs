@@ -36,6 +36,17 @@ public abstract class CellBaseClass
   Int2 _pos = Int2.Zero;
   protected void SpawnCell(GlobalConstants.CellType cellType)
   {
+    int _enemyID = -1;
+
+    foreach (var kvp in LevelLoader.Instance.BaseCoordinatesByOwner)
+    {
+      if (kvp.Key != OwnerId)
+      {
+        _enemyID = kvp.Key;
+        break;
+      }
+    }
+
     int lx = Coordinates.X - 1;
     int ly = Coordinates.Y - 1;
     int hx = Coordinates.X + 1;
@@ -48,7 +59,7 @@ public abstract class CellBaseClass
         if (x >= 0 && x <= LevelLoader.Instance.MapSize
           && y >= 0 && y <= LevelLoader.Instance.MapSize)
         {
-          if (LevelLoader.Instance.Map[x, y].SoldierHere == null && LevelLoader.Instance.Map[x, y].CellHere == null)
+          if (LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyID].Count == 0 && LevelLoader.Instance.Map[x, y].CellHere == null)
           {            
             _pos.Set(x, y);
 

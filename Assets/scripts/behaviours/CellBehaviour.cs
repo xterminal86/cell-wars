@@ -25,7 +25,8 @@ public class CellBehaviour : MonoBehaviour
     else if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
     {
       LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
-      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldierHere = null;
+      //LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldierHere = null;
+      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldiersByOwnerHere[CellInstance.OwnerId].Dequeue();
     }
     else if (CellInstance.Type == GlobalConstants.CellType.BARRACKS)
     {

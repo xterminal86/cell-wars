@@ -22,7 +22,7 @@ public class Main : MonoBehaviour
   bool _buildMode = false;
   bool _validSpot = false;
 
-  float _cameraLimitX = 0.0f, _cameraLimitY = 0.0f;
+  float _cameraScrollLimit = 0.0f;
   void Start()
   {    
     InfoText.text = "";
@@ -32,8 +32,7 @@ public class Main : MonoBehaviour
 
     LevelLoader.Instance.Initialize();
 
-    _cameraLimitX = LevelLoader.Instance.MapSize;
-    _cameraLimitY = LevelLoader.Instance.MapSize;
+    _cameraScrollLimit = LevelLoader.Instance.MapSize;
   }
 
   Vector3 _mousePosition = Vector3.zero;
@@ -169,8 +168,8 @@ public class Main : MonoBehaviour
       _zoom += GlobalConstants.CameraZoomSpeed;
     }
 
-    _cameraPos.x = Mathf.Clamp(_cameraPos.x, 0.0f, _cameraLimitX);
-    _cameraPos.y = Mathf.Clamp(_cameraPos.y, 0.0f, _cameraLimitX);
+    _cameraPos.x = Mathf.Clamp(_cameraPos.x, 0.0f, _cameraScrollLimit);
+    _cameraPos.y = Mathf.Clamp(_cameraPos.y, 0.0f, _cameraScrollLimit);
 
     _zoom = Mathf.Clamp(_zoom, 2.0f, Mathf.Infinity);
 

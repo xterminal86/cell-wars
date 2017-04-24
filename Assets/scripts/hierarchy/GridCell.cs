@@ -8,4 +8,14 @@ public class GridCell
 
   public CellBaseClass CellHere;
   public CellBaseClass SoldierHere;
+
+  public Dictionary<int, Queue<CellBaseClass>> SoldiersByOwnerHere = new Dictionary<int, Queue<CellBaseClass>>();
+
+  public GridCell()
+  {
+    // FIXME: hardcoded owner IDs
+
+    SoldiersByOwnerHere[0] = new Queue<CellBaseClass>();
+    SoldiersByOwnerHere[1] = new Queue<CellBaseClass>();
+  }
 }

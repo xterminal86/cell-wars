@@ -273,9 +273,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     Time.timeScale = 0.0f;
   }
 
-  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos)
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, int enemyID)
   {
     GameObject bullet = (GameObject)Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
-    bullet.GetComponent<Bullet>().SetTarget(targetPos);
+    bullet.GetComponent<Bullet>().SetTarget(targetPos, enemyID);
   }
 }

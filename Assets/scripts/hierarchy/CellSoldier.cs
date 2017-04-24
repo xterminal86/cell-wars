@@ -14,6 +14,7 @@ public class CellSoldier : CellBaseClass
 
   Int2 _previousPos = Int2.Zero;
 
+  int _enemyId = 0;
   public CellSoldier()
   {    
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
@@ -21,6 +22,17 @@ public class CellSoldier : CellBaseClass
 
   public override void InitBehaviour()
   {
+    // Find enemy ID
+
+    foreach (var b in LevelLoader.Instance.BaseCoordinatesByOwner)
+    {
+      if (OwnerId != b.Key)
+      {
+        _enemyId = b.Key;
+        break;
+      }
+    }
+
     _position = BehaviourRef.transform.position;
 
     _gridX = Mathf.Round(_position.x);
@@ -29,7 +41,7 @@ public class CellSoldier : CellBaseClass
     Coordinates.Set(_gridX, _gridY);
     _previousPos.Set(Coordinates);
 
-    LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldierHere = this;
+    LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldiersByOwnerHere[OwnerId].Enqueue(this);
 
     FindTarget();
   }
@@ -87,6 +99,7 @@ public class CellSoldier : CellBaseClass
 
   bool CanOccupy()
   {
+    /*
     if ((Coordinates.X != _previousPos.X
       || Coordinates.Y != _previousPos.Y)
       && LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldierHere == null)
@@ -98,11 +111,28 @@ public class CellSoldier : CellBaseClass
 
       return true;
     }
+    */
+
+    if (Coordinates.X != _previousPos.X || Coordinates.Y != _previousPos.Y)
+    { 
+      if (LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldiersByOwnerHere[OwnerId].Count != 0)
+      {
+        //Debug.Log("Removing self from " + _previousPos);
+
+        LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldiersByOwnerHere[OwnerId].Dequeue();
+      }
+
+      //Debug.Log("Adding self to " + Coordinates);
+
+      LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldiersByOwnerHere[OwnerId].Enqueue(this);
+
+      _previousPos.Set(Coordinates);
+
+      return true;
+    }
 
     return false;
   }
-
-  int _enemyId = 0;
 
   Int2 _enemyPos = Int2.Zero;
   bool FindEnemies()
@@ -119,6 +149,30 @@ public class CellSoldier : CellBaseClass
         if (x >= 0 && x < LevelLoader.Instance.MapSize
          && y >= 0 && y < LevelLoader.Instance.MapSize)
         {
+          // Check soldiers
+
+          if (LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyId].Count != 0)            
+          {
+            
+            _enemyPos.Set(LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyId].Peek().Coordinates);
+
+            //Debug.Log("Soldier found at " + _enemyPos);
+
+            return true;
+          }
+
+          // Check other cells
+
+          if ((LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
+          {
+            _enemyPos.Set(x, y);
+
+            //Debug.Log("Enemy cell found at " + _enemyPos);
+
+            return true;
+          }
+
+          /*
           if ((LevelLoader.Instance.Map[x, y].SoldierHere != null && LevelLoader.Instance.Map[x, y].SoldierHere.OwnerId != OwnerId)
            || (LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
           { 
@@ -128,6 +182,7 @@ public class CellSoldier : CellBaseClass
 
             return true;
           }
+          */
         }
       }
     }
@@ -136,22 +191,7 @@ public class CellSoldier : CellBaseClass
   }
 
   void FindTarget()
-  {    
-    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
-    {
-      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
-      {        
-        if (LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId)
-        {
-          _enemyId = LevelLoader.Instance.Map[x, y].CellHere.OwnerId;
-
-          goto exitLoop;
-        }            
-      }
-    }
-      
-exitLoop: 
-
+  { 
     float distance = 0.0f;
     float minDistance = float.MaxValue;
 
@@ -160,22 +200,19 @@ exitLoop:
 
     bool found = false;
 
-    foreach (var kvp in LevelLoader.Instance.BaseCoordinatesByOwner)
+    foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[_enemyId])
     {      
-      if (kvp.Key == _enemyId)
+      distance = Vector3.Distance(new Vector3(item.X, item.Y), new Vector3(Coordinates.X, Coordinates.Y));
+
+      if (minDistance <= distance)
       {
-        distance = Vector3.Distance(new Vector3(kvp.Value.X, kvp.Value.Y), new Vector3(Coordinates.X, Coordinates.Y));
+        found = true;
 
-        if (minDistance <= distance)
-        {
-          found = true;
-
-          pos.Set(kvp.Value);
-          minDistance = distance;
-        }
-
-        pos2.Set(kvp.Value);
+        pos.Set(item);
+        minDistance = distance;
       }
+
+      pos2.Set(item);
     }
 
     if (!found)
@@ -192,6 +229,20 @@ exitLoop:
   {
     Vector3 posTmp = Vector3.zero;
 
+    if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldiersByOwnerHere[_enemyId].Count != 0)
+    {
+      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldiersByOwnerHere[_enemyId].Peek().BehaviourRef.transform.position;
+    }
+    else if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere != null)
+    {
+      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.BehaviourRef.transform.position;
+    }
+
+    _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
+
+    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemyId);
+
+    /*
     if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere != null)
     {
       posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere.BehaviourRef.transform.position;
@@ -204,16 +255,6 @@ exitLoop:
     _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
 
     LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D);
-
-    /*
-    if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere != null)
-    {
-      LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere.ReceiveDamage(1);
-    } 
-    else if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere != null)
-    {
-      LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.ReceiveDamage(1);
-    }
     */
 
     //Debug.Log("Attacking " + c + " at " + c.Coordinates); 

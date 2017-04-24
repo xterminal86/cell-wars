@@ -6,8 +6,10 @@ public class Bullet : MonoBehaviour
 {
   public GameObject BulletHitEffectPrefab;
 
+  int _enemyID = -1;
+
   Vector3 _targetPos = Vector3.zero;
-  public void SetTarget(Vector3 targetPos)
+  public void SetTarget(Vector3 targetPos, int enemyID)
   {
     _targetPos = targetPos;
 
@@ -15,6 +17,8 @@ public class Bullet : MonoBehaviour
     _gridY = Mathf.Round(_targetPos.y);
 
     _gridPos.Set(_gridX, _gridY);
+
+    _enemyID = enemyID;
   }
 
   Vector3 _position = Vector3.zero;
@@ -41,7 +45,12 @@ public class Bullet : MonoBehaviour
       var hitEffect = (GameObject)Instantiate(BulletHitEffectPrefab, new Vector3(_position.x, _position.y, BulletHitEffectPrefab.transform.position.z), Quaternion.identity, LevelLoader.Instance.GridHolder);
 
       var cell = LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].CellHere;
-      var soldier = LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].SoldierHere;
+      CellBaseClass soldier = null;
+
+      if (LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].SoldiersByOwnerHere[_enemyID].Count != 0)
+      {
+        soldier = LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].SoldiersByOwnerHere[_enemyID].Peek();
+      }
 
       if (cell != null)
       {
