@@ -6,7 +6,9 @@ public class AI : MonoBehaviour
 {
   LevelLoader _level;
 
-  int _maxBuildActions = 3;
+  // Limit of build actions performed by CPU
+  public int MaxBuildActions = int.MaxValue;
+
   int _buildActionsDone = 0;
 
   void Start()
@@ -16,17 +18,45 @@ public class AI : MonoBehaviour
 
   void Update()
   {
-    if (_buildActionsDone < _maxBuildActions)
+    CountBuildings();
+
+    if (_buildActionsDone < MaxBuildActions)
     {
-      if (BuildDone())
+      DecideWhatToBuild();
+    }
+  }
+
+  int _coloniesBuilt = 0, _barracksBuilt = 0;
+  void CountBuildings()
+  {
+    _coloniesBuilt = 0;
+    _barracksBuilt = 0;
+
+    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    {
+      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {
-        _buildActionsDone++;
+        var cell = LevelLoader.Instance.Map[x, y];
+
+        // FIXME: hardcoded AI id
+
+        if (cell.CellHere != null && cell.CellHere.OwnerId == 1)
+        {
+          if (cell.CellHere.Type == GlobalConstants.CellType.BARRACKS)
+          {
+            _barracksBuilt++;
+          }
+          else if (cell.CellHere.Type == GlobalConstants.CellType.COLONY)
+          {
+            _coloniesBuilt++;
+          }
+        }
       }
     }
   }
 
   Int2 _pos = Int2.Zero;
-  bool BuildDone()
+  void DecideWhatToBuild()
   {
     for (int x = 0; x < _level.MapSize; x++)
     {
@@ -34,39 +64,24 @@ public class AI : MonoBehaviour
       {
         _pos.Set(x, y);
 
-        if (_level.CheckLocationToBuild(_pos, 1))
+        if (_level.CheckLocationToBuild(_pos, 1) && TryToBuild(_pos))
         {
-          return TryToBuild(_pos);         
+          _buildActionsDone++;
         }
       }
     }
-
-    return false;
   }
 
   bool TryToBuild(Int2 posToBuild)
   {
-    bool res = false;
+    var buildingType = (_coloniesBuilt > _barracksBuilt) ? GlobalConstants.CellType.BARRACKS : GlobalConstants.CellType.COLONY;
 
-    switch (_buildActionsDone)
-    {
-      case 0:
-        if (_level.DronesCountByOwner[1] >= GlobalConstants.ColonyDronesCost)
-        {
-          _level.Build(posToBuild, GlobalConstants.CellType.COLONY, 1);
-          res = true;
-        }         
-        break;
+    if (_level.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
+    {      
+      _level.Build(posToBuild, buildingType, 1);
+      return true;
+    }    
 
-      case 1:
-        if (_level.DronesCountByOwner[1] >= GlobalConstants.BarracksDronesCost)
-        {
-          _level.Build(posToBuild, GlobalConstants.CellType.BARRACKS, 1);
-          res = true;
-        }         
-        break;
-    }
-
-    return res;
+    return false;
   }
 }

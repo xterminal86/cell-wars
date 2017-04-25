@@ -7,7 +7,6 @@ public class GridCell
   public Int2 Coordinates = Int2.Zero;
 
   public CellBaseClass CellHere;
-  public CellBaseClass SoldierHere;
 
   public Dictionary<int, Queue<CellBaseClass>> SoldiersByOwnerHere = new Dictionary<int, Queue<CellBaseClass>>();
 

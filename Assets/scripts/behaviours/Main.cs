@@ -61,17 +61,17 @@ public class Main : MonoBehaviour
   {   
     _occupyMap = "";
       
-    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    for (int x = LevelLoader.Instance.MapSize - 1; x >= 0; x--)
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {
-        if (LevelLoader.Instance.Map[x, y].SoldierHere == null)
+        if (LevelLoader.Instance.Map[y, x].CellHere != null)
         {
-          _occupyMap += "0";
+          _occupyMap += LevelLoader.Instance.Map[y, x].CellHere.OwnerId.ToString();
         }
         else
         {
-          _occupyMap += "1";
+          _occupyMap += ".";
         }
       }
 

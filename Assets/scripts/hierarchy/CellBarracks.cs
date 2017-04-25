@@ -28,7 +28,7 @@ public class CellBarracks : CellBaseClass
        && LevelLoader.Instance.SoldiersCountByOwner[OwnerId] < _unitsLimit)
       {        
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
-        SpawnCell(GlobalConstants.CellType.SOLDIER);
+        TryToSpawnCell(GlobalConstants.CellType.SOLDIER);
       }
     }
 

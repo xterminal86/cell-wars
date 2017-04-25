@@ -14,7 +14,6 @@ public class CellSoldier : CellBaseClass
 
   Int2 _previousPos = Int2.Zero;
 
-  int _enemyId = 0;
   public CellSoldier()
   {    
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
@@ -22,16 +21,7 @@ public class CellSoldier : CellBaseClass
 
   public override void InitBehaviour()
   {
-    // Find enemy ID
-
-    foreach (var b in LevelLoader.Instance.BaseCoordinatesByOwner)
-    {
-      if (OwnerId != b.Key)
-      {
-        _enemyId = b.Key;
-        break;
-      }
-    }
+    base.InitBehaviour();
 
     _position = BehaviourRef.transform.position;
 
@@ -98,21 +88,7 @@ public class CellSoldier : CellBaseClass
   }
 
   bool CanOccupy()
-  {
-    /*
-    if ((Coordinates.X != _previousPos.X
-      || Coordinates.Y != _previousPos.Y)
-      && LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldierHere == null)
-    {      
-      LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldierHere = null;
-      LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldierHere = this;
-
-      _previousPos.Set(Coordinates);
-
-      return true;
-    }
-    */
-
+  {    
     if (Coordinates.X != _previousPos.X || Coordinates.Y != _previousPos.Y)
     { 
       if (LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldiersByOwnerHere[OwnerId].Count != 0)
@@ -171,18 +147,6 @@ public class CellSoldier : CellBaseClass
 
             return true;
           }
-
-          /*
-          if ((LevelLoader.Instance.Map[x, y].SoldierHere != null && LevelLoader.Instance.Map[x, y].SoldierHere.OwnerId != OwnerId)
-           || (LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
-          { 
-            _enemyPos.Set(x, y);
-
-            //Debug.Log("Enemy found at " + _enemyPos);
-
-            return true;
-          }
-          */
         }
       }
     }
@@ -241,21 +205,6 @@ public class CellSoldier : CellBaseClass
     _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
 
     LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemyId);
-
-    /*
-    if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere != null)
-    {
-      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldierHere.BehaviourRef.transform.position;
-    }
-    else if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere != null)
-    {
-      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.BehaviourRef.transform.position;
-    }
-      
-    _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
-
-    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D);
-    */
 
     //Debug.Log("Attacking " + c + " at " + c.Coordinates); 
   }

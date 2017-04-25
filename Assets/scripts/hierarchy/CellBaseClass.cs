@@ -19,8 +19,19 @@ public abstract class CellBaseClass
   {
   }
 
+  protected int _enemyId = 0;
   public virtual void InitBehaviour()
-  {    
+  {
+    // Find enemy ID
+
+    foreach (var b in LevelLoader.Instance.BaseCoordinatesByOwner)
+    {
+      if (OwnerId != b.Key)
+      {
+        _enemyId = b.Key;
+        break;
+      }
+    }
   }
 
   public void ReceiveDamage(int amount)
@@ -34,19 +45,8 @@ public abstract class CellBaseClass
   }
 
   Int2 _pos = Int2.Zero;
-  protected void SpawnCell(GlobalConstants.CellType cellType)
-  {
-    int _enemyID = -1;
-
-    foreach (var kvp in LevelLoader.Instance.BaseCoordinatesByOwner)
-    {
-      if (kvp.Key != OwnerId)
-      {
-        _enemyID = kvp.Key;
-        break;
-      }
-    }
-
+  protected void TryToSpawnCell(GlobalConstants.CellType cellType)
+  {    
     int lx = Coordinates.X - 1;
     int ly = Coordinates.Y - 1;
     int hx = Coordinates.X + 1;
@@ -56,10 +56,10 @@ public abstract class CellBaseClass
     {
       for (int y = ly; y <= hy; y++)
       {
-        if (x >= 0 && x <= LevelLoader.Instance.MapSize
-          && y >= 0 && y <= LevelLoader.Instance.MapSize)
+        if (x >= 0 && x <= LevelLoader.Instance.MapSize - 1
+          && y >= 0 && y <= LevelLoader.Instance.MapSize - 1)
         {
-          if (LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyID].Count == 0 && LevelLoader.Instance.Map[x, y].CellHere == null)
+          if (LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyId].Count == 0 && LevelLoader.Instance.Map[x, y].CellHere == null)
           {            
             _pos.Set(x, y);
 

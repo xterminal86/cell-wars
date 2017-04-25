@@ -15,7 +15,7 @@ public class CellBase : CellBaseClass
     if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
     {
       _timer = 0.0f;
-      SpawnCell(GlobalConstants.CellType.DRONE);
+      TryToSpawnCell(GlobalConstants.CellType.DRONE);
     }
 
     _timer += Time.smoothDeltaTime;

@@ -6,7 +6,7 @@ public static class GlobalConstants
 {
   public const float DroneSpawnTimeSeconds = 1.0f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
-  public const float AttackTimeout = 0.5f;
+  public const float AttackTimeout = 1.5f;
   public const float BulletSpeed = 2.0f;
   public const float CameraZoomSpeed = 1.0f;
   public const float CameraMoveSpeed = 10.0f;

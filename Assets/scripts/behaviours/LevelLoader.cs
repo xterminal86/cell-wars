@@ -184,7 +184,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
-      _map[pos.X, pos.Y].CellHere = c;
+      if (c.Type != GlobalConstants.CellType.SOLDIER)
+      {
+        _map[pos.X, pos.Y].CellHere = c;
+      }
     }
   }
 
