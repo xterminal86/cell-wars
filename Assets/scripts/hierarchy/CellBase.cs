@@ -13,9 +13,15 @@ public class CellBase : CellBaseClass
   public override void Update()
   {
     if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
-    {
+    {   
+      var res = TryToFindEmptyCell();
+
+      if (res != null)
+      {
+        SpawnCell(GlobalConstants.CellType.DRONE);
+      }
+
       _timer = 0.0f;
-      TryToSpawnCell(GlobalConstants.CellType.DRONE);
     }
 
     _timer += Time.smoothDeltaTime;

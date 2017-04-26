@@ -16,12 +16,19 @@ public class AI : MonoBehaviour
     _level = LevelLoader.Instance;
   }
 
+  float _actionCooldownTimer = 0.0f;
   void Update()
   {
+    if (_actionCooldownTimer < GlobalConstants.CPUActionTimeout)
+    {
+      _actionCooldownTimer += Time.smoothDeltaTime;
+      return;
+    }
+
     CountBuildings();
 
     if (_buildActionsDone < MaxBuildActions)
-    {
+    {      
       DecideWhatToBuild();
     }
   }
@@ -66,7 +73,9 @@ public class AI : MonoBehaviour
 
         if (_level.CheckLocationToBuild(_pos, 1) && TryToBuild(_pos))
         {
+          _actionCooldownTimer = 0.0f;
           _buildActionsDone++;
+          return;
         }
       }
     }

@@ -11,9 +11,10 @@ public class Main : MonoBehaviour
   public Button BuildBarracksButton;
   public Button CancelButton;
 
-  public Text DronesNumber;
   public Text OccupyMap;
   public Text InfoText;
+  public Text DronesPlayerText;
+  public Text DronesCpuText;
 
   GameObject _highlighter;
 
@@ -47,9 +48,8 @@ public class Main : MonoBehaviour
 
     // FIXME: ownerID magic numbers
 
-    DronesNumber.text = string.Format("Player drones: {0}\nCPU drones: {1}\nPlayer soldiers: {2}\nCPU soldiers: {3}", 
-      LevelLoader.Instance.DronesCountByOwner[0], LevelLoader.Instance.DronesCountByOwner[1],
-      LevelLoader.Instance.SoldiersCountByOwner[0], LevelLoader.Instance.SoldiersCountByOwner[1]);
+    DronesPlayerText.text = LevelLoader.Instance.DronesCountByOwner[0].ToString();
+    DronesCpuText.text = LevelLoader.Instance.DronesCountByOwner[1].ToString();
 
     //PrintOccupyMap();
 

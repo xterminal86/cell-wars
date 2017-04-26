@@ -17,17 +17,12 @@ public class CellBehaviour : MonoBehaviour
 	}
 
   public void DestroySelf()
-  {    
-    if (CellInstance.Type == GlobalConstants.CellType.DRONE)
-    {
-      LevelLoader.Instance.DronesCountByOwner[CellInstance.OwnerId]--;
-    }
-    else if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
+  {        
+    if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
     {
       (CellInstance as CellSoldier).DelistFromBarracks();
 
-      LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
-      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldiersByOwnerHere[CellInstance.OwnerId].Dequeue();
+      LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
     }
     else if (CellInstance.Type == GlobalConstants.CellType.BARRACKS)
     {

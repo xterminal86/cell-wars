@@ -10,6 +10,7 @@ public static class GlobalConstants
   public const float BulletSpeed = 2.0f;
   public const float CameraZoomSpeed = 1.0f;
   public const float CameraMoveSpeed = 10.0f;
+  public const float CPUActionTimeout = 3.0f;
 
   public const int SoldiersPerBarrack = 2;
   public const int BuildRangeDistance = 3;

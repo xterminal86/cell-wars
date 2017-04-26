@@ -28,15 +28,17 @@ public class CellBarracks : CellBaseClass
     ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 5.0f);
 
     if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)
-    {
+    {   
       _timer = 0.0f;
 
       if (CanSpawnSoldier())
-      {              
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
-        var c = TryToSpawnCell(GlobalConstants.CellType.SOLDIER);
-        if (c != null)
-        {
+      {          
+        var res = TryToFindEmptyCell();
+        if (res != null)
+        {          
+          LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
+          var c = SpawnCell(GlobalConstants.CellType.SOLDIER);
+
           _spawnedSoldiersById[_spawnId] = (c as CellSoldier);
 
           (c as CellSoldier).SpawnID = _spawnId;

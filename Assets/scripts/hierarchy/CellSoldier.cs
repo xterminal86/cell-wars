@@ -6,7 +6,7 @@ public class CellSoldier : CellBaseClass
 { 
   Vector3 _heading = Vector3.zero;
   Vector3 _dir = Vector3.zero;
-  Vector3 _target = Vector3.zero;
+  Vector3 _destination = Vector3.zero;
 
   float _attackTimer = 0.0f;
   float _magnitude = 1.0f;
@@ -34,23 +34,25 @@ public class CellSoldier : CellBaseClass
     Coordinates.Set(_gridX, _gridY);
     _previousPos.Set(Coordinates);
 
-    LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldiersByOwnerHere[OwnerId].Enqueue(this);
+    LevelLoader.Instance.SoldiersMap[Coordinates.X, Coordinates.Y][this.GetHashCode()] = this;
 
-    FindTarget();
+    FindDestination();
   }
 
   Vector3 _position = Vector3.zero;
   public override void Update()
   {
+    base.Update();
+
     CheckTarget();
 
     _position = BehaviourRef.transform.position;
 
-    _heading = (_target - BehaviourRef.transform.position);
+    _heading = (_destination - BehaviourRef.transform.position);
     _magnitude = _heading.magnitude;
     _dir = _heading / _magnitude;
 
-    CanOccupy();
+    GridPositionChanged();
 
     if (!FindEnemies())
     {      
@@ -84,26 +86,23 @@ public class CellSoldier : CellBaseClass
 
   void CheckTarget()
   {
-    if ((int)_target.x == Coordinates.X && (int)_target.y == Coordinates.Y)
+    if (!IsDestinationPresent() || ((int)_destination.x == Coordinates.X && (int)_destination.y == Coordinates.Y))
     {
-      FindTarget();
+      FindDestination();
     }
   }
 
-  bool CanOccupy()
+  bool IsDestinationPresent()
+  {
+    return (LevelLoader.Instance.Map[(int)_destination.x, (int)_destination.y].CellHere != null);
+  }
+
+  bool GridPositionChanged()
   {    
     if (Coordinates.X != _previousPos.X || Coordinates.Y != _previousPos.Y)
     { 
-      if (LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldiersByOwnerHere[OwnerId].Count != 0)
-      {
-        //Debug.Log("Removing self from " + _previousPos);
-
-        LevelLoader.Instance.Map[_previousPos.X, _previousPos.Y].SoldiersByOwnerHere[OwnerId].Dequeue();
-      }
-
-      //Debug.Log("Adding self to " + Coordinates);
-
-      LevelLoader.Instance.Map[Coordinates.X, Coordinates.Y].SoldiersByOwnerHere[OwnerId].Enqueue(this);
+      LevelLoader.Instance.SoldiersMap[_previousPos.X, _previousPos.Y].Remove(this.GetHashCode());
+      LevelLoader.Instance.SoldiersMap[Coordinates.X, Coordinates.Y][this.GetHashCode()] = this;
 
       _previousPos.Set(Coordinates);
 
@@ -113,6 +112,7 @@ public class CellSoldier : CellBaseClass
     return false;
   }
 
+  CellBaseClass _enemy;
   Int2 _enemyPos = Int2.Zero;
   bool FindEnemies()
   {
@@ -130,14 +130,15 @@ public class CellSoldier : CellBaseClass
         {
           // Check soldiers
 
-          if (LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyId].Count != 0)            
-          {
-            
-            _enemyPos.Set(LevelLoader.Instance.Map[x, y].SoldiersByOwnerHere[_enemyId].Peek().Coordinates);
+          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
+          {           
+            if (kvp.Value.OwnerId != OwnerId)
+            {
+              _enemyPos.Set(kvp.Value.Coordinates);
+              _enemy = kvp.Value;
 
-            //Debug.Log("Soldier found at " + _enemyPos);
-
-            return true;
+              return true;
+            }
           }
 
           // Check other cells
@@ -145,6 +146,7 @@ public class CellSoldier : CellBaseClass
           if ((LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
           {
             _enemyPos.Set(x, y);
+            _enemy = LevelLoader.Instance.Map[x, y].CellHere;
 
             //Debug.Log("Enemy cell found at " + _enemyPos);
 
@@ -157,7 +159,10 @@ public class CellSoldier : CellBaseClass
     return false;
   }
 
-  void FindTarget()
+  /// <summary>
+  /// Finds enemy building to move at.
+  /// </summary>
+  void FindDestination()
   { 
     float distance = 0.0f;
     float minDistance = float.MaxValue;
@@ -187,8 +192,8 @@ public class CellSoldier : CellBaseClass
       pos.Set(pos2);
     }
 
-    _target.x = pos.X;
-    _target.y = pos.Y;
+    _destination.x = pos.X;
+    _destination.y = pos.Y;
   }
 
   Vector3 _enemyPosition3D = Vector3.zero;
@@ -196,20 +201,20 @@ public class CellSoldier : CellBaseClass
   {
     Vector3 posTmp = Vector3.zero;
 
-    if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldiersByOwnerHere[_enemyId].Count != 0)
+    if (_enemy != null)
     {
-      posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].SoldiersByOwnerHere[_enemyId].Peek().BehaviourRef.transform.position;
+      posTmp = _enemy.WorldCoordinates;
     }
     else if (LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere != null)
     {
       posTmp = LevelLoader.Instance.Map[_enemyPos.X, _enemyPos.Y].CellHere.BehaviourRef.transform.position;
     }
 
+    //Debug.Log("Attacking " + _enemy + " at " + posTmp + " " + _enemy.Coordinates); 
+
     _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
 
-    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemyId);
-
-    //Debug.Log("Attacking " + c + " at " + c.Coordinates); 
+    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemy);
   }
 
   public void DelistFromBarracks()

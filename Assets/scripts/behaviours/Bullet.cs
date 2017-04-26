@@ -6,10 +6,10 @@ public class Bullet : MonoBehaviour
 {
   public GameObject BulletHitEffectPrefab;
 
-  int _enemyID = -1;
+  CellBaseClass _enemy;
 
   Vector3 _targetPos = Vector3.zero;
-  public void SetTarget(Vector3 targetPos, int enemyID)
+  public void SetTarget(Vector3 targetPos, CellBaseClass enemy)
   {
     _targetPos = targetPos;
 
@@ -18,7 +18,7 @@ public class Bullet : MonoBehaviour
 
     _gridPos.Set(_gridX, _gridY);
 
-    _enemyID = enemyID;
+    _enemy = enemy;
   }
 
   Vector3 _position = Vector3.zero;
@@ -44,21 +44,9 @@ public class Bullet : MonoBehaviour
     {
       var hitEffect = (GameObject)Instantiate(BulletHitEffectPrefab, new Vector3(_position.x, _position.y, BulletHitEffectPrefab.transform.position.z), Quaternion.identity, LevelLoader.Instance.GridHolder);
 
-      var cell = LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].CellHere;
-      CellBaseClass soldier = null;
-
-      if (LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].SoldiersByOwnerHere[_enemyID].Count != 0)
+      if (_enemy != null)
       {
-        soldier = LevelLoader.Instance.Map[_gridPos.X, _gridPos.Y].SoldiersByOwnerHere[_enemyID].Peek();
-      }
-
-      if (cell != null)
-      {
-        cell.ReceiveDamage(1);
-      }
-      else if (soldier != null)
-      {
-        soldier.ReceiveDamage(1);
+        _enemy.ReceiveDamage(1);
       }
 
       Destroy(gameObject);
