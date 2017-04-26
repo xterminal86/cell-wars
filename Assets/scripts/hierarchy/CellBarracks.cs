@@ -4,12 +4,21 @@ using UnityEngine;
 
 public class CellBarracks : CellBaseClass 
 {  
+  Dictionary<int, CellSoldier> _spawnedSoldiersById = new Dictionary<int, CellSoldier>();
+  public Dictionary<int, CellSoldier> SpawnedSoldiersById
+  {
+    get { return _spawnedSoldiersById; }
+  }
+
   public CellBarracks()
   {
     Hitpoints = GlobalConstants.CellBarracksHitpoints;
-  }
 
-  int _unitsLimit = 0;
+    for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)
+    {
+      _spawnedSoldiersById[i] = null;
+    }
+  }
 
   float _timer = 0.0f;
   public override void Update()
@@ -22,16 +31,38 @@ public class CellBarracks : CellBaseClass
     {
       _timer = 0.0f;
 
-      _unitsLimit = LevelLoader.Instance.BarracksCountByOwner[OwnerId] * GlobalConstants.SoldiersPerBarrack;
-
-      if (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellSoldierHitpoints 
-       && LevelLoader.Instance.SoldiersCountByOwner[OwnerId] < _unitsLimit)
-      {        
+      if (CanSpawnSoldier())
+      {              
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
-        TryToSpawnCell(GlobalConstants.CellType.SOLDIER);
+        var c = TryToSpawnCell(GlobalConstants.CellType.SOLDIER);
+        if (c != null)
+        {
+          _spawnedSoldiersById[_spawnId] = (c as CellSoldier);
+
+          (c as CellSoldier).SpawnID = _spawnId;
+          (c as CellSoldier).BarracksRef = this;
+        }
       }
     }
 
     _timer += Time.smoothDeltaTime;
+  }
+    
+  int _spawnId = 0;
+  bool CanSpawnSoldier()
+  {
+    _spawnId = -1;
+
+    // Check for vacant slots
+
+    for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)
+    {
+      if (_spawnedSoldiersById[i] == null)
+      {
+        _spawnId = i;
+      }
+    }
+
+    return (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellSoldierHitpoints && _spawnId != -1);    
   }
 }

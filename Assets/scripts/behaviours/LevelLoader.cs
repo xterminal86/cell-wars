@@ -103,7 +103,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     PlaceCell(_baseCoordinatesByOwner[1], GlobalConstants.CellType.BASE, 1);
   }    
 
-  public void PlaceCell(Int2 pos, GlobalConstants.CellType cellType, int ownerId)
+  public CellBaseClass PlaceCell(Int2 pos, GlobalConstants.CellType cellType, int ownerId)
   {
     CellBaseClass c = null;
     GameObject go = null;
@@ -189,6 +189,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         _map[pos.X, pos.Y].CellHere = c;
       }
     }
+
+    return c;
   }
 
   public bool CheckLocationToBuild(Int2 posToCheck, int ownerId)

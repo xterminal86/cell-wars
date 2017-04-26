@@ -14,6 +14,9 @@ public class CellSoldier : CellBaseClass
 
   Int2 _previousPos = Int2.Zero;
 
+  public int SpawnID = -1;
+  public CellBarracks BarracksRef;
+
   public CellSoldier()
   {    
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
@@ -207,5 +210,13 @@ public class CellSoldier : CellBaseClass
     LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemyId);
 
     //Debug.Log("Attacking " + c + " at " + c.Coordinates); 
+  }
+
+  public void DelistFromBarracks()
+  {
+    if (BarracksRef != null)
+    {
+      BarracksRef.SpawnedSoldiersById[SpawnID] = null;
+    }
   }
 }

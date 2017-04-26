@@ -24,6 +24,8 @@ public class CellBehaviour : MonoBehaviour
     }
     else if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
     {
+      (CellInstance as CellSoldier).DelistFromBarracks();
+
       LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
       LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].SoldiersByOwnerHere[CellInstance.OwnerId].Dequeue();
     }

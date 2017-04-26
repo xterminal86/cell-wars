@@ -45,7 +45,7 @@ public abstract class CellBaseClass
   }
 
   Int2 _pos = Int2.Zero;
-  protected void TryToSpawnCell(GlobalConstants.CellType cellType)
+  protected CellBaseClass TryToSpawnCell(GlobalConstants.CellType cellType)
   {    
     int lx = Coordinates.X - 1;
     int ly = Coordinates.Y - 1;
@@ -63,11 +63,12 @@ public abstract class CellBaseClass
           {            
             _pos.Set(x, y);
 
-            LevelLoader.Instance.PlaceCell(_pos, cellType, OwnerId);
-            return;
+            return LevelLoader.Instance.PlaceCell(_pos, cellType, OwnerId);
           }
         }
       }
     }
+
+    return null;
   }
 }
