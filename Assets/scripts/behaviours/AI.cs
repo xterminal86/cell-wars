@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Crude implementation of AI
+/// </summary>
 public class AI : MonoBehaviour 
-{
-  LevelLoader _level;
-
+{  
   // Limit of build actions performed by CPU
   public int MaxBuildActions = int.MaxValue;
 
   int _buildActionsDone = 0;
-
-  void Start()
-  {
-    _level = LevelLoader.Instance;
-  }
 
   float _actionCooldownTimer = 0.0f;
   void Update()
@@ -65,13 +61,13 @@ public class AI : MonoBehaviour
   Int2 _pos = Int2.Zero;
   void DecideWhatToBuild()
   {
-    for (int x = 0; x < _level.MapSize; x++)
+    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
     {
-      for (int y = 0; y < _level.MapSize; y++)
+      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {
         _pos.Set(x, y);
 
-        if (_level.CheckLocationToBuild(_pos, 1) && TryToBuild(_pos))
+        if (LevelLoader.Instance.CheckLocationToBuild(_pos, 1) && TryToBuild(_pos))
         {
           _actionCooldownTimer = 0.0f;
           _buildActionsDone++;
@@ -85,9 +81,9 @@ public class AI : MonoBehaviour
   {
     var buildingType = (_coloniesBuilt > _barracksBuilt) ? GlobalConstants.CellType.BARRACKS : GlobalConstants.CellType.COLONY;
 
-    if (_level.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
+    if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
     {      
-      _level.Build(posToBuild, buildingType, 1);
+      LevelLoader.Instance.Build(posToBuild, buildingType, 1);
       return true;
     }    
 

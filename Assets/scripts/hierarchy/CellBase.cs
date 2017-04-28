@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Main building of a player, works like colony. 
+/// If it's destroyed - it's game over.
+/// </summary>
 public class CellBase : CellBaseClass
 {
   public CellBase()

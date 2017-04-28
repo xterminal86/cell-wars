@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Spawner - spawns attackers.
+/// </summary>
 public class CellBarracks : CellBaseClass 
 {  
   Dictionary<int, CellSoldier> _spawnedSoldiersById = new Dictionary<int, CellSoldier>();

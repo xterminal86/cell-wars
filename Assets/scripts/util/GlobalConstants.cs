@@ -4,20 +4,31 @@ using UnityEngine;
 
 public static class GlobalConstants 
 {
+  // Time between new cell is spawned by building
   public const float DroneSpawnTimeSeconds = 1.0f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
+
+  // Attacker cooldown in seconds
   public const float AttackTimeout = 1.5f;
+
   public const float BulletSpeed = 2.0f;
   public const float CameraZoomSpeed = 1.0f;
   public const float CameraMoveSpeed = 10.0f;
-  public const float CPUActionTimeout = 3.0f;
+
+  // Cooldown between build actions for CPU to give player some advantage
+  public const float CPUActionTimeout = 6.0f;
 
   public const int SoldiersPerBarrack = 2;
+
+  // Maximum block distance between already built building 
+  // and new spot for a new building.
   public const int BuildRangeDistance = 3;
 
+  // Drones cost for various buildings
   public const int ColonyDronesCost = 8;
   public const int BarracksDronesCost = 16;
 
+  // Various cells hitpoints
   public const int CellBaseHitpoints = 12;
   public const int CellColonyHitpoints = 8;
   public const int CellBarracksHitpoints = 6;

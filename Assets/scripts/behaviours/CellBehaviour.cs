@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Attach this to every cell prefab.
+/// </summary>
 public class CellBehaviour : MonoBehaviour 
 {
   public CellBaseClass CellInstance;
@@ -9,7 +12,7 @@ public class CellBehaviour : MonoBehaviour
   public TextMesh HpText;
   public Transform ModelTransform;
 
-	void Update () 
+	void Update() 
 	{
     HpText.text = CellInstance.Hitpoints.ToString();
 
@@ -26,8 +29,6 @@ public class CellBehaviour : MonoBehaviour
     }
     else if (CellInstance.Type == GlobalConstants.CellType.BARRACKS)
     {
-      LevelLoader.Instance.BarracksCountByOwner[CellInstance.OwnerId]--;
-
       LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
     }
     else if (CellInstance.Type == GlobalConstants.CellType.COLONY)

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Colony - spawns drones around itself.
+/// </summary>
 public class CellColony : CellBaseClass 
 {
   public CellColony()

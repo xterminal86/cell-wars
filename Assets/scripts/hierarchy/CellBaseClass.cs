@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base class for cells logic.
+/// </summary>
 public abstract class CellBaseClass
 {
   public int Hitpoints = 3;
@@ -13,7 +16,12 @@ public abstract class CellBaseClass
 
   public GlobalConstants.CellType Type;
 
+  // Reference to a behaviour for this cell (also used for translation)
   public CellBehaviour BehaviourRef;
+
+  // Reference to a model for various effects (mainly rotation). 
+  // Usually it's child of a game object. Because we use orthographic projection,
+  // to deal with Z depth for all objects on a scene, we can adjust Z value of a child object in a prefab.
   public Transform ModelTransform;
 
   public virtual void Update()

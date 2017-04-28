@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Attacker's bullet.
+/// </summary>
 public class Bullet : MonoBehaviour 
 {
   public GameObject BulletHitEffectPrefab;

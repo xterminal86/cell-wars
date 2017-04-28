@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Basically holds all information about game.
+/// </summary>
 public class LevelLoader : MonoSingleton<LevelLoader> 
 {  
   public GameObject GridCellPrefab;
@@ -15,6 +18,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   public Material CellMaterial;
 
+  // Holds all objects inside one transform for organizing.
   Transform _gridHolder;
   public Transform GridHolder
   {
@@ -22,12 +26,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   }
 
   public int MapSize = 32;
-
-  Dictionary<int, int> _barracksCountByOwner = new Dictionary<int, int>();
-  public Dictionary<int, int> BarracksCountByOwner
-  {
-    get { return _barracksCountByOwner; }
-  }
 
   Dictionary<int, int> _dronesCountByOwner = new Dictionary<int, int>();
   public Dictionary<int, int> DronesCountByOwner
@@ -41,18 +39,22 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _map; }
   }
 
+  // Used for getting targets for automatic moving for attackers
   Dictionary<int, List<Int2>> _buildingsCoordinatesByOwner = new Dictionary<int, List<Int2>>();
   public Dictionary<int, List<Int2>> BuildingsCoordinatesByOwner
   {
     get { return _buildingsCoordinatesByOwner; }
   }
 
+  // Kinda same as above (basically not used right now)
   Dictionary<int, Int2> _baseCoordinatesByOwner = new Dictionary<int, Int2>();
   public Dictionary<int, Int2> BaseCoordinatesByOwner
   {
     get { return _baseCoordinatesByOwner; }
   }
 
+  // Shows how many attackers occupies given [x,y] cell. 
+  // Indiced by attacker's class instance hash code.
   public Dictionary<int, CellBaseClass>[,] SoldiersMap;
 
   public override void Initialize()    
@@ -83,9 +85,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     _buildingsCoordinatesByOwner[0] = new List<Int2>();
     _buildingsCoordinatesByOwner[1] = new List<Int2>();
 
-    _barracksCountByOwner[0] = 0;
-    _barracksCountByOwner[1] = 0;
-
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
 
@@ -100,6 +99,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     PlaceCell(_baseCoordinatesByOwner[1], GlobalConstants.CellType.BASE, 1);
   }    
 
+  /// <summary>
+  /// Places the given type of cell on a map.
+  /// </summary>
+  /// <returns>The cell instance or null</returns>
+  /// <param name="pos">Position to place at</param>
+  /// <param name="cellType">Cell type</param>
+  /// <param name="ownerId">Owner (player) identifier</param>
   public CellBaseClass PlaceCell(Int2 pos, GlobalConstants.CellType cellType, int ownerId)
   {
     CellBaseClass c = null;
@@ -140,8 +146,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         c.Type = GlobalConstants.CellType.BARRACKS;
 
         go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
-
-        _barracksCountByOwner[ownerId]++;
 
         break;
 
@@ -225,6 +229,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
   }
 
+  /// <summary>
+  /// Destroys number of drones of ownerId player.
+  /// </summary>
+  /// <param name="number">Number of drones to destroy</param>
+  /// <param name="ownerId">Owner (player) identifier</param>
   public void TransformDrones(int number, int ownerId)
   {
     int transformedCount = 0;
@@ -268,6 +277,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
   }
 
+  // TODO: stub
   public void GameOver(int loserId)
   {
     Time.timeScale = 0.0f;

@@ -5,14 +5,18 @@ using UnityEngine.UI;
 
 public class Main : MonoBehaviour 
 {	  
+  // Prefab for a square that highlights the grid cell
   public GameObject GridHighlighter;
 
+  // Building menu
   public Button BuildColonyButton;
   public Button BuildBarracksButton;
   public Button CancelButton;
 
-  public Text OccupyMap;
+  // For various information text
   public Text InfoText;
+
+  // Number of drones
   public Text DronesPlayerText;
   public Text DronesCpuText;
 
@@ -20,7 +24,10 @@ public class Main : MonoBehaviour
 
   Material _highlighterMaterial;
 
+  // When user clicks building button, we enter "build mode"
   bool _buildMode = false;
+
+  // True if current spot is valid for building
   bool _validSpot = false;
 
   float _cameraScrollLimit = 0.0f;
@@ -51,34 +58,7 @@ public class Main : MonoBehaviour
     DronesPlayerText.text = LevelLoader.Instance.DronesCountByOwner[0].ToString();
     DronesCpuText.text = LevelLoader.Instance.DronesCountByOwner[1].ToString();
 
-    //PrintOccupyMap();
-
     EnableButtons();
-  }
-
-  string _occupyMap = string.Empty;
-  void PrintOccupyMap()
-  {   
-    _occupyMap = "";
-      
-    for (int x = LevelLoader.Instance.MapSize - 1; x >= 0; x--)
-    {
-      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
-      {
-        if (LevelLoader.Instance.Map[y, x].CellHere != null)
-        {
-          _occupyMap += LevelLoader.Instance.Map[y, x].CellHere.OwnerId.ToString();
-        }
-        else
-        {
-          _occupyMap += ".";
-        }
-      }
-
-      _occupyMap += "\n";
-    }
-
-    OccupyMap.text = _occupyMap;
   }
 
   Int2 _cellCoords = Int2.Zero;

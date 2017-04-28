@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Attacker - moves towards nearest enemy building, attacking everything it encounters.
+/// </summary>
 public class CellSoldier : CellBaseClass 
 { 
   Vector3 _heading = Vector3.zero;
@@ -44,7 +47,8 @@ public class CellSoldier : CellBaseClass
   {
     base.Update();
 
-    CheckTarget();
+    // Check if destination target is still there
+    CheckTargetStatus();
 
     _position = BehaviourRef.transform.position;
 
@@ -52,8 +56,10 @@ public class CellSoldier : CellBaseClass
     _magnitude = _heading.magnitude;
     _dir = _heading / _magnitude;
 
+    // If this soldier changed its map coordinates, adjust references accordingly
     GridPositionChanged();
 
+    // Try to find enemies nearby
     if (!FindEnemies())
     {      
       _position += (_dir * Time.smoothDeltaTime * 0.5f);
@@ -84,15 +90,15 @@ public class CellSoldier : CellBaseClass
     BehaviourRef.transform.position = _position;
   }
 
-  void CheckTarget()
+  void CheckTargetStatus()
   {
-    if (!IsDestinationPresent() || ((int)_destination.x == Coordinates.X && (int)_destination.y == Coordinates.Y))
+    if (!IsDestinationStillPresent() || ((int)_destination.x == Coordinates.X && (int)_destination.y == Coordinates.Y))
     {
       FindDestination();
     }
   }
 
-  bool IsDestinationPresent()
+  bool IsDestinationStillPresent()
   {
     return (LevelLoader.Instance.Map[(int)_destination.x, (int)_destination.y].CellHere != null);
   }
@@ -128,7 +134,7 @@ public class CellSoldier : CellBaseClass
         if (x >= 0 && x < LevelLoader.Instance.MapSize
          && y >= 0 && y < LevelLoader.Instance.MapSize)
         {
-          // Check soldiers
+          // Check soldiers first
 
           foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
           {           
@@ -141,7 +147,7 @@ public class CellSoldier : CellBaseClass
             }
           }
 
-          // Check other cells
+          // Check other cells second
 
           if ((LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
           {
