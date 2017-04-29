@@ -134,7 +134,7 @@ public abstract class CellBaseClass
             }
           }
 
-          if (LevelLoader.Instance.Map[x, y].CellHere == null)
+          if (LevelLoader.Instance.Map[x, y].CellHere == null && LevelLoader.Instance.Map[x, y].NumberOfLocks == 0)
           { 
             cellEmpty = true;
           }

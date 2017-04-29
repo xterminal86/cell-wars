@@ -9,6 +9,7 @@ public class CellColony : CellBaseClass
 {
   public CellColony()
   {
+    Type = GlobalConstants.CellType.COLONY;
     Hitpoints = GlobalConstants.CellColonyHitpoints;
   }
 

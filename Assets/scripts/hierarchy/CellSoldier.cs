@@ -11,6 +11,8 @@ public class CellSoldier : CellBaseClass
   Vector3 _dir = Vector3.zero;
   Vector3 _destination = Vector3.zero;
 
+  float _moveSpeedModifier = 1.0f;
+
   float _attackTimer = 0.0f;
   float _magnitude = 1.0f;
   float _gridX = 0.0f, _gridY = 0.0f;
@@ -22,6 +24,7 @@ public class CellSoldier : CellBaseClass
 
   public CellSoldier()
   {    
+    Type = GlobalConstants.CellType.SOLDIER;
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
   }
 
@@ -42,6 +45,7 @@ public class CellSoldier : CellBaseClass
     FindDestination();
   }
 
+  float _resMoveSpeed = 0.0f;
   Vector3 _position = Vector3.zero;
   public override void Update()
   {
@@ -49,6 +53,9 @@ public class CellSoldier : CellBaseClass
 
     // Check if destination target is still there
     CheckTargetStatus();
+
+    // Make adjustments if there are holders nearby
+    CheckHolders();
 
     _position = BehaviourRef.transform.position;
 
@@ -62,7 +69,8 @@ public class CellSoldier : CellBaseClass
     // Try to find enemies nearby
     if (!FindEnemies())
     {      
-      _position += (_dir * Time.smoothDeltaTime * 0.5f);
+      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.AttackerMoveSpeed * _moveSpeedModifier);
+      _position += (_dir * _resMoveSpeed);
     }
     else
     {
@@ -88,6 +96,29 @@ public class CellSoldier : CellBaseClass
     ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 25.0f);
 
     BehaviourRef.transform.position = _position;
+  }
+
+  void CheckHolders()
+  {
+    float d = 0.0f;
+
+    foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[_enemyId])
+    {
+      var b = LevelLoader.Instance.Map[item.X, item.Y];
+
+      if (b.CellHere.Type == GlobalConstants.CellType.HOLDER)
+      {
+        d = Vector3.Distance(WorldCoordinates, b.CellHere.WorldCoordinates);
+
+        if (d <= GlobalConstants.CellHolderRange)
+        {
+          _moveSpeedModifier = GlobalConstants.HolderSlowFactor;
+          return;
+        }
+      }
+    }
+
+    _moveSpeedModifier = 1.0f;
   }
 
   void CheckTargetStatus()
@@ -149,7 +180,8 @@ public class CellSoldier : CellBaseClass
 
           // Check other cells second
 
-          if ((LevelLoader.Instance.Map[x, y].CellHere != null && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
+          if ((LevelLoader.Instance.Map[x, y].CellHere != null             
+            && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
           {
             _enemyPos.Set(x, y);
             _enemy = LevelLoader.Instance.Map[x, y].CellHere;
@@ -180,9 +212,11 @@ public class CellSoldier : CellBaseClass
 
     foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[_enemyId])
     {      
+      var cell = LevelLoader.Instance.Map[item.X, item.Y].CellHere;
+
       distance = Vector3.Distance(new Vector3(item.X, item.Y), new Vector3(Coordinates.X, Coordinates.Y));
 
-      if (minDistance <= distance)
+      if (minDistance <= distance && cell.Type != GlobalConstants.CellType.HOLDER)
       {
         found = true;
 

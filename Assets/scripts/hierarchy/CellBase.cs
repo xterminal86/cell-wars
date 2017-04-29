@@ -10,6 +10,7 @@ public class CellBase : CellBaseClass
 {
   public CellBase()
   {
+    Type = GlobalConstants.CellType.BASE;
     Hitpoints = GlobalConstants.CellBaseHitpoints;
   }
 

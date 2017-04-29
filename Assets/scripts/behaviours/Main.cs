@@ -11,6 +11,7 @@ public class Main : MonoBehaviour
   // Building menu
   public Button BuildColonyButton;
   public Button BuildBarracksButton;
+  public Button BuildHolderButton;
   public Button CancelButton;
 
   // For various information text
@@ -161,8 +162,9 @@ public class Main : MonoBehaviour
   {
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
 
-    BuildColonyButton.interactable = (dronesPlayer >= GlobalConstants.ColonyDronesCost);
-    BuildBarracksButton.interactable = (dronesPlayer >= GlobalConstants.BarracksDronesCost);
+    BuildColonyButton.interactable = (dronesPlayer >= GlobalConstants.CellColonyHitpoints);
+    BuildBarracksButton.interactable = (dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
+    BuildHolderButton.interactable = (dronesPlayer >= GlobalConstants.CellHolderHitpoints);
 
     CancelButton.gameObject.SetActive(_buildMode);
   }
@@ -178,6 +180,10 @@ public class Main : MonoBehaviour
 
       case 1:
         _buildingType = GlobalConstants.CellType.BARRACKS;
+        break;
+
+      case 2:
+        _buildingType = GlobalConstants.CellType.HOLDER;
         break;
     }
 

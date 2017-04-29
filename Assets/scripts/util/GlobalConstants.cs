@@ -11,9 +11,13 @@ public static class GlobalConstants
   // Attacker cooldown in seconds
   public const float AttackTimeout = 1.5f;
 
+  // Various game parameters
   public const float BulletSpeed = 2.0f;
+  public const float AttackerMoveSpeed = 0.5f;
+  public const float HolderSlowFactor = 0.5f;
   public const float CameraZoomSpeed = 1.0f;
   public const float CameraMoveSpeed = 10.0f;
+  public const float CellHolderRange = 3.0f;
 
   // Cooldown between build actions for CPU to give player some advantage
   public const float CPUActionTimeout = 6.0f;
@@ -24,21 +28,19 @@ public static class GlobalConstants
   // and new spot for a new building.
   public const int BuildRangeDistance = 3;
 
-  // Drones cost for various buildings
-  public const int ColonyDronesCost = 8;
-  public const int BarracksDronesCost = 16;
-
   // Various cells hitpoints
-  public const int CellBaseHitpoints = 12;
+  public const int CellBaseHitpoints = 32;
   public const int CellColonyHitpoints = 8;
-  public const int CellBarracksHitpoints = 6;
+  public const int CellBarracksHitpoints = 8;
   public const int CellSoldierHitpoints = 4;
   public const int CellDroneHitpoints = 1;
+  public const int CellHolderHitpoints = 16;
 
   public static Dictionary<CellType, int> DroneCostByType = new Dictionary<CellType, int>()
   {
-    { CellType.COLONY, ColonyDronesCost },
-    { CellType.BARRACKS, BarracksDronesCost }
+    { CellType.COLONY, CellColonyHitpoints },
+    { CellType.BARRACKS, CellBarracksHitpoints },
+    { CellType.HOLDER, CellHolderHitpoints }
   };
 
   public static Dictionary<CellType, Color> PlayerColors = new Dictionary<CellType, Color>()
@@ -47,6 +49,7 @@ public static class GlobalConstants
     { CellType.COLONY, Color.green },
     { CellType.DRONE, Color.green },
     { CellType.BARRACKS, Color.red },
+    { CellType.HOLDER, Color.blue },
     { CellType.SOLDIER, Color.red }
   };
 
@@ -71,6 +74,7 @@ public static class GlobalConstants
     DRONE,
     BARRACKS,
     SOLDIER,
+    HOLDER,
     NONE
   }
 }

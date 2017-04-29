@@ -8,7 +8,8 @@ using UnityEngine;
 public class CellBehaviour : MonoBehaviour 
 {
   public CellBaseClass CellInstance;
-  	
+
+  public Transform RadiusMarker;
   public TextMesh HpText;
   public Transform ModelTransform;
 
@@ -20,20 +21,22 @@ public class CellBehaviour : MonoBehaviour
 	}
 
   public void DestroySelf()
-  {        
-    if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
+  { 
+    switch (CellInstance.Type)
     {
-      (CellInstance as CellSoldier).DelistFromBarracks();
+      case GlobalConstants.CellType.SOLDIER:
+        (CellInstance as CellSoldier).DelistFromBarracks();
+        LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
+        break;
 
-      LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
-    }
-    else if (CellInstance.Type == GlobalConstants.CellType.BARRACKS)
-    {
-      LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
-    }
-    else if (CellInstance.Type == GlobalConstants.CellType.COLONY)
-    {
-      LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
+      case GlobalConstants.CellType.BARRACKS:
+      case GlobalConstants.CellType.COLONY:
+        LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
+        break;
+      case GlobalConstants.CellType.HOLDER:
+        (CellInstance as CellHolder).UnlockCells();
+        LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
+        break;        
     }
 
     if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)

@@ -15,6 +15,7 @@ public class CellBarracks : CellBaseClass
 
   public CellBarracks()
   {
+    Type = GlobalConstants.CellType.BARRACKS;
     Hitpoints = GlobalConstants.CellBarracksHitpoints;
 
     for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)

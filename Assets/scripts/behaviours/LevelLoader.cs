@@ -12,6 +12,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellColonyPrefab;
   public GameObject CellDronePrefab;
   public GameObject CellBarracksPrefab;
+  public GameObject CellHolderPrefab;
   public GameObject CellSoldierPrefab;
 
   public GameObject BulletPrefab;
@@ -114,47 +115,44 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     switch (cellType)
     {
       case GlobalConstants.CellType.BASE:
+        
         c = new CellBase();
-
-        c.Type = GlobalConstants.CellType.BASE;
-
         go = (GameObject)Instantiate(CellBasePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.DRONE:
+        
         c = new CellDrone();
-
-        c.Type = GlobalConstants.CellType.DRONE;
-
         go = (GameObject)Instantiate(CellDronePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.COLONY:
+        
         c = new CellColony();
-
-        c.Type = GlobalConstants.CellType.COLONY;
-
         go = (GameObject)Instantiate(CellColonyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.BARRACKS:
+        
         c = new CellBarracks();
-
-        c.Type = GlobalConstants.CellType.BARRACKS;
-
         go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.SOLDIER:
+        
         c = new CellSoldier();
-
-        c.Type = GlobalConstants.CellType.SOLDIER;
-
         go = (GameObject)Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
+      case GlobalConstants.CellType.HOLDER:
+        
+        c = new CellHolder();
+        go = (GameObject)Instantiate(CellHolderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
     }
@@ -218,12 +216,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     switch (type)
     {
       case GlobalConstants.CellType.COLONY:
-        TransformDrones(GlobalConstants.ColonyDronesCost, ownerId);
+        TransformDrones(GlobalConstants.CellColonyHitpoints, ownerId);
         PlaceCell(pos, type, ownerId);
         break;
 
       case GlobalConstants.CellType.BARRACKS:
-        TransformDrones(GlobalConstants.BarracksDronesCost, ownerId);
+        TransformDrones(GlobalConstants.CellBarracksHitpoints, ownerId);
+        PlaceCell(pos, type, ownerId);
+        break;
+
+      case GlobalConstants.CellType.HOLDER:
+        TransformDrones(GlobalConstants.CellHolderHitpoints, ownerId);
         PlaceCell(pos, type, ownerId);
         break;
     }
