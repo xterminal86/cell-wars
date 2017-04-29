@@ -13,6 +13,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellDronePrefab;
   public GameObject CellBarracksPrefab;
   public GameObject CellHolderPrefab;
+  public GameObject CellDefenderPrefab;
   public GameObject CellSoldierPrefab;
 
   public GameObject BulletPrefab;
@@ -155,6 +156,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         go = (GameObject)Instantiate(CellHolderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
+
+      case GlobalConstants.CellType.DEFENDER:
+      
+        c = new CellDefender();
+        go = (GameObject)Instantiate(CellDefenderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
     }
 
     if (c != null)
@@ -229,6 +237,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         TransformDrones(GlobalConstants.CellHolderHitpoints, ownerId);
         PlaceCell(pos, type, ownerId);
         break;
+
+      case GlobalConstants.CellType.DEFENDER:
+        TransformDrones(GlobalConstants.CellDefenderHitpoints, ownerId);
+        PlaceCell(pos, type, ownerId);
+        break;
     }
   }
 
@@ -286,10 +299,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     Time.timeScale = 0.0f;
   }
 
-  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBaseClass enemy)
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBaseClass enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
   {
     GameObject bullet = (GameObject)Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
-    bullet.GetComponent<Bullet>().SetTarget(targetPos, enemy);
+    bullet.GetComponent<Bullet>().SetTarget(targetPos, enemy, bulletSpeed);
   }
 
   void Update()

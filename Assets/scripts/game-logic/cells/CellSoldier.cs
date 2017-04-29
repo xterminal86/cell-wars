@@ -74,14 +74,14 @@ public class CellSoldier : CellBaseClass
     }
     else
     {
-      if (_attackTimer >= GlobalConstants.AttackTimeout)
+      if (_attackTimer >= GlobalConstants.SoldierAttackTimeout)
       {
         _attackTimer = 0.0f;
         AttackCell();
       }
     }
 
-    if (_attackTimer < GlobalConstants.AttackTimeout)
+    if (_attackTimer < GlobalConstants.SoldierAttackTimeout)
     {
       _attackTimer += Time.smoothDeltaTime;
     }

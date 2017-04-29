@@ -33,6 +33,13 @@ public class CellHolder : CellBaseClass
     }
   }
 
+  public override void Update()
+  {
+    base.Update();
+
+    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 10.0f);
+  }
+
   public void UnlockCells()
   {
     int lx = Coordinates.X - 1;

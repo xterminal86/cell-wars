@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
   CellBaseClass _enemy;
 
   Vector3 _targetPos = Vector3.zero;
-  public void SetTarget(Vector3 targetPos, CellBaseClass enemy)
+  public void SetTarget(Vector3 targetPos, CellBaseClass enemy, float bulletSpeed)
   {
     _targetPos = targetPos;
 
@@ -22,12 +22,13 @@ public class Bullet : MonoBehaviour
     _gridPos.Set(_gridX, _gridY);
 
     _enemy = enemy;
+    _bulletSpeed = bulletSpeed;
   }
 
   Vector3 _position = Vector3.zero;
   Vector3 _heading = Vector3.zero;
   Vector3 _dir = Vector3.zero;
-  float _magnitude = 0.0f, _gridX = 0.0f, _gridY = 0.0f;
+  float _magnitude = 0.0f, _gridX = 0.0f, _gridY = 0.0f, _bulletSpeed = 0.0f;
   Int2 _gridPos = Int2.Zero;
 	void Update () 
 	{
@@ -39,7 +40,7 @@ public class Bullet : MonoBehaviour
 
     if (_magnitude > 0.1f)
     {
-      _position += (_dir * Time.smoothDeltaTime * GlobalConstants.BulletSpeed);
+      _position += (_dir * Time.smoothDeltaTime * _bulletSpeed);
 
       transform.position = _position;
     }

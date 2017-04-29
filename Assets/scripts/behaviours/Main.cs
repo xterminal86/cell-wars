@@ -12,6 +12,7 @@ public class Main : MonoBehaviour
   public Button BuildColonyButton;
   public Button BuildBarracksButton;
   public Button BuildHolderButton;
+  public Button BuildDefenderButton;
   public Button CancelButton;
 
   // For various information text
@@ -165,6 +166,7 @@ public class Main : MonoBehaviour
     BuildColonyButton.interactable = (dronesPlayer >= GlobalConstants.CellColonyHitpoints);
     BuildBarracksButton.interactable = (dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
     BuildHolderButton.interactable = (dronesPlayer >= GlobalConstants.CellHolderHitpoints);
+    BuildDefenderButton.interactable = (dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
 
     CancelButton.gameObject.SetActive(_buildMode);
   }
@@ -184,6 +186,10 @@ public class Main : MonoBehaviour
 
       case 2:
         _buildingType = GlobalConstants.CellType.HOLDER;
+        break;
+
+      case 3:
+        _buildingType = GlobalConstants.CellType.DEFENDER;
         break;
     }
 

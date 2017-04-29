@@ -13,9 +13,28 @@ public class CellBehaviour : MonoBehaviour
   public TextMesh HpText;
   public Transform ModelTransform;
 
+  string _hpMarker = string.Empty;
 	void Update() 
 	{
-    HpText.text = CellInstance.Hitpoints.ToString();
+    if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
+    {
+      _hpMarker = "";
+
+      for (int i = 0; i < CellInstance.Hitpoints; i++)
+      {
+        _hpMarker += '.';
+      }
+    }
+    else if (CellInstance.Type == GlobalConstants.CellType.DRONE)
+    {
+      _hpMarker = "";
+    }
+    else
+    {
+      _hpMarker = CellInstance.Hitpoints.ToString();
+    }
+
+    HpText.text = _hpMarker;
 
     CellInstance.Update();
 	}
@@ -31,6 +50,7 @@ public class CellBehaviour : MonoBehaviour
 
       case GlobalConstants.CellType.BARRACKS:
       case GlobalConstants.CellType.COLONY:
+      case GlobalConstants.CellType.DEFENDER:
         LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
         break;
       case GlobalConstants.CellType.HOLDER:
