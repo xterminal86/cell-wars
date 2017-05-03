@@ -59,53 +59,6 @@ public abstract class CellBaseClass
     }
   }
 
-  protected CellBaseClass SpawnCell(GlobalConstants.CellType cellType)
-  {
-    /*
-    int lx = Coordinates.X - 1;
-    int ly = Coordinates.Y - 1;
-    int hx = Coordinates.X + 1;
-    int hy = Coordinates.Y + 1;
-
-    for (int x = lx; x <= hx; x++)
-    {
-      for (int y = ly; y <= hy; y++)
-      {
-        if (x >= 0 && x < LevelLoader.Instance.MapSize
-          && y >= 0 && y < LevelLoader.Instance.MapSize)
-        {
-          bool cellEmpty = true;
-
-          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
-          {
-            if (kvp.Value != null && kvp.Value.OwnerId != OwnerId)
-            {
-              cellEmpty = false;
-              break;
-            }
-          }
-          
-          if (LevelLoader.Instance.Map[x, y].CellHere != null)
-          {            
-            cellEmpty = false;
-          }
-
-          if (cellEmpty)
-          {
-            _pos.Set(x, y);
-
-            return LevelLoader.Instance.PlaceCell(_pos, cellType, OwnerId);
-          }
-        }
-      }
-    }
-
-    return null;
-    */
-
-    return LevelLoader.Instance.PlaceCell(_emptyCellPos, cellType, OwnerId);
-  }
-
   Int2 _emptyCellPos = Int2.Zero;
   protected Int2 TryToFindEmptyCell()
   {

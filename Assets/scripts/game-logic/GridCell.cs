@@ -11,5 +11,6 @@ public class GridCell
 
   public CellBaseClass CellHere;
 
+  // If multiple holders influence the same cell, it should be accounted for
   public int NumberOfLocks = 0;
 }

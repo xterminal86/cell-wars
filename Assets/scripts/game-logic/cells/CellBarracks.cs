@@ -41,7 +41,7 @@ public class CellBarracks : CellBaseClass
         if (res != null)
         {          
           LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
-          var c = SpawnCell(GlobalConstants.CellType.SOLDIER);
+          var c = LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.SOLDIER, OwnerId);
 
           _spawnedSoldiersById[_spawnId] = (c as CellSoldier);
 

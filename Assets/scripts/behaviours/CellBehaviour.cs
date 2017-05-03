@@ -59,16 +59,18 @@ public class CellBehaviour : MonoBehaviour
         break;        
     }
 
-    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
-    {
-      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
-    }
-
     Destroy(gameObject);
 
     if (CellInstance.Type == GlobalConstants.CellType.BASE)
     {
       LevelLoader.Instance.GameOver(CellInstance.OwnerId);    
     }
+
+    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
+    {
+      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
+    }
+
+    CellInstance = null;
   }
 }

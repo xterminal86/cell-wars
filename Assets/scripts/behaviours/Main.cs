@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class Main : MonoBehaviour 
 {	  
   // Prefab for a square that highlights the grid cell
   public GameObject GridHighlighter;
+
+  public SelectedSpot SelectedSpot;
+
+  public RectTransform BuildButtonsGroup;
+  public RectTransform CancelButtonGroup;
 
   // Building menu
   public Button BuildColonyButton;
@@ -26,11 +32,7 @@ public class Main : MonoBehaviour
 
   Material _highlighterMaterial;
 
-  // When user clicks building button, we enter "build mode"
   bool _buildMode = false;
-
-  // True if current spot is valid for building
-  bool _validSpot = false;
 
   float _cameraScrollLimit = 0.0f;
   void Start()
@@ -45,6 +47,7 @@ public class Main : MonoBehaviour
     _cameraScrollLimit = LevelLoader.Instance.MapSize;
   }
 
+  bool _validSpot = false;
   Vector3 _mousePosition = Vector3.zero;
   Vector3 _highligherPosition = Vector3.zero;
   void Update()
@@ -52,6 +55,8 @@ public class Main : MonoBehaviour
     ProcessHighlighter();
     ProcessInput();
     ControlCamera();
+
+    SelectedSpot.transform.gameObject.SetActive(_buildMode);
 
     _highlighter.transform.position = _highligherPosition;
 
@@ -61,6 +66,8 @@ public class Main : MonoBehaviour
     DronesCpuText.text = LevelLoader.Instance.DronesCountByOwner[1].ToString();
 
     EnableButtons();
+
+    _validSpot = LevelLoader.Instance.CheckLocationToBuild(_selectedSpotPos2D, 0);
   }
 
   Int2 _cellCoords = Int2.Zero;
@@ -76,36 +83,51 @@ public class Main : MonoBehaviour
       _cellCoords.X = (int)hitInfo.collider.gameObject.transform.position.x;
       _cellCoords.Y = (int)hitInfo.collider.gameObject.transform.position.y;
 
-      _validSpot = LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 0);
-
-      if (_buildMode)
-      {
-        _highlighterMaterial.color = _validSpot ? Color.green : Color.red;
-      } 
-      else
-      {
-        _highlighterMaterial.color = Color.white;
-      }
+      _highlighterMaterial.color = LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 0) ? Color.green : Color.white;
 
       _highligherPosition = hitInfo.collider.transform.parent.position;
       _highligherPosition.z = -4.0f;
     }
+
+    if (SelectedSpot.gameObject.activeSelf)
+    {
+      SelectedSpot.SetColor(_validSpot ? Color.green : Color.red);
+    }
   }
 
+  Vector3 _selectedSpotPos = Vector3.zero;
+  Int2 _selectedSpotPos2D = Int2.Zero;
+  CellBaseClass _selectedCell;
   void ProcessInput()
-  {    
-    if (_buildMode && _validSpot && Input.GetMouseButtonDown(0))
-    {
-      if (LevelLoader.Instance.DronesCountByOwner[0] < GlobalConstants.DroneCostByType[_buildingType])
-      {
-        PrintInfoText("Not enough drones!");
-        return;
-      }
+  {   
+    if (Input.GetMouseButtonDown(0) && IsValidClickPosition())
+    { 
+      _buildMode = true;
 
-      LevelLoader.Instance.Build(_cellCoords, _buildingType, 0);
+      _selectedCell = LevelLoader.Instance.Map[_cellCoords.X, _cellCoords.Y].CellHere;
 
-      _buildMode = false;
+      _selectedSpotPos.x = _cellCoords.X;
+      _selectedSpotPos.y = _cellCoords.Y;
+      _selectedSpotPos.z = SelectedSpot.transform.position.z;
+
+      _selectedSpotPos2D.X = _cellCoords.X;
+      _selectedSpotPos2D.Y = _cellCoords.Y;
+
+      SelectedSpot.transform.position = _selectedSpotPos;
     }
+  }
+
+  bool IsValidClickPosition()
+  {
+    bool isOverUI = EventSystem.current.IsPointerOverGameObject();
+    Vector3 mousePos = Input.mousePosition;
+
+    Ray r = Camera.main.ScreenPointToRay(mousePos);
+
+    RaycastHit hitInfo;
+    bool boundsCheck = Physics.Raycast(r, out hitInfo, Mathf.Infinity, LayerMask.GetMask("grid"));
+
+    return (!isOverUI && boundsCheck);
   }
 
   Vector3 _cameraPos = Vector3.zero;
@@ -162,11 +184,12 @@ public class Main : MonoBehaviour
   void EnableButtons()
   {
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
+    bool colonySelected = (_selectedCell != null && _selectedCell.Type == GlobalConstants.CellType.COLONY);
 
-    BuildColonyButton.interactable = (dronesPlayer >= GlobalConstants.CellColonyHitpoints);
-    BuildBarracksButton.interactable = (dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
-    BuildHolderButton.interactable = (dronesPlayer >= GlobalConstants.CellHolderHitpoints);
-    BuildDefenderButton.interactable = (dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
+    BuildColonyButton.interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
+    BuildBarracksButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
+    BuildHolderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellHolderHitpoints);
+    BuildDefenderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
 
     CancelButton.gameObject.SetActive(_buildMode);
   }
@@ -178,28 +201,37 @@ public class Main : MonoBehaviour
     {
       case 0:
         _buildingType = GlobalConstants.CellType.COLONY;
+        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 1:
         _buildingType = GlobalConstants.CellType.BARRACKS;
+        _selectedCell.BehaviourRef.DestroySelf();
+        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 2:
         _buildingType = GlobalConstants.CellType.HOLDER;
+        _selectedCell.BehaviourRef.DestroySelf();
+        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 3:
         _buildingType = GlobalConstants.CellType.DEFENDER;
+        _selectedCell.BehaviourRef.DestroySelf();
+        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
     }
 
-    _buildMode = true;
+    _buildMode = false;
   }
 
   public void CancelBuild()
-  {    
-    _buildingType = GlobalConstants.CellType.NONE;
+  { 
     _buildMode = false;
+
+    SelectedSpot.transform.gameObject.SetActive(false);
+    _buildingType = GlobalConstants.CellType.NONE;
   }
 
   public void PrintInfoText(string text)

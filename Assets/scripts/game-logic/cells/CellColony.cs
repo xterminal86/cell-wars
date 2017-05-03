@@ -19,10 +19,9 @@ public class CellColony : CellBaseClass
     if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
     {   
       var res = TryToFindEmptyCell();
-
       if (res != null)
       {
-        SpawnCell(GlobalConstants.CellType.DRONE);
+        LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.DRONE, OwnerId);
       }
 
       _timer = 0.0f;
