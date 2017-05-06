@@ -21,28 +21,37 @@ public class SelectedSpot : MonoBehaviour
   {
     _counter += Time.smoothDeltaTime;
 
-    if (_counter < 0.5f)
+    if ((_counter > 0.0f && _counter < 0.25f) 
+     || (_counter > 0.75f && _counter < 1.0f))
     {
       _scale.x -= Time.smoothDeltaTime;
       _scale.y -= Time.smoothDeltaTime;
       _scale.z -= Time.smoothDeltaTime;
     }
-    else
+    else if ((_counter > 0.25f && _counter < 0.5f) 
+          || (_counter > 0.5f && _counter < 0.75f))
     {
       _scale.x += Time.smoothDeltaTime;
       _scale.y += Time.smoothDeltaTime;
       _scale.z += Time.smoothDeltaTime;
     }
 
-    if (_counter > 1.2f)
+    if (_counter > 1.0f)
     {
       _counter = 0.0f;
     }
 
-    _scale.x = Mathf.Clamp(_scale.x, 0.5f, 1.2f);
-    _scale.y = Mathf.Clamp(_scale.y, 0.5f, 1.2f);
-    _scale.z = Mathf.Clamp(_scale.z, 0.5f, 1.2f);
+    _scale.x = Mathf.Clamp(_scale.x, 0.5f, 1.3f);
+    _scale.y = Mathf.Clamp(_scale.y, 0.5f, 1.3f);
+    _scale.z = Mathf.Clamp(_scale.z, 0.5f, 1.3f);
 
     transform.localScale = _scale;
 	}
+
+  void OnEnable()
+  {
+    _scale.Set(1.0f, 1.0f, 1.0f);
+
+    _counter = 0.0f;
+  }
 }

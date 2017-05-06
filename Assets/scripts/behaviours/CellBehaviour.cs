@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Attach this to every cell prefab.
@@ -10,31 +11,16 @@ public class CellBehaviour : MonoBehaviour
   public CellBaseClass CellInstance;
 
   public Transform RadiusMarker;
-  public TextMesh HpText;
   public Transform ModelTransform;
 
-  string _hpMarker = string.Empty;
+  public Image HitpointsBar;
+
 	void Update() 
 	{
-    if (CellInstance.Type == GlobalConstants.CellType.SOLDIER)
-    {
-      _hpMarker = "";
-
-      for (int i = 0; i < CellInstance.Hitpoints; i++)
-      {
-        _hpMarker += '.';
-      }
+    if (CellInstance.Type != GlobalConstants.CellType.DRONE)
+    { 
+      CellInstance.CalculateHitpointsBar(GlobalConstants.CellHitpointsByType[CellInstance.Type]);
     }
-    else if (CellInstance.Type == GlobalConstants.CellType.DRONE)
-    {
-      _hpMarker = "";
-    }
-    else
-    {
-      _hpMarker = CellInstance.Hitpoints.ToString();
-    }
-
-    HpText.text = _hpMarker;
 
     CellInstance.Update();
 	}

@@ -24,6 +24,44 @@ public abstract class CellBaseClass
   // to deal with Z depth for all objects on a scene, we can adjust Z value of a child object in a prefab.
   public Transform ModelTransform;
 
+  // How much cell is skewing (overriden in InitBehaviour of child class)
+  protected float _animationSpeed = 0.0f;
+
+  // To animate using scaling, we perform 4 steps:
+  // (thus the magic number 4 in phase duration calculation of drone cell, for example)
+  //
+  // Starting from (1, 1, 1) scale:
+  //
+  // 1) Increasing X, decreasing Y
+  // 2) Decreasing X, increasing Y (this returns to normal scale)
+  // 3) Increasing Y, decreasing X
+  // 4) Decreasing Y, increasing X (back to normal scale again)
+  //
+  // This is the duration of one such animation phase in seconds (overriden in InitBehaviour of child class)
+  protected float _phaseDuration = 0.0f;
+
+  protected float _zRotationSpeed = 10.0f;
+
+  protected Vector3 _hitpointsBarSize = new Vector3(0.5f, 0.05f);
+  Vector3 _hpBarNewSize = new Vector3(0.5f, 0.05f);
+  Color _hitPointsBarColor = Color.green;
+  int _halfHitpoints = 0;
+  public void CalculateHitpointsBar(int maxHitpoints)
+  {
+    if (_halfHitpoints == 0)
+    {
+      _halfHitpoints = (maxHitpoints % 2 == 0) ? (maxHitpoints / 2) : (maxHitpoints + 1) / 2;
+    }
+    
+    _hpBarNewSize.x = (_hitpointsBarSize.x / maxHitpoints) * Hitpoints;
+
+    _hitPointsBarColor.r = ((maxHitpoints - Hitpoints) < _halfHitpoints) ? (((maxHitpoints - Hitpoints) % _halfHitpoints) * (1.0f / (float)_halfHitpoints)) : 1.0f;
+    _hitPointsBarColor.g = ((maxHitpoints - Hitpoints) < _halfHitpoints) ? 1.0f : 1.0f - (((maxHitpoints - Hitpoints) % _halfHitpoints) * (1.0f / (float)_halfHitpoints));
+
+    BehaviourRef.HitpointsBar.rectTransform.sizeDelta = _hpBarNewSize;
+    BehaviourRef.HitpointsBar.color = _hitPointsBarColor;
+  }
+
   public virtual void Update()
   {
     if (BehaviourRef != null)
@@ -34,10 +72,13 @@ public abstract class CellBaseClass
 
   protected int _enemyId = 0;
   public virtual void InitBehaviour()
-  {
+  { 
+    _hitpointsBarSize.x = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.x;
+    _hitpointsBarSize.y = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.y;
+
     WorldCoordinates.Set(Coordinates.X, Coordinates.Y, 0.0f);
 
-    // Find enemy ID
+     // Find enemy ID
 
     foreach (var b in LevelLoader.Instance.BaseCoordinatesByOwner)
     {
@@ -78,18 +119,20 @@ public abstract class CellBaseClass
         {
           cellEmpty = false;
 
-          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
-          {
-            if (kvp.Value == null || (kvp.Value != null && kvp.Value.OwnerId == OwnerId))
-            {              
-              cellEmpty = true;
-              break;
-            }
-          }
-
+          // Check if cell is empty
           if (LevelLoader.Instance.Map[x, y].CellHere == null && LevelLoader.Instance.Map[x, y].NumberOfLocks == 0)
           { 
             cellEmpty = true;
+
+            // Now check if there are enemy attackers on it
+            foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
+            {
+              if (kvp.Value != null && kvp.Value.OwnerId != OwnerId)
+              {              
+                cellEmpty = false;
+                break;
+              }
+            }
           }
 
           if (cellEmpty)
@@ -104,5 +147,34 @@ public abstract class CellBaseClass
   exitLoop:
 
     return (cellEmpty ? _emptyCellPos : null);
+  }
+
+  Vector3 _localScale = Vector3.one;
+  float _scaleTimer = 0.0f;
+  protected void PlayAnimation()
+  {
+    if ((_scaleTimer > 0.0f && _scaleTimer < _phaseDuration) || (_scaleTimer > _phaseDuration * 3.0f && _scaleTimer < _phaseDuration * 4.0f))
+    {
+      _localScale.x += Time.smoothDeltaTime * _animationSpeed;
+      _localScale.y -= Time.smoothDeltaTime * _animationSpeed;
+    }
+    else if ((_scaleTimer > _phaseDuration && _scaleTimer < _phaseDuration * 2.0f) || (_scaleTimer > _phaseDuration * 2.0f && _scaleTimer < _phaseDuration * 3.0f))
+    {
+      _localScale.x -= Time.smoothDeltaTime * _animationSpeed;
+      _localScale.y += Time.smoothDeltaTime * _animationSpeed;
+    }
+    else if (_scaleTimer > _phaseDuration * 4.0f)
+    {
+      _scaleTimer = 0.0f;
+    }
+
+    _scaleTimer += Time.smoothDeltaTime;
+
+    _localScale.x = Mathf.Clamp(_localScale.x, 0.5f, 1.5f);
+    _localScale.y = Mathf.Clamp(_localScale.y, 0.5f, 1.5f);
+
+    ModelTransform.localScale = _localScale;
+
+    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * _zRotationSpeed);
   }
 }

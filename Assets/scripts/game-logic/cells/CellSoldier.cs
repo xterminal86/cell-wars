@@ -32,6 +32,10 @@ public class CellSoldier : CellBaseClass
   {
     base.InitBehaviour();
 
+    _phaseDuration = 2.0f / 4.0f;
+    _animationSpeed = 0.2f / _phaseDuration;
+    _zRotationSpeed = 20.0f;
+
     _position = BehaviourRef.transform.position;
 
     _gridX = Mathf.Round(_position.x);
@@ -50,6 +54,8 @@ public class CellSoldier : CellBaseClass
   public override void Update()
   {
     base.Update();
+
+    PlayAnimation();
 
     // Check if destination target is still there
     CheckTargetStatus();
@@ -90,10 +96,6 @@ public class CellSoldier : CellBaseClass
     _gridY = Mathf.Round(_position.y);
 
     Coordinates.Set(_gridX, _gridY);
-
-    ModelTransform.Rotate(Vector3.right, Time.smoothDeltaTime * 50.0f);
-    ModelTransform.Rotate(Vector3.up, Time.smoothDeltaTime * 100.0f);
-    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 25.0f);
 
     BehaviourRef.transform.position = _position;
   }

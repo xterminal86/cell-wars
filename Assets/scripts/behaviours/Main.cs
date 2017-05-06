@@ -19,7 +19,6 @@ public class Main : MonoBehaviour
   public Button BuildBarracksButton;
   public Button BuildHolderButton;
   public Button BuildDefenderButton;
-  public Button CancelButton;
 
   // For various information text
   public Text InfoText;
@@ -115,6 +114,13 @@ public class Main : MonoBehaviour
 
       SelectedSpot.transform.position = _selectedSpotPos;
     }
+    else if (Input.GetMouseButtonDown(1))
+    {
+      _buildMode = false;
+
+      SelectedSpot.transform.gameObject.SetActive(false);
+      _buildingType = GlobalConstants.CellType.NONE;
+    }
   }
 
   bool IsValidClickPosition()
@@ -190,8 +196,6 @@ public class Main : MonoBehaviour
     BuildBarracksButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
     BuildHolderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellHolderHitpoints);
     BuildDefenderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
-
-    CancelButton.gameObject.SetActive(_buildMode);
   }
 
   GlobalConstants.CellType _buildingType = GlobalConstants.CellType.NONE;
@@ -224,14 +228,6 @@ public class Main : MonoBehaviour
     }
 
     _buildMode = false;
-  }
-
-  public void CancelBuild()
-  { 
-    _buildMode = false;
-
-    SelectedSpot.transform.gameObject.SetActive(false);
-    _buildingType = GlobalConstants.CellType.NONE;
   }
 
   public void PrintInfoText(string text)

@@ -24,12 +24,18 @@ public class CellBarracks : CellBaseClass
     }
   }
 
+  public override void InitBehaviour()
+  {
+    base.InitBehaviour();
+
+    _phaseDuration = 1.0f;
+    _animationSpeed = 0.1f;
+  }
+
   float _timer = 0.0f;
   public override void Update()
   {
-    ModelTransform.Rotate(Vector3.right, Time.smoothDeltaTime * 10.0f);
-    ModelTransform.Rotate(Vector3.up, Time.smoothDeltaTime * 20.0f);
-    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 5.0f);
+    PlayAnimation();
 
     if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)
     {   

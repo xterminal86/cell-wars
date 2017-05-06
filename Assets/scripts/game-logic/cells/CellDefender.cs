@@ -12,6 +12,11 @@ public class CellDefender : CellBaseClass
   
   public override void InitBehaviour()
   {
+    base.InitBehaviour();
+
+    _phaseDuration = 1.0f;
+    _animationSpeed = 0.1f;
+
     Vector3 newScale = new Vector3(GlobalConstants.CellDefenderRange * 2, GlobalConstants.CellDefenderRange * 2, GlobalConstants.CellDefenderRange * 2);
     BehaviourRef.RadiusMarker.localScale = newScale;
   }
@@ -22,6 +27,8 @@ public class CellDefender : CellBaseClass
   public override void Update()
   {
     base.Update();
+
+    PlayAnimation();
 
     if (_enemyFound != null && _enemyFound.BehaviourRef == null)
     {
@@ -46,10 +53,6 @@ public class CellDefender : CellBaseClass
         LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.WorldCoordinates, _enemyFound, GlobalConstants.DefenderBulletSpeed);
       }
     }
-
-    ModelTransform.Rotate(Vector3.right, Time.smoothDeltaTime * 50.0f);
-    ModelTransform.Rotate(Vector3.up, Time.smoothDeltaTime * 100.0f);
-    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 25.0f);
   }
 
   float _distance = 0.0f;

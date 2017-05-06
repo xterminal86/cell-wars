@@ -43,6 +43,17 @@ public static class GlobalConstants
   public const int CellHolderHitpoints = 16;
   public const int CellDefenderHitpoints = 8;
 
+  public static Dictionary<CellType, int> CellHitpointsByType = new Dictionary<CellType, int>() 
+  {
+    { CellType.BASE, CellBaseHitpoints },
+    { CellType.COLONY, CellColonyHitpoints },
+    { CellType.BARRACKS, CellBarracksHitpoints },
+    { CellType.SOLDIER, CellSoldierHitpoints },
+    { CellType.DRONE, CellDroneHitpoints },
+    { CellType.HOLDER, CellHolderHitpoints },
+    { CellType.DEFENDER, CellDefenderHitpoints }
+  };
+
   public static Dictionary<CellType, int> DroneCostByType = new Dictionary<CellType, int>()
   {
     { CellType.COLONY, CellColonyHitpoints },

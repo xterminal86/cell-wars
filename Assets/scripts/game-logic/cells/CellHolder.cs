@@ -12,6 +12,12 @@ public class CellHolder : CellBaseClass
 
   public override void InitBehaviour()
   {
+    base.InitBehaviour();
+
+    _phaseDuration = 1.0f;
+    _animationSpeed = 0.1f;
+    _zRotationSpeed = 5.0f;
+
     Vector3 newScale = new Vector3(GlobalConstants.CellHolderRange * 2, GlobalConstants.CellHolderRange * 2, GlobalConstants.CellHolderRange * 2);
     BehaviourRef.RadiusMarker.localScale = newScale;
 
@@ -44,7 +50,7 @@ public class CellHolder : CellBaseClass
   {
     base.Update();
 
-    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * 10.0f);
+    PlayAnimation();
   }
 
   public void UnlockCells()

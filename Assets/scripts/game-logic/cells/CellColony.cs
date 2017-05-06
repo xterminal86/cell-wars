@@ -13,9 +13,19 @@ public class CellColony : CellBaseClass
     Hitpoints = GlobalConstants.CellColonyHitpoints;
   }
 
+  public override void InitBehaviour()
+  {
+    base.InitBehaviour();
+
+    _phaseDuration = 1.0f;
+    _animationSpeed = 0.1f;
+  }
+
   float _timer = 0.0f;
   public override void Update()
   {    
+    PlayAnimation();
+
     if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
     {   
       var res = TryToFindEmptyCell();

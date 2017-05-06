@@ -18,6 +18,9 @@ public class CellDrone : CellBaseClass
   Material _m;
   public override void InitBehaviour()
   {
+    _phaseDuration = 3.0f / 4.0f;
+    _animationSpeed = 0.2f / _phaseDuration;
+
     _m = BehaviourRef.GetComponentInChildren<Renderer>().material;
 
     _color.r = _m.color.r;
@@ -33,6 +36,8 @@ public class CellDrone : CellBaseClass
   public override void Update()
   {
     base.Update();
+
+    PlayAnimation();
 
     if (!FindBaseOrColonyAround())
     {
