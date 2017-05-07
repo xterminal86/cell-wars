@@ -42,6 +42,8 @@ public abstract class CellBaseClass
 
   protected float _zRotationSpeed = 10.0f;
 
+  public bool IsDying = false;
+
   protected Vector3 _hitpointsBarSize = new Vector3(0.5f, 0.05f);
   Vector3 _hpBarNewSize = new Vector3(0.5f, 0.05f);
   Color _hitPointsBarColor = Color.green;
@@ -100,11 +102,6 @@ public abstract class CellBaseClass
   public void ReceiveDamage(int amount)
   {
     Hitpoints -= amount;
-
-    if (Hitpoints <= 0 && BehaviourRef != null)
-    {      
-      BehaviourRef.DestroySelf();
-    }
   }
 
   Int2 _emptyCellPos = Int2.Zero;
@@ -127,14 +124,14 @@ public abstract class CellBaseClass
           cellEmpty = false;
 
           // Check if cell is empty
-          if (LevelLoader.Instance.Map[x, y].CellHere == null && LevelLoader.Instance.Map[x, y].NumberOfLocks == 0)
+          if (LevelLoader.Instance.ObjectsMap[x, y] == null && LevelLoader.Instance.LockMap[x, y] == 0)
           { 
             cellEmpty = true;
 
             // Now check if there are enemy attackers on it
             foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
             {
-              if (kvp.Value != null && kvp.Value.OwnerId != OwnerId)
+              if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId)
               {              
                 cellEmpty = false;
                 break;

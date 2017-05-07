@@ -49,7 +49,15 @@ public class CellBehaviour : MonoBehaviour
       CellInstance.CalculateHitpointsBar(GlobalConstants.CellHitpointsByType[CellInstance.Type]);
     }
 
-    CellInstance.Update();
+    if (!_isDestroying)
+    {
+      CellInstance.Update();
+    }
+
+    if (CellInstance.Hitpoints <= 0)
+    {      
+      DestroySelf();
+    }
 	}
 
   // Because of cell death animation, it might be possible for
@@ -63,6 +71,11 @@ public class CellBehaviour : MonoBehaviour
   // TLDR: basically, the problem is in duplicate start of coroutine.
   // To prevent this we introduce this flag.
   bool _isDestroying = false;
+  public bool IsDestroying
+  {
+    get { return _isDestroying; }
+  }
+
   public void DestroySelf()
   { 
     if (_isDestroying)
@@ -127,7 +140,7 @@ public class CellBehaviour : MonoBehaviour
 
     if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
     {
-      LevelLoader.Instance.Map[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].CellHere = null;
+      LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
     CellInstance = null;

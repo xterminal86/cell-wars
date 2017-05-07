@@ -39,16 +39,7 @@ public class CellHolder : CellBaseClass
             LevelLoader.Instance.ObjectsMap[x, y].DestroySelf();
           }
 
-          /*
-          // Destroy all drones around
-          if (LevelLoader.Instance.Map[x, y].CellHere != null
-            && LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE)
-          {
-            LevelLoader.Instance.Map[x, y].CellHere.BehaviourRef.DestroySelf();
-          }
-          */
-
-          LevelLoader.Instance.Map[x, y].NumberOfLocks++;
+          LevelLoader.Instance.LockMap[x, y]++;
         }
       }
     }
@@ -75,8 +66,8 @@ public class CellHolder : CellBaseClass
         if (x >= 0 && x <= LevelLoader.Instance.MapSize - 1
           && y >= 0 && y <= LevelLoader.Instance.MapSize - 1)
         {
-          LevelLoader.Instance.Map[x, y].NumberOfLocks--;
-          LevelLoader.Instance.Map[x, y].NumberOfLocks = Mathf.Clamp(LevelLoader.Instance.Map[x, y].NumberOfLocks, 0, int.MaxValue);
+          LevelLoader.Instance.LockMap[x, y]--;
+          LevelLoader.Instance.LockMap[x, y] = Mathf.Clamp(LevelLoader.Instance.LockMap[x, y], 0, int.MaxValue);
         }
       }
     }

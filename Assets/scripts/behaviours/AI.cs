@@ -39,21 +39,21 @@ public class AI : MonoBehaviour
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {
-        var cell = LevelLoader.Instance.Map[x, y];
+        var obj = LevelLoader.Instance.ObjectsMap[x, y];
 
         // FIXME: hardcoded AI id
 
-        if (cell.CellHere != null && cell.CellHere.OwnerId == 1)
+        if (obj != null && obj.CellInstance.OwnerId == 1)
         {
-          if (cell.CellHere.Type == GlobalConstants.CellType.BARRACKS)
+          if (obj.CellInstance.Type == GlobalConstants.CellType.BARRACKS)
           {
             _barracksBuilt++;
           }
-          else if (cell.CellHere.Type == GlobalConstants.CellType.COLONY)
+          else if (obj.CellInstance.Type == GlobalConstants.CellType.COLONY)
           {
             _coloniesBuilt++;
           }
-        }
+        }       
       }
     }
   }

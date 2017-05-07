@@ -82,21 +82,15 @@ public class CellDrone : CellBaseClass
               || LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.BASE)
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId == OwnerId)
           {
-            return true;
-          }
+            IsDying = false;
 
-          /*
-          if (LevelLoader.Instance.Map[x, y].CellHere != null
-            && (LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.COLONY 
-             || LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.BASE)
-            && LevelLoader.Instance.Map[x, y].CellHere.OwnerId == OwnerId)
-          {
             return true;
           }
-          */
         }
       }
     }
+
+    IsDying = true;
 
     return false;
   }

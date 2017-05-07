@@ -23,17 +23,12 @@ public class CellDefender : CellBaseClass
 
   float _timer = 0.0f;
 
-  CellBaseClass _enemyFound = null;
+  CellBehaviour _enemyFound;
   public override void Update()
   {
     base.Update();
 
     PlayAnimation();
-
-    if (_enemyFound != null && _enemyFound.BehaviourRef == null)
-    {
-      _enemyFound = null;
-    }
 
     if (_enemyFound == null)
     {      
@@ -50,7 +45,7 @@ public class CellDefender : CellBaseClass
       else
       {
         _timer = 0.0f;
-        LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.WorldCoordinates, _enemyFound, GlobalConstants.DefenderBulletSpeed);
+        LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.CellInstance.WorldCoordinates, _enemyFound, GlobalConstants.DefenderBulletSpeed);
       }
     }
   }
@@ -76,9 +71,14 @@ public class CellDefender : CellBaseClass
 
           foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
           {           
-            _distance = Vector3.Distance(WorldCoordinates, kvp.Value.WorldCoordinates);
+            if (kvp.Value == null)
+            {
+              continue;
+            }
+            
+            _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
-            if (kvp.Value.OwnerId != OwnerId && _distance <= GlobalConstants.CellDefenderRange)
+            if (kvp.Value.CellInstance.OwnerId != OwnerId && _distance <= GlobalConstants.CellDefenderRange)
             {              
               _enemyFound = kvp.Value;
               return;
@@ -87,10 +87,10 @@ public class CellDefender : CellBaseClass
 
           // Check other cells second
 
-          if ((LevelLoader.Instance.Map[x, y].CellHere != null             
-            && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
+          if ((LevelLoader.Instance.ObjectsMap[x, y] != null             
+            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId))
           {            
-            _enemyFound = LevelLoader.Instance.Map[x, y].CellHere;
+            _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
             return;
           }
         }

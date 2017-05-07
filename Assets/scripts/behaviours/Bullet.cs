@@ -9,10 +9,10 @@ public class Bullet : MonoBehaviour
 {
   public GameObject BulletHitEffectPrefab;
 
-  CellBaseClass _enemy;
+  CellBehaviour _enemy;
 
   Vector3 _targetPos = Vector3.zero;
-  public void SetTarget(Vector3 targetPos, CellBaseClass enemy, float bulletSpeed)
+  public void SetTarget(Vector3 targetPos, CellBehaviour enemy, float bulletSpeed)
   {
     _targetPos = targetPos;
 
@@ -50,7 +50,7 @@ public class Bullet : MonoBehaviour
 
       if (_enemy != null)
       {
-        _enemy.ReceiveDamage(1);
+        _enemy.CellInstance.ReceiveDamage(1);
       }
 
       Destroy(gameObject);

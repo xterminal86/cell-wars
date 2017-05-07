@@ -35,10 +35,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _dronesCountByOwner; }
   }
 
-  GridCell[,] _map;
-  public GridCell[,] Map
+  // How many holders influence given cell
+  int [,] _locksMap;
+  public int[,] LockMap
   {
-    get { return _map; }
+    get { return _locksMap; }
   }
 
   CellBehaviour[,] _objectsMap;
@@ -63,30 +64,27 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   // Shows how many attackers occupies given [x,y] cell. 
   // Indiced by attacker's class instance hash code.
-  public Dictionary<int, CellBaseClass>[,] SoldiersMap;
+  public Dictionary<int, CellBehaviour>[,] SoldiersMap;
 
   public override void Initialize()    
   { 
     _gridHolder = GameObject.Find("grid").transform;
 
-    _map = new GridCell[MapSize, MapSize];
+    _locksMap = new int[MapSize, MapSize];
     _objectsMap = new CellBehaviour[MapSize, MapSize];
 
-    SoldiersMap = new Dictionary<int, CellBaseClass>[MapSize, MapSize];
+    SoldiersMap = new Dictionary<int, CellBehaviour>[MapSize, MapSize];
 
     for (int x = 0; x < MapSize; x++)
     {
       for (int y = 0; y < MapSize; y++)
       {
-        SoldiersMap[x, y] = new Dictionary<int, CellBaseClass>();
+        SoldiersMap[x, y] = new Dictionary<int, CellBehaviour>();
 
-        _map[x, y] = new GridCell();
+        _locksMap[x, y] = 0;
         _objectsMap[x, y] = null;
 
         var go = (GameObject)Instantiate(GridCellPrefab, new Vector3(x, y, 0.0f), Quaternion.identity, _gridHolder);
-
-        _map[x, y].Coordinates.X = x;
-        _map[x, y].Coordinates.Y = y;
       }
     }
 
@@ -190,7 +188,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       c.Coordinates.Set(pos);
 
       CellBehaviour b = go.GetComponent<CellBehaviour>();
-      _objectsMap[pos.X, pos.Y] = b;
 
       b.CellInstance = c;
       b.CellInstance.BehaviourRef = b;
@@ -199,7 +196,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
       if (c.Type != GlobalConstants.CellType.SOLDIER)
       {        
-        _map[pos.X, pos.Y].CellHere = c;
+        _objectsMap[pos.X, pos.Y] = b;
       }
     }
 
@@ -208,7 +205,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   public bool CheckLocationToBuild(Int2 posToCheck, int ownerId)
   {
-    if (_map[posToCheck.X, posToCheck.Y].CellHere != null)
+    if (_objectsMap[posToCheck.X, posToCheck.Y] != null)
     {
       return false;
     }
@@ -267,7 +264,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     {
       for (int y = 0; y < MapSize; y++)
       {
-        if (_map[x, y].CellHere == null)
+        if (_objectsMap[x, y] == null)
         {
           continue;
         }
@@ -277,12 +274,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
           return;
         }
 
-        if (_map[x, y].CellHere.OwnerId == ownerId
-         && _map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE)
+        if (_objectsMap[x, y].CellInstance.OwnerId == ownerId
+          && _objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE)
         {
           transformedCount++;
 
-          _map[x, y].CellHere.BehaviourRef.DestroySelf();
+          _objectsMap[x, y].DestroySelf();
         }
       }
     }
@@ -309,7 +306,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     Time.timeScale = 0.0f;
   }
 
-  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBaseClass enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
   {
     GameObject bullet = (GameObject)Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
     bullet.GetComponent<Bullet>().SetTarget(targetPos, enemy, bulletSpeed);
@@ -322,17 +319,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
 
-    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    for (int x = 0; x < MapSize; x++)
     {
-      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
+      for (int y = 0; y < MapSize; y++)
       {
-        if (LevelLoader.Instance.Map[x, y].CellHere != null)
+        if (_objectsMap[x, y] != null)
         {          
-          if (LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE && LevelLoader.Instance.Map[x, y].CellHere.OwnerId == 0)
+          if (_objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE && _objectsMap[x, y].CellInstance.OwnerId == 0)
           {
             _dronesCountByOwner[0]++;
           }
-          else if (LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE && LevelLoader.Instance.Map[x, y].CellHere.OwnerId == 1)
+          else if (_objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE && _objectsMap[x, y].CellInstance.OwnerId == 1)
           {
             _dronesCountByOwner[1]++;
           }

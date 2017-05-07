@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public delegate void Callback();
+public delegate void CallbackO(object o);
+
 public static class Utils
 {
   public static int BlockDistance(Int2 point1, Int2 point2)

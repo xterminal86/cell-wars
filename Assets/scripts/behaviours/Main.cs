@@ -249,23 +249,45 @@ public class Main : MonoBehaviour
       case 1:
         _buildingType = GlobalConstants.CellType.BARRACKS;
         _selectedCell.DestroySelf();
-        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        StartCoroutine(WaitForDestroyRoutine(() =>
+        {
+          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        }));
         break;
 
       case 2:
         _buildingType = GlobalConstants.CellType.HOLDER;
         _selectedCell.DestroySelf();
-        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        StartCoroutine(WaitForDestroyRoutine(() =>
+        {
+          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        }));
         break;
 
       case 3:
         _buildingType = GlobalConstants.CellType.DEFENDER;
         _selectedCell.DestroySelf();
-        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        StartCoroutine(WaitForDestroyRoutine(() =>
+        {
+          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        }));
         break;
     }
 
     _buildMode = false;
+  }
+
+  IEnumerator WaitForDestroyRoutine(Callback cb)
+  {
+    while (_selectedCell != null)
+    {
+      yield return null;
+    }
+
+    if (cb != null)
+      cb();
+
+    yield return null;
   }
 
   public void PrintInfoText(string text)
