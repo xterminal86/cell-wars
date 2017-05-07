@@ -24,6 +24,7 @@ public static class GlobalConstants
   public const float CameraMoveSpeed = 10.0f;
   public const float CellHolderRange = 3.0f;
   public const float CellDefenderRange = 4.0f;
+  public const int RoundTimeSeconds = 120;
 
   // Cooldown between build actions for CPU to give player some advantage
   public const float CPUActionTimeout = 6.0f;

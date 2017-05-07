@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class Main : MonoBehaviour 
 {	  
@@ -12,7 +13,7 @@ public class Main : MonoBehaviour
   public SelectedSpot SelectedSpot;
 
   public RectTransform BuildButtonsGroup;
-  public RectTransform CancelButtonGroup;
+  public RectTransform MenuGroup;
 
   // Building menu
   public Button BuildColonyButton;
@@ -27,6 +28,9 @@ public class Main : MonoBehaviour
   public Text DronesPlayerText;
   public Text DronesCpuText;
 
+  // Time of round
+  public Text TimerText;
+
   GameObject _highlighter;
 
   Material _highlighterMaterial;
@@ -35,7 +39,7 @@ public class Main : MonoBehaviour
 
   float _cameraScrollLimit = 0.0f;
   void Start()
-  {    
+  {   
     InfoText.text = "";
       
     _highlighter = (GameObject)Instantiate(GridHighlighter, Vector3.zero, Quaternion.identity);
@@ -46,6 +50,8 @@ public class Main : MonoBehaviour
     _cameraScrollLimit = LevelLoader.Instance.MapSize;
   }
 
+  int _secondsPassed = 0;
+  float _roundTimer = 0.0f;
   bool _validSpot = false;
   Vector3 _mousePosition = Vector3.zero;
   Vector3 _highligherPosition = Vector3.zero;
@@ -67,6 +73,25 @@ public class Main : MonoBehaviour
     EnableButtons();
 
     _validSpot = LevelLoader.Instance.CheckLocationToBuild(_selectedSpotPos2D, 0);
+
+    _roundTimer += Time.smoothDeltaTime;
+
+    if (_roundTimer > 1.0f)
+    {
+      _secondsPassed++;
+      _roundTimer = 0.0f;
+    }
+
+    if (_secondsPassed >= GlobalConstants.RoundTimeSeconds)
+    {      
+      PrintInfoText("TIME'S UP!");
+      Time.timeScale = 0.0f;
+    }
+
+    int minutes = (GlobalConstants.RoundTimeSeconds - _secondsPassed) / 60;
+    int seconds = (GlobalConstants.RoundTimeSeconds - _secondsPassed) % 60;
+
+    TimerText.text = string.Format("{0}:{1:00}", minutes, seconds);
   }
 
   Int2 _cellCoords = Int2.Zero;
@@ -120,6 +145,19 @@ public class Main : MonoBehaviour
 
       SelectedSpot.transform.gameObject.SetActive(false);
       _buildingType = GlobalConstants.CellType.NONE;
+    }
+    else if (Input.GetKeyDown(KeyCode.Escape))
+    {
+      if (MenuGroup.gameObject.activeSelf)
+      {
+        MenuGroup.gameObject.SetActive(false);
+        Time.timeScale = 1.0f;
+      }
+      else
+      {
+        MenuGroup.gameObject.SetActive(true);
+        Time.timeScale = 0.0f;
+      }
     }
   }
 
@@ -248,5 +286,17 @@ public class Main : MonoBehaviour
     }
 
     InfoText.text = "";
+  }
+
+  public void ResumeGameHandler()
+  {
+    MenuGroup.gameObject.SetActive(false);
+    Time.timeScale = 1.0f;
+  }
+
+  public void ReturnToTitleHandler()
+  {
+    Time.timeScale = 1.0f;
+    SceneManager.LoadScene("title");
   }
 }
