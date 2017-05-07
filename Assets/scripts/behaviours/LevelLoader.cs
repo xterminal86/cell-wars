@@ -41,6 +41,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _map; }
   }
 
+  CellBehaviour[,] _objectsMap;
+  public CellBehaviour[,] ObjectsMap
+  {
+    get { return _objectsMap; }
+  }
+
   // Used for getting targets for automatic moving for attackers
   Dictionary<int, List<Int2>> _buildingsCoordinatesByOwner = new Dictionary<int, List<Int2>>();
   public Dictionary<int, List<Int2>> BuildingsCoordinatesByOwner
@@ -64,6 +70,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     _gridHolder = GameObject.Find("grid").transform;
 
     _map = new GridCell[MapSize, MapSize];
+    _objectsMap = new CellBehaviour[MapSize, MapSize];
 
     SoldiersMap = new Dictionary<int, CellBaseClass>[MapSize, MapSize];
 
@@ -74,6 +81,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         SoldiersMap[x, y] = new Dictionary<int, CellBaseClass>();
 
         _map[x, y] = new GridCell();
+        _objectsMap[x, y] = null;
 
         var go = (GameObject)Instantiate(GridCellPrefab, new Vector3(x, y, 0.0f), Quaternion.identity, _gridHolder);
 
@@ -173,7 +181,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       go.GetComponentInChildren<Renderer>().material = m;
 
       if (c.Type != GlobalConstants.CellType.DRONE && c.Type != GlobalConstants.CellType.SOLDIER)
-      {
+      {        
         _buildingsCoordinatesByOwner[ownerId].Add(new Int2(pos));
       }
 
@@ -182,13 +190,15 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       c.Coordinates.Set(pos);
 
       CellBehaviour b = go.GetComponent<CellBehaviour>();
+      _objectsMap[pos.X, pos.Y] = b;
+
       b.CellInstance = c;
       b.CellInstance.BehaviourRef = b;
       b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
       if (c.Type != GlobalConstants.CellType.SOLDIER)
-      {
+      {        
         _map[pos.X, pos.Y].CellHere = c;
       }
     }

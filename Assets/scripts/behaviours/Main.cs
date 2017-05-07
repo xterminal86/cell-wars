@@ -121,14 +121,14 @@ public class Main : MonoBehaviour
 
   Vector3 _selectedSpotPos = Vector3.zero;
   Int2 _selectedSpotPos2D = Int2.Zero;
-  CellBaseClass _selectedCell;
+  CellBehaviour _selectedCell;
   void ProcessInput()
   {   
     if (Input.GetMouseButtonDown(0) && IsValidClickPosition())
     { 
       _buildMode = true;
 
-      _selectedCell = LevelLoader.Instance.Map[_cellCoords.X, _cellCoords.Y].CellHere;
+      _selectedCell = LevelLoader.Instance.ObjectsMap[_cellCoords.X, _cellCoords.Y];
 
       _selectedSpotPos.x = _cellCoords.X;
       _selectedSpotPos.y = _cellCoords.Y;
@@ -228,7 +228,7 @@ public class Main : MonoBehaviour
   void EnableButtons()
   {
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
-    bool colonySelected = (_selectedCell != null && _selectedCell.Type == GlobalConstants.CellType.COLONY);
+    bool colonySelected = (_selectedCell != null && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY);
 
     BuildColonyButton.interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
     BuildBarracksButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
@@ -248,19 +248,19 @@ public class Main : MonoBehaviour
 
       case 1:
         _buildingType = GlobalConstants.CellType.BARRACKS;
-        _selectedCell.BehaviourRef.DestroySelf();
+        _selectedCell.DestroySelf();
         LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 2:
         _buildingType = GlobalConstants.CellType.HOLDER;
-        _selectedCell.BehaviourRef.DestroySelf();
+        _selectedCell.DestroySelf();
         LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 3:
         _buildingType = GlobalConstants.CellType.DEFENDER;
-        _selectedCell.BehaviourRef.DestroySelf();
+        _selectedCell.DestroySelf();
         LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
         break;
     }

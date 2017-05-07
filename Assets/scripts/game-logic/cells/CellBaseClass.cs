@@ -70,11 +70,18 @@ public abstract class CellBaseClass
     }
   }
 
+  protected int _randomRotation = 0;
   protected int _enemyId = 0;
   public virtual void InitBehaviour()
   { 
-    _hitpointsBarSize.x = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.x;
-    _hitpointsBarSize.y = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.y;
+    if (BehaviourRef.HitpointsBar != null)
+    {
+      _hitpointsBarSize.x = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.x;
+      _hitpointsBarSize.y = BehaviourRef.HitpointsBar.rectTransform.sizeDelta.y;
+    }
+
+    int rnd = Random.Range(0, 2);
+    _randomRotation = (rnd == 0) ? 1 : -1;
 
     WorldCoordinates.Set(Coordinates.X, Coordinates.Y, 0.0f);
 
@@ -113,7 +120,7 @@ public abstract class CellBaseClass
     for (int x = lx; x <= hx; x++)
     {
       for (int y = ly; y <= hy; y++)
-      {
+      {        
         if (x >= 0 && x < LevelLoader.Instance.MapSize
           && y >= 0 && y < LevelLoader.Instance.MapSize)
         {
@@ -175,6 +182,6 @@ public abstract class CellBaseClass
 
     ModelTransform.localScale = _localScale;
 
-    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * _zRotationSpeed);
+    ModelTransform.Rotate(Vector3.forward, Time.smoothDeltaTime * _zRotationSpeed * _randomRotation);
   }
 }

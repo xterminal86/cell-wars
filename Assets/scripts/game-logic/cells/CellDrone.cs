@@ -18,6 +18,8 @@ public class CellDrone : CellBaseClass
   Material _m;
   public override void InitBehaviour()
   {
+    base.InitBehaviour();
+
     _phaseDuration = 3.0f / 4.0f;
     _animationSpeed = 0.2f / _phaseDuration;
 
@@ -75,6 +77,15 @@ public class CellDrone : CellBaseClass
         if (x >= 0 && x < LevelLoader.Instance.MapSize
          && y >= 0 && y < LevelLoader.Instance.MapSize)
         {
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null
+              && (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.COLONY
+              || LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.BASE)
+              && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId == OwnerId)
+          {
+            return true;
+          }
+
+          /*
           if (LevelLoader.Instance.Map[x, y].CellHere != null
             && (LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.COLONY 
              || LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.BASE)
@@ -82,6 +93,7 @@ public class CellDrone : CellBaseClass
           {
             return true;
           }
+          */
         }
       }
     }

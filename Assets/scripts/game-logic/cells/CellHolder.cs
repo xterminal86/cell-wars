@@ -33,12 +33,20 @@ public class CellHolder : CellBaseClass
         if (x >= 0 && x <= LevelLoader.Instance.MapSize - 1
             && y >= 0 && y <= LevelLoader.Instance.MapSize - 1)
         {
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null
+           && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE)
+          {
+            LevelLoader.Instance.ObjectsMap[x, y].DestroySelf();
+          }
+
+          /*
           // Destroy all drones around
           if (LevelLoader.Instance.Map[x, y].CellHere != null
             && LevelLoader.Instance.Map[x, y].CellHere.Type == GlobalConstants.CellType.DRONE)
           {
             LevelLoader.Instance.Map[x, y].CellHere.BehaviourRef.DestroySelf();
           }
+          */
 
           LevelLoader.Instance.Map[x, y].NumberOfLocks++;
         }

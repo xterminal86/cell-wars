@@ -29,7 +29,7 @@ public static class GlobalConstants
   // Cooldown between build actions for CPU to give player some advantage
   public const float CPUActionTimeout = 6.0f;
 
-  public const int SoldiersPerBarrack = 2;
+  public const int SoldiersPerBarrack = 1;
 
   // Maximum block distance between already built building 
   // and new spot for a new building.

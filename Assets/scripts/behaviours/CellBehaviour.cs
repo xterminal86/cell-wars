@@ -15,6 +15,33 @@ public class CellBehaviour : MonoBehaviour
 
   public Image HitpointsBar;
 
+  void Start()
+  {
+    StartCoroutine(GrowRoutine());
+  }
+
+  Vector3 _scale = Vector3.zero;
+  IEnumerator GrowRoutine()
+  {
+    float timer = 0.0f;
+    while (timer < 1.0f)
+    {
+      timer += Time.smoothDeltaTime * 2.0f;
+
+      _scale.Set(timer, timer, timer);
+
+      transform.localScale = _scale;
+
+      yield return null;
+    }
+
+    _scale.Set(1, 1, 1);
+
+    transform.localScale = _scale;
+
+    yield return null;
+  }
+
 	void Update() 
 	{
     if (CellInstance.Type != GlobalConstants.CellType.DRONE)
@@ -25,8 +52,54 @@ public class CellBehaviour : MonoBehaviour
     CellInstance.Update();
 	}
 
+  // Because of cell death animation, it might be possible for
+  // an object to "pick up" reference to a cell that just started playing its death animation,
+  // which will invalidate a reference after several frames. 
+  // For example, when we transforming colony into holder from 16 drones, drones around new built holder
+  // will be destroyed via TransformDrones, but almost immediately they will also be marked for destroying
+  // by holder, because previous destroy only started the animation and hasn't set reference to null yet.
+  // When it happens, second destroy call (issued by holder) will crash. 
+  //
+  // TLDR: basically, the problem is in duplicate start of coroutine.
+  // To prevent this we introduce this flag.
+  bool _isDestroying = false;
   public void DestroySelf()
   { 
+    if (_isDestroying)
+    {
+      return;
+    }
+    
+    _isDestroying = true;
+
+    StartCoroutine(DestroyRoutine());
+  }
+
+  IEnumerator DestroyRoutine()
+  {
+    float timer = 1.0f;
+    while (timer > 0.0f)
+    {
+      timer -= Time.smoothDeltaTime * 2.0f;
+
+      _scale.Set(timer, timer, timer);
+
+      transform.localScale = _scale;
+
+      yield return null;
+    }
+
+    _scale.Set(0, 0, 0);
+
+    transform.localScale = _scale;
+
+    DestroyGameObject();
+
+    yield return null;
+  }
+
+  void DestroyGameObject()
+  {
     switch (CellInstance.Type)
     {
       case GlobalConstants.CellType.SOLDIER:

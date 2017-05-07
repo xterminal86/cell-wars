@@ -108,6 +108,13 @@ public class CellSoldier : CellBaseClass
     {
       var b = LevelLoader.Instance.Map[item.X, item.Y];
 
+      //Debug.Log(" Cell : [" + b + "] cell here: [" + b.CellHere + "] building: [" + item + "]");
+
+      if (b.CellHere == null)
+      {
+        continue;
+      }
+
       if (b.CellHere.Type == GlobalConstants.CellType.HOLDER)
       {
         d = Vector3.Distance(WorldCoordinates, b.CellHere.WorldCoordinates);
@@ -182,13 +189,11 @@ public class CellSoldier : CellBaseClass
 
           // Check other cells second
 
-          if ((LevelLoader.Instance.Map[x, y].CellHere != null             
-            && LevelLoader.Instance.Map[x, y].CellHere.OwnerId != OwnerId))
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null
+            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId)
           {
             _enemyPos.Set(x, y);
-            _enemy = LevelLoader.Instance.Map[x, y].CellHere;
-
-            //Debug.Log("Enemy cell found at " + _enemyPos);
+            _enemy = LevelLoader.Instance.ObjectsMap[x, y].CellInstance;
 
             return true;
           }

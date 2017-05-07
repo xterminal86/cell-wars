@@ -7,15 +7,13 @@ using UnityEngine;
 /// </summary>
 public class AttackHitEffect : MonoBehaviour 
 {	
-  float _timer = 0.0f;
-	void Update () 
+  public Animator AnimatorComponent;
+
+	void Update() 
 	{
-    if (_timer > 2.0f)
+    if (AnimatorComponent.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
     {
       Destroy(gameObject);
-      return;
     }
-
-    _timer += Time.smoothDeltaTime;
 	}
 }
