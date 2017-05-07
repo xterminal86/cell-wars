@@ -243,33 +243,37 @@ public class Main : MonoBehaviour
     {
       case 0:
         _buildingType = GlobalConstants.CellType.COLONY;
-        LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+        LevelLoader.Instance.TransformDrones(GlobalConstants.CellColonyHitpoints, 0);
+        LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 1:
         _buildingType = GlobalConstants.CellType.BARRACKS;
+        LevelLoader.Instance.TransformDrones(GlobalConstants.CellBarracksHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
         {
-          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         }));
         break;
 
       case 2:
         _buildingType = GlobalConstants.CellType.HOLDER;
+        LevelLoader.Instance.TransformDrones(GlobalConstants.CellHolderHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
         {
-          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         }));
         break;
 
       case 3:
         _buildingType = GlobalConstants.CellType.DEFENDER;
+        LevelLoader.Instance.TransformDrones(GlobalConstants.CellDefenderHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
         {
-          LevelLoader.Instance.Build(_selectedSpotPos2D, _buildingType, 0);
+          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         }));
         break;
     }

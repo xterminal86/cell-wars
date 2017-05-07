@@ -83,7 +83,8 @@ public class AI : MonoBehaviour
 
     if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
     {      
-      LevelLoader.Instance.Build(posToBuild, buildingType, 1);
+      LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[buildingType], 1);
+      LevelLoader.Instance.PlaceCell(posToBuild, buildingType, 1);
       return true;
     }    
 

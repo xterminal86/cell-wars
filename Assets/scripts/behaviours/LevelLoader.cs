@@ -226,32 +226,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     return (checkCounter != 0);
   }
 
-  public void Build(Int2 pos, GlobalConstants.CellType type, int ownerId)
-  {
-    switch (type)
-    {
-      case GlobalConstants.CellType.COLONY:
-        TransformDrones(GlobalConstants.CellColonyHitpoints, ownerId);
-        PlaceCell(pos, type, ownerId);
-        break;
-
-      case GlobalConstants.CellType.BARRACKS:
-        TransformDrones(GlobalConstants.CellBarracksHitpoints, ownerId);
-        PlaceCell(pos, type, ownerId);
-        break;
-
-      case GlobalConstants.CellType.HOLDER:
-        TransformDrones(GlobalConstants.CellHolderHitpoints, ownerId);
-        PlaceCell(pos, type, ownerId);
-        break;
-
-      case GlobalConstants.CellType.DEFENDER:
-        TransformDrones(GlobalConstants.CellDefenderHitpoints, ownerId);
-        PlaceCell(pos, type, ownerId);
-        break;
-    }
-  }
-
   /// <summary>
   /// Destroys number of drones of ownerId player.
   /// </summary>
