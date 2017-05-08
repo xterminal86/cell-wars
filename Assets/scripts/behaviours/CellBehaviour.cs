@@ -55,7 +55,7 @@ public class CellBehaviour : MonoBehaviour
     }
 
     if (CellInstance.Hitpoints <= 0)
-    {      
+    {     
       DestroySelf();
     }
 	}

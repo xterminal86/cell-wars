@@ -35,6 +35,18 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _dronesCountByOwner; }
   }
 
+  Dictionary<int, int> _territoryCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> TerritoryCountByOwner
+  {
+    get { return _territoryCountByOwner; }
+  }
+
+  Dictionary<int, int> _scoreCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> ScoreCountByOwner
+  {
+    get { return _scoreCountByOwner; }
+  }
+
   // How many holders influence given cell
   int [,] _locksMap;
   public int[,] LockMap
@@ -95,6 +107,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
+
+    _scoreCountByOwner[0] = 0;
+    _scoreCountByOwner[1] = 0;
+
+    _territoryCountByOwner[0] = 0;
+    _territoryCountByOwner[1] = 0;
 
     Vector3 cameraPos = new Vector3((float)MapSize / 2.0f - 0.5f, (float)MapSize / 2.0f - 0.5f, Camera.main.transform.position.z);
 
@@ -293,12 +311,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
 
+    _territoryCountByOwner[0] = 0;
+    _territoryCountByOwner[1] = 0;
+
     for (int x = 0; x < MapSize; x++)
     {
       for (int y = 0; y < MapSize; y++)
       {
         if (_objectsMap[x, y] != null)
         {          
+          _territoryCountByOwner[_objectsMap[x, y].CellInstance.OwnerId]++;
+
           if (_objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE && _objectsMap[x, y].CellInstance.OwnerId == 0)
           {
             _dronesCountByOwner[0]++;

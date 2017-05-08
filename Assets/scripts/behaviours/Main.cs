@@ -25,8 +25,11 @@ public class Main : MonoBehaviour
   public Text InfoText;
 
   // Number of drones
-  public Text DronesPlayerText;
-  public Text DronesCpuText;
+  public Text TerritoryPlayerText;
+  public Text TerritoryCpuText;
+
+  public Text ScorePlayerText;
+  public Text ScoreCPUText;
 
   // Time of round
   public Text TimerText;
@@ -67,8 +70,11 @@ public class Main : MonoBehaviour
 
     // FIXME: ownerID magic numbers
 
-    DronesPlayerText.text = LevelLoader.Instance.DronesCountByOwner[0].ToString();
-    DronesCpuText.text = LevelLoader.Instance.DronesCountByOwner[1].ToString();
+    TerritoryPlayerText.text = LevelLoader.Instance.TerritoryCountByOwner[0].ToString();
+    TerritoryCpuText.text = LevelLoader.Instance.TerritoryCountByOwner[1].ToString();
+
+    ScorePlayerText.text = LevelLoader.Instance.ScoreCountByOwner[0].ToString();
+    ScoreCPUText.text = LevelLoader.Instance.ScoreCountByOwner[1].ToString();
 
     EnableButtons();
 

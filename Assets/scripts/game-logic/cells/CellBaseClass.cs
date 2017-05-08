@@ -74,6 +74,11 @@ public abstract class CellBaseClass
 
   protected int _randomRotation = 0;
   protected int _enemyId = 0;
+  public int EnemyId
+  {
+    get { return _enemyId; }
+  }
+
   public virtual void InitBehaviour()
   { 
     if (BehaviourRef.HitpointsBar != null)
