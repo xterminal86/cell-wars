@@ -19,7 +19,9 @@ public class Title : MonoBehaviour
   void SceneLoadedHandler(Scene scene, LoadSceneMode mode)
   { 
     SceneManager.sceneLoaded -= SceneLoadedHandler;
-    //AudioManager.Instance.PlayMusic("in-game-1");
+    #if !UNITY_EDITOR
+    AudioManager.Instance.PlayMusic("in-game-1");
+    #endif
   }
 
   public void ExitGameHandler()

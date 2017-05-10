@@ -69,7 +69,7 @@ public class AudioManager : MonoSingleton<AudioManager>
     float volume = MusicVolume;
     while (volume > 0.0f)
     {
-      volume -= Time.smoothDeltaTime;
+      volume -= 0.1f;
       _audioSourcesByName[_currentMusicTrackPlaying].volume -= Time.smoothDeltaTime;
 
       yield return null;

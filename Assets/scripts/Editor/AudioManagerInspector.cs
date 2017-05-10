@@ -8,7 +8,6 @@ using System.IO;
 public class AudioManagerInspector : Editor
 {
   string _musicPath = "Assets/music";
-  string _soundsPath = "Assets/sounds";
 
   AudioManager _am;
 
@@ -29,16 +28,7 @@ public class AudioManagerInspector : Editor
     }
 
     PrintListContents(_am.MusicTracks);
-
-    /*
-    if (GUILayout.Button("Generate Sounds List"))
-    {
-      BuildMediaList(_sm.SoundEffects, _soundsPath);
-    }
-
-    PrintListContents(_sm.SoundEffects);
-    */
-
+      
     if (GUI.changed)
     {
       EditorUtility.SetDirty(_am);

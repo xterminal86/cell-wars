@@ -441,6 +441,10 @@ public class Main : MonoBehaviour
 
   public void ReturnToTitleHandler()
   {
+    #if !UNITY_EDITOR
+    AudioManager.Instance.StopMusic();
+    #endif
+
     Time.timeScale = 1.0f;
     SceneManager.LoadScene("title");
   }
