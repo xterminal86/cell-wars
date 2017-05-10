@@ -90,6 +90,12 @@ public static class GlobalConstants
     PlayerColors, CPUColors
   };
 
+  // Loop start and end in samples of a track by name
+  public static Dictionary<string, Int2> MusicTrackByName = new Dictionary<string, Int2>()
+  {
+    { "in-game-1", new Int2(1209531, 8769285) }
+  };
+
   public enum CellType
   {    
     BASE = 0,

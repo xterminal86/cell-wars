@@ -12,14 +12,14 @@ public class Main : MonoBehaviour
 
   public SelectedSpot SelectedSpot;
 
-  public RectTransform BuildButtonsGroup;
-  public RectTransform MenuGroup;
+  public GameObject MenuButtonsGroup;
 
   // Building menu
-  public Button BuildColonyButton;
-  public Button BuildBarracksButton;
-  public Button BuildHolderButton;
-  public Button BuildDefenderButton;
+  public Canvas BuildButtonsGroup;
+  public CustomButton BuildColonyButton;
+  public CustomButton BuildBarracksButton;
+  public CustomButton BuildHolderButton;
+  public CustomButton BuildDefenderButton;
 
   // For various information text
   public Text InfoText;
@@ -132,6 +132,8 @@ public class Main : MonoBehaviour
   {   
     if (Input.GetMouseButtonDown(0) && IsValidClickPosition())
     { 
+      StartCoroutine(ShowBuildButtonsRoutine());
+
       _buildMode = true;
 
       _selectedCell = LevelLoader.Instance.ObjectsMap[_cellCoords.X, _cellCoords.Y];
@@ -147,24 +149,117 @@ public class Main : MonoBehaviour
     }
     else if (Input.GetMouseButtonDown(1))
     {
-      _buildMode = false;
-
-      SelectedSpot.transform.gameObject.SetActive(false);
-      _buildingType = GlobalConstants.CellType.NONE;
+      CancelBuild();
     }
     else if (Input.GetKeyDown(KeyCode.Escape))
     {
-      if (MenuGroup.gameObject.activeSelf)
+      if (MenuButtonsGroup.activeSelf)
       {
-        MenuGroup.gameObject.SetActive(false);
+        MenuButtonsGroup.SetActive(false);
         Time.timeScale = 1.0f;
       }
       else
       {
-        MenuGroup.gameObject.SetActive(true);
+        MenuButtonsGroup.SetActive(true);
         Time.timeScale = 0.0f;
       }
     }
+  }
+
+  IEnumerator WaitRoutine(int framesToWait, Callback cb)
+  {
+    int frames = 0;
+    while (frames < framesToWait)
+    {
+      frames++;
+      yield return null;
+    }
+
+    if (cb != null)
+      cb();
+    
+    yield return null;
+  }
+
+  float _buttonsMenuScale = 1.5f;
+  IEnumerator ShowBuildButtonsRoutine()
+  {
+    float scaleStep = (_buttonsMenuScale / 10.0f);
+
+    BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = false;
+
+    Vector3 position = BuildButtonsGroup.transform.localPosition;
+    Vector3 localScale = BuildButtonsGroup.transform.localScale;
+    localScale.Set(0.0f, 0.0f, 0.0f);
+    position.Set(_cellCoords.X, _cellCoords.Y, Camera.main.transform.localPosition.z + 1.0f);
+
+    BuildButtonsGroup.transform.localPosition = position;
+    BuildButtonsGroup.transform.localScale = localScale;
+
+    BuildButtonsGroup.gameObject.SetActive(true);
+
+    float scale = 0.0f;
+
+    while (scale < _buttonsMenuScale)
+    {
+      scale += scaleStep;
+
+      localScale.Set(scale, scale, scale);
+      BuildButtonsGroup.transform.localScale = localScale;
+
+      scale = Mathf.Clamp(scale, 0.0f, _buttonsMenuScale);
+
+      yield return null;
+    }
+
+    localScale.Set(_buttonsMenuScale, _buttonsMenuScale, _buttonsMenuScale);
+    BuildButtonsGroup.transform.localScale = localScale;
+
+    BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = true;
+
+    yield return null;
+  }
+
+  IEnumerator HideBuildButtonsRoutine()
+  {
+    float scaleStep = (_buttonsMenuScale / 10.0f);
+
+    BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = false;
+
+    Vector3 localScale = BuildButtonsGroup.transform.localScale;
+    localScale.Set(_buttonsMenuScale, _buttonsMenuScale, _buttonsMenuScale);
+
+    BuildButtonsGroup.transform.localScale = localScale;
+
+    float scale = _buttonsMenuScale;
+
+    while (scale > 0.0f)
+    {
+      scale -= scaleStep;
+
+      localScale.Set(scale, scale, scale);
+      BuildButtonsGroup.transform.localScale = localScale;
+
+      scale = Mathf.Clamp(scale, 0.0f, _buttonsMenuScale);
+
+      yield return null;
+    }
+
+    BuildButtonsGroup.gameObject.SetActive(false);
+
+    BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = true;
+
+    yield return null;
+  }
+
+  public void CancelBuild()
+  {
+    StartCoroutine(HideBuildButtonsRoutine());
+
+    _buildMode = false;
+
+    SelectedSpot.transform.gameObject.SetActive(false);
+    _buildingType = GlobalConstants.CellType.NONE;
   }
 
   bool IsValidClickPosition()
@@ -236,11 +331,17 @@ public class Main : MonoBehaviour
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
     bool colonySelected = (_selectedCell != null && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY);
 
-    BuildColonyButton.interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
-    BuildBarracksButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
-    BuildHolderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellHolderHitpoints);
-    BuildDefenderButton.interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
+    BuildColonyButton.Interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
+    BuildBarracksButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
+    BuildHolderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellHolderHitpoints);
+    BuildDefenderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
   }
+
+  // Since we wait for transforming of drones before actual build,
+  // it is possible to order a building and then click on other cell
+  // which will erase old build coordinates.
+  // To prevent this, we remember building position.
+  Int2 _buildPos = Int2.Zero;
 
   GlobalConstants.CellType _buildingType = GlobalConstants.CellType.NONE;
   public void BuildSelectHandler(int buildingIndex)
@@ -248,38 +349,45 @@ public class Main : MonoBehaviour
     switch (buildingIndex)
     {
       case 0:
+        StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.COLONY;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellColonyHitpoints, 0);
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 1:
+        _buildPos.Set(_selectedSpotPos2D);
+        StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.BARRACKS;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellBarracksHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
-        {
-          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
+        {          
+          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
         }));
         break;
 
       case 2:
+        _buildPos.Set(_selectedSpotPos2D);
+        StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.HOLDER;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellHolderHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
-        {
-          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
+        {          
+          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
         }));
         break;
 
       case 3:
+        _buildPos.Set(_selectedSpotPos2D);
+        StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.DEFENDER;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellDefenderHitpoints, 0);
         _selectedCell.DestroySelf();
         StartCoroutine(WaitForDestroyRoutine(() =>
-        {
-          LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
+        {          
+          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
         }));
         break;
     }
@@ -322,8 +430,11 @@ public class Main : MonoBehaviour
 
   public void ResumeGameHandler()
   {
-    MenuGroup.gameObject.SetActive(false);
-    Time.timeScale = 1.0f;
+    StartCoroutine(WaitRoutine(3, () =>
+    {
+      MenuButtonsGroup.SetActive(false);
+      Time.timeScale = 1.0f;
+    }));
   }
 
   public void ReturnToTitleHandler()

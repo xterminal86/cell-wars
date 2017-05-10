@@ -6,6 +6,8 @@ public class TestMain : MonoBehaviour
 {
   public GameObject TestObjectPrefab;
 
+  public AudioSource TestSound;
+
   TestInstantiated _reference;
  
   GameObject _testObjectInstance;
@@ -35,6 +37,11 @@ public class TestMain : MonoBehaviour
       Debug.Log("_testRefClass.TestObjectReference: " + _testRefClass.TestObjectReference + "\n_reference: " + _reference + "\n_testObjectInstance: " + _testObjectInstance + "\nTestClassReference: " + _testClassRef);
       _timer = 0.0f;
     }
+  }
+
+  public void ButtonMethod()
+  {
+    TestSound.Play();
   }
 }
 
