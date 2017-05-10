@@ -11,6 +11,7 @@ public class CellColony : CellBaseClass
   {
     Type = GlobalConstants.CellType.COLONY;
     Hitpoints = GlobalConstants.CellColonyHitpoints;
+    Priority = GlobalConstants.CellColonyPriority;
   }
 
   public override void InitBehaviour()

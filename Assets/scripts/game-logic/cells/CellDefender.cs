@@ -8,6 +8,7 @@ public class CellDefender : CellBaseClass
   {
     Type = GlobalConstants.CellType.DEFENDER;
     Hitpoints = GlobalConstants.CellDefenderHitpoints;
+    Priority = GlobalConstants.CellDefenderPriority;
   }
   
   public override void InitBehaviour()

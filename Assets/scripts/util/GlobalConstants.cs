@@ -26,6 +26,15 @@ public static class GlobalConstants
   public const float CellDefenderRange = 4.0f;
   public const int RoundTimeSeconds = 300;
 
+  // Attacker priorities for targets
+  public const int CellDronePriority = 1;
+  public const int CellColonyPriority = 100;
+  public const int CellSoldierPriority = 150;
+  public const int CellDefenderPriority = 60;
+  public const int CellBarracksPriority = 60;
+  public const int CellHolderPriority = 50;
+  public const int CellBasePriority = 200;
+
   // Cooldown between build actions for CPU to give player some advantage
   public const float CPUActionTimeout = 6.0f;
 

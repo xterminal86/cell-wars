@@ -12,6 +12,7 @@ public class CellDrone : CellBaseClass
   {
     Type = GlobalConstants.CellType.DRONE;
     Hitpoints = GlobalConstants.CellDroneHitpoints;
+    Priority = GlobalConstants.CellDronePriority;
   }
 
   Color _color = Color.white;

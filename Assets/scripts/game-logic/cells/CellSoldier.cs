@@ -26,6 +26,7 @@ public class CellSoldier : CellBaseClass
   {    
     Type = GlobalConstants.CellType.SOLDIER;
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
+    Priority = GlobalConstants.CellSoldierPriority;
   }
 
   public override void InitBehaviour()
@@ -166,6 +167,8 @@ public class CellSoldier : CellBaseClass
     int hx = Coordinates.X + 1;
     int hy = Coordinates.Y + 1;
 
+    int enemyPriority = 0;
+
     for (int x = lx; x <= hx; x++)
     {
       for (int y = ly; y <= hy; y++)
@@ -179,10 +182,12 @@ public class CellSoldier : CellBaseClass
           {           
             if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId)
             {
-              _enemyPos.Set(kvp.Value.CellInstance.Coordinates);
-              _enemy = kvp.Value;
-
-              return true;
+              if (kvp.Value.CellInstance.Priority > enemyPriority)
+              {
+                enemyPriority = kvp.Value.CellInstance.Priority;
+                _enemyPos.Set(kvp.Value.CellInstance.Coordinates);
+                _enemy = kvp.Value;
+              }
             }
           }
 
@@ -192,16 +197,18 @@ public class CellSoldier : CellBaseClass
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
             && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsDying)
           {
-            _enemyPos.Set(x, y);
-            _enemy = LevelLoader.Instance.ObjectsMap[x, y];
-
-            return true;
+            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority)
+            {
+              enemyPriority = LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority;
+              _enemyPos.Set(x, y);
+              _enemy = LevelLoader.Instance.ObjectsMap[x, y];
+            }
           }
         }
       }
     }
 
-    return false;
+    return (enemyPriority != 0);
   }
 
   /// <summary>

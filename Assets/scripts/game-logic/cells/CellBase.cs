@@ -12,6 +12,7 @@ public class CellBase : CellBaseClass
   {
     Type = GlobalConstants.CellType.BASE;
     Hitpoints = GlobalConstants.CellBaseHitpoints;
+    Priority = GlobalConstants.CellBasePriority;
   }
 
   public override void InitBehaviour()

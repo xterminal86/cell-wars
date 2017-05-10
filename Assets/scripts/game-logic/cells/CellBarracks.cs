@@ -17,6 +17,7 @@ public class CellBarracks : CellBaseClass
   {
     Type = GlobalConstants.CellType.BARRACKS;
     Hitpoints = GlobalConstants.CellBarracksHitpoints;
+    Priority = GlobalConstants.CellBarracksPriority;
 
     for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)
     {

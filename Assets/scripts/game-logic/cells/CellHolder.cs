@@ -8,6 +8,7 @@ public class CellHolder : CellBaseClass
   {
     Type = GlobalConstants.CellType.HOLDER;
     Hitpoints = GlobalConstants.CellHolderHitpoints;
+    Priority = GlobalConstants.CellHolderPriority;
   }
 
   public override void InitBehaviour()

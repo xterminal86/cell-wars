@@ -9,8 +9,6 @@ public class GridCell
 {
   public Int2 Coordinates = Int2.Zero;
 
-  public CellBaseClass CellHere;
-
   // If multiple holders influence the same cell, it should be accounted for
   public int NumberOfLocks = 0;
 }
