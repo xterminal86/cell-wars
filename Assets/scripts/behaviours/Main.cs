@@ -329,7 +329,9 @@ public class Main : MonoBehaviour
   void EnableButtons()
   {
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
-    bool colonySelected = (_selectedCell != null && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY);
+    bool colonySelected = (_selectedCell != null 
+      && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY 
+      && _selectedCell.CellInstance.OwnerId == 0);
 
     BuildColonyButton.Interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
     BuildBarracksButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
