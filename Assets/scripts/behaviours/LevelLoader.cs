@@ -292,7 +292,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     return c;
   }
 
-  public bool CheckLocationToBuild(Int2 posToCheck, int ownerId)
+  public bool CheckLocationToBuild(Int2 posToCheck, int ownerId, int enemyId)
   {
     if (_objectsMap[posToCheck.X, posToCheck.Y] != null)
     {
@@ -301,18 +301,28 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     int d = 0;
 
-    int checkCounter = 0;
+    int checkCounterSelf = 0, checkCounterEnemy = 0;
     foreach (var item in _buildingsCoordinatesByOwner[ownerId])
     {
       d = Utils.BlockDistance(item, posToCheck);
 
       if (d <= GlobalConstants.BuildRangeDistance)
       {
-        checkCounter++;
+        checkCounterSelf++;
       }
     }
 
-    return (checkCounter != 0);
+    foreach (var item in _buildingsCoordinatesByOwner[enemyId])
+    {
+      d = Utils.BlockDistance(item, posToCheck);
+
+      if (d <= GlobalConstants.BuildRangeDistance * 2)
+      {
+        checkCounterEnemy++;
+      }
+    }
+
+    return (checkCounterSelf != 0 && checkCounterEnemy == 0);
   }
 
   /// <summary>

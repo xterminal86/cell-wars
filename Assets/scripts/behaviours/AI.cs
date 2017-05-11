@@ -67,7 +67,7 @@ public class AI : MonoBehaviour
       {
         _pos.Set(x, y);
 
-        if (LevelLoader.Instance.CheckLocationToBuild(_pos, 1) && TryToBuild(_pos))
+        if (LevelLoader.Instance.CheckLocationToBuild(_pos, 1, 0) && TryToBuild(_pos))
         {
           _actionCooldownTimer = 0.0f;
           _buildActionsDone++;

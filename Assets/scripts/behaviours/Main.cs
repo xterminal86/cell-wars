@@ -78,7 +78,7 @@ public class Main : MonoBehaviour
 
     EnableButtons();
 
-    _validSpot = LevelLoader.Instance.CheckLocationToBuild(_selectedSpotPos2D, 0);
+    _validSpot = LevelLoader.Instance.CheckLocationToBuild(_selectedSpotPos2D, 0, 1);
 
     _roundTimer += Time.smoothDeltaTime;
 
@@ -113,7 +113,7 @@ public class Main : MonoBehaviour
       _cellCoords.X = (int)hitInfo.collider.gameObject.transform.position.x;
       _cellCoords.Y = (int)hitInfo.collider.gameObject.transform.position.y;
 
-      _highlighterMaterial.color = LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 0) ? Color.green : Color.white;
+      _highlighterMaterial.color = LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 0, 1) ? Color.green : Color.white;
 
       _highligherPosition = hitInfo.collider.transform.parent.position;
       _highligherPosition.z = -4.0f;
@@ -129,10 +129,13 @@ public class Main : MonoBehaviour
   Int2 _selectedSpotPos2D = Int2.Zero;
   CellBehaviour _selectedCell;
   void ProcessInput()
-  {   
+  { 
     if (Input.GetMouseButtonDown(0) && IsValidClickPosition())
     { 
-      StartCoroutine(ShowBuildButtonsRoutine());
+      if (!_buildMenuAnimationWorking)
+      {
+        StartCoroutine(ShowBuildButtonsRoutine());
+      }
 
       _buildMode = true;
 
@@ -181,9 +184,12 @@ public class Main : MonoBehaviour
     yield return null;
   }
 
+  bool _buildMenuAnimationWorking = false;
   float _buttonsMenuScale = 1.5f;
   IEnumerator ShowBuildButtonsRoutine()
   {
+    _buildMenuAnimationWorking = true;
+
     float scaleStep = (_buttonsMenuScale / 10.0f);
 
     BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = false;
@@ -217,11 +223,15 @@ public class Main : MonoBehaviour
 
     BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = true;
 
+    _buildMenuAnimationWorking = false;
+
     yield return null;
   }
 
   IEnumerator HideBuildButtonsRoutine()
   {
+    _buildMenuAnimationWorking = true;
+
     float scaleStep = (_buttonsMenuScale / 10.0f);
 
     BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = false;
@@ -249,12 +259,17 @@ public class Main : MonoBehaviour
 
     BuildButtonsGroup.GetComponent<GraphicRaycaster>().enabled = true;
 
+    _buildMenuAnimationWorking = false;
+
     yield return null;
   }
 
   public void CancelBuild()
   {
-    StartCoroutine(HideBuildButtonsRoutine());
+    if (!_buildMenuAnimationWorking)
+    {
+      StartCoroutine(HideBuildButtonsRoutine());
+    }
 
     _buildMode = false;
 

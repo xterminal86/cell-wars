@@ -25,6 +25,8 @@ public class LockedCellMarker : MonoBehaviour
       _color.r += Time.smoothDeltaTime;
     }
 
+    _color.r = Mathf.Clamp(_color.r, 0.0f, 1.0f);
+
     _m.color = _color;
 
     if (_counter > 2.0f)
