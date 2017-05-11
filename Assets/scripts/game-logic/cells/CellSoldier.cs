@@ -216,28 +216,36 @@ public class CellSoldier : CellBaseClass
   /// </summary>
   void FindDestination()
   { 
-    float distance = 0.0f;
-    float minDistance = float.MaxValue;
+    int distance = 0;
+    int minDistance = int.MaxValue;
 
     Int2 pos = Int2.Zero;
     Int2 pos2 = Int2.Zero;
 
     bool found = false;
 
+    int priority = 0;
+
     foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[_enemyId])
     {      
       var obj = LevelLoader.Instance.ObjectsMap[item.X, item.Y];
 
-      distance = Vector3.Distance(new Vector3(item.X, item.Y), new Vector3(Coordinates.X, Coordinates.Y));
+      distance = Utils.BlockDistance(item, Coordinates);
 
-      if (minDistance <= distance && obj != null && obj.CellInstance.Type != GlobalConstants.CellType.HOLDER)
+      if (obj != null && obj.CellInstance.Type != GlobalConstants.CellType.HOLDER)
       {
-        found = true;
+        if (obj.CellInstance.Priority > priority && distance < minDistance)
+        {
+          priority = obj.CellInstance.Priority;
 
-        pos.Set(item);
-        minDistance = distance;
+          found = true;
+
+          pos.Set(item);
+          minDistance = distance;
+        }
       }
 
+      // In case nothing suitable was found, make sure to add at least something
       pos2.Set(item);
     }
 
