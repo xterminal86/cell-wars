@@ -62,6 +62,11 @@ public class Main : MonoBehaviour
   Vector3 _highligherPosition = Vector3.zero;
   void Update()
   {
+    if (LevelLoader.Instance.IsGameOver)
+    {
+      return;
+    }
+
     ProcessHighlighter();
     ProcessInput();
     ControlCamera();
@@ -92,8 +97,7 @@ public class Main : MonoBehaviour
 
     if (_secondsPassed >= GlobalConstants.RoundTimeSeconds)
     {      
-      PrintInfoText("TIME'S UP!");
-      Time.timeScale = 0.0f;
+      LevelLoader.Instance.GameOver(-1, "TIME'S UP!");
     }
 
     int minutes = (GlobalConstants.RoundTimeSeconds - _secondsPassed) / 60;
@@ -440,5 +444,15 @@ public class Main : MonoBehaviour
 
     Time.timeScale = 1.0f;
     SceneManager.LoadScene("title");
+  }
+
+  public void RestartGameHandler()
+  {
+    #if !UNITY_EDITOR
+    AudioManager.Instance.StopMusic();
+    #endif
+
+    Time.timeScale = 1.0f;
+    SceneManager.LoadScene("main");
   }
 }

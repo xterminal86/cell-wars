@@ -9,7 +9,7 @@ public static class GlobalConstants
   public const float SoldierSpawnTimeSeconds = 4.0f;
 
   // If there is no base or colony in range, drone dies after this number of seconds passed
-  public const float AbandonedDroneLifetimeSeconds = 3.0f;
+  public const float AbandonedDroneLifetimeSeconds = 0.1f;  // 2.0f
 
   // Attacker cooldown in seconds
   public const float SoldierAttackTimeout = 1.0f;

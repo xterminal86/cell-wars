@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Basically holds all information about game.
@@ -25,6 +27,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public Material TerritoryOverlayMaterial;
 
   public GameObject TerritoryOverlayPrefab;
+
+  public RectTransform GameOverWindow;
+  public Text GameOverTitleText;
+  public Text PlayerTerritoryText;
+  public Text CPUTerritoryText;
+  public Text PlayerScoreText;
+  public Text CPUScoreText;
 
   // Holds all objects inside one transform for organizing.
   Transform _gridHolder;
@@ -88,8 +97,16 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   // Indiced by attacker's class instance hash code.
   public Dictionary<int, CellBehaviour>[,] SoldiersMap;
 
+  public bool IsGameOver = false;
+
   public override void Initialize()    
   { 
+    System.GC.Collect();
+
+    GameOverWindow.gameObject.SetActive(false);
+
+    IsGameOver = false;
+
     _gridHolder = GameObject.Find("grid").transform;
     _territoryOverlayHolder = GameObject.Find("territory-overlay-holder").transform;
 
@@ -388,10 +405,53 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
   }
 
-  // TODO: stub
-  public void GameOver(int loserId)
+  public void GameOver(int loserId, string message)
   {
+    IsGameOver = true;
     Time.timeScale = 0.0f;
+
+    // Time's up
+    if (loserId == -1)
+    {
+      GameOverTitleText.text = "TIME'S UP!";
+    }
+    else
+    {
+      GameOverTitleText.text = (loserId == 0) ? "YOU LOST!" : "YOU WON!";
+    }
+
+    PlayerTerritoryText.text = _territoryCountByOwner[0].ToString();
+    CPUTerritoryText.text = _territoryCountByOwner[1].ToString();
+    PlayerScoreText.text = _scoreCountByOwner[0].ToString();
+    CPUScoreText.text = _scoreCountByOwner[1].ToString();
+
+    StartCoroutine(ShowGameOverFormRoutine());
+  }
+
+  IEnumerator ShowGameOverFormRoutine()
+  {
+    Vector3 windowScale = GameOverWindow.localScale;
+
+    GameOverWindow.localScale = Vector3.zero;
+
+    float scale = 0.0f;
+
+    GameOverWindow.gameObject.SetActive(true);
+
+    while (scale < 1.0f)
+    {
+      scale += 0.1f;
+
+      windowScale.Set(scale, scale, scale);
+
+      GameOverWindow.localScale = windowScale;
+
+      yield return null;
+    }
+
+    GameOverWindow.localScale = Vector3.one;
+
+    yield return null;
   }
 
   public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
@@ -465,8 +525,33 @@ public class LevelLoader : MonoSingleton<LevelLoader>
           _overlayCellColor.a = 0.0f;
         }
 
-        _territoryOverlay[x, y].GetComponent<Renderer>().material.color = _overlayCellColor;
+        if (_territoryOverlay[x, y] != null)
+        {
+          _territoryOverlay[x, y].GetComponent<Renderer>().material.color = _overlayCellColor;
+        }
       }
     }
+  }
+
+  public void RestartGameHandler()
+  {
+    #if !UNITY_EDITOR
+    AudioManager.Instance.StopMusic();
+    #endif
+
+    Time.timeScale = 1.0f;
+    SceneManager.LoadScene("main");
+  }
+
+  public void ReturnToTitleHandler()
+  {
+    GameOverWindow.gameObject.SetActive(false);
+
+    #if !UNITY_EDITOR
+    AudioManager.Instance.StopMusic();
+    #endif
+
+    Time.timeScale = 1.0f;
+    SceneManager.LoadScene("title");
   }
 }

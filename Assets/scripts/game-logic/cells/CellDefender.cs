@@ -88,11 +88,15 @@ public class CellDefender : CellBaseClass
 
           // Check other cells second
 
-          if ((LevelLoader.Instance.ObjectsMap[x, y] != null             
-            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId))
-          {            
-            _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
-            return;
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null)
+          {
+            _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
+
+            if (_distance <= GlobalConstants.CellDefenderRange && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId)
+            {                      
+              _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
+              return;
+            }
           }
         }
       }
