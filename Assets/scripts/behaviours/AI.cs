@@ -1,22 +1,41 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Crude implementation of AI
 /// </summary>
 public class AI : MonoBehaviour 
 {  
+  Heuristic _heuristic = new Heuristic();
+
   // Limit of build actions performed by CPU
   public int MaxBuildActions = int.MaxValue;
 
   int _buildActionsDone = 0;
 
+  Text _debugText;
+  void Start()
+  {
+    _debugText = GameObject.Find("debug-text").GetComponent<Text>();
+  }
+
   float _actionCooldownTimer = 0.0f;
   void Update()
   {
-    if (_actionCooldownTimer < GlobalConstants.CPUActionTimeout)
+    CalculateHeuristic();
+
+    // To simulate pause between actions
+
+    if (_buildDone)
     {
+      if (_actionCooldownTimer > GlobalConstants.CPUActionTimeout)
+      {
+        _buildDone = false;
+        return;
+      }
+
       _actionCooldownTimer += Time.smoothDeltaTime;
       return;
     }
@@ -26,6 +45,57 @@ public class AI : MonoBehaviour
     if (_buildActionsDone < MaxBuildActions)
     {      
       DecideWhatToBuild();
+    }
+  }
+
+  void CalculateHeuristic()
+  {
+    _heuristic.Clear();
+
+    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    {
+      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
+      {
+        var cellObject = LevelLoader.Instance.ObjectsMap[x, y];
+
+        if (cellObject != null)
+        {
+          FillHeuristic(cellObject.CellInstance);
+        }
+      }
+    }
+
+    _heuristic.OurScore = LevelLoader.Instance.ScoreCountByOwner[1];
+    _heuristic.EnemyScore = LevelLoader.Instance.ScoreCountByOwner[0];
+
+    _debugText.text = _heuristic.ToString();
+  }
+
+  void FillHeuristic(CellBaseClass cellObject)
+  {
+    switch (cellObject.Type)
+    {
+      case GlobalConstants.CellType.COLONY:
+        if (cellObject.OwnerId == 0)
+        {
+          _heuristic.EnemyColonies++;
+        }
+        else
+        {
+          _heuristic.OurColonies++;
+        }
+        break;      
+
+      case GlobalConstants.CellType.BARRACKS:
+        if (cellObject.OwnerId == 0)
+        {
+          _heuristic.EnemyBarracks++;
+        }
+        else
+        {
+          _heuristic.OurBarracks++;
+        }
+        break;
     }
   }
 
@@ -58,6 +128,7 @@ public class AI : MonoBehaviour
     }
   }
 
+  bool _buildDone = false;
   Int2 _pos = Int2.Zero;
   void DecideWhatToBuild()
   {
@@ -69,6 +140,7 @@ public class AI : MonoBehaviour
 
         if (LevelLoader.Instance.CheckLocationToBuild(_pos, 1, 0) && TryToBuild(_pos))
         {
+          _buildDone = true;
           _actionCooldownTimer = 0.0f;
           _buildActionsDone++;
           return;
@@ -91,3 +163,52 @@ public class AI : MonoBehaviour
     return false;
   }
 }
+
+public class Heuristic
+{
+  public int OurColonies = 0;
+  public int EnemyColonies = 0;
+  public int OurBarracks = 0;
+  public int EnemyBarracks = 0;
+  public int OurDrones = 0;
+  public int EnemyDrones = 0;
+  public int OurArea = 0;
+  public int EnemyArea = 0;
+  public int OurAttackers = 0;
+  public int EnemyAttackers = 0;
+  public int OurScore = 0;
+  public int EnemyScore = 0;
+
+  public void Clear()
+  {
+    OurColonies = 0;
+    EnemyColonies = 0;
+    OurBarracks = 0;
+    EnemyBarracks = 0;
+    OurDrones = 0;
+    EnemyDrones = 0;
+    OurArea = 0;
+    EnemyArea = 0;
+    OurAttackers = 0;
+    EnemyAttackers = 0;
+    OurScore = 0;
+    EnemyScore = 0;
+  }
+
+  public override string ToString()
+  {
+    return string.Format("CPU colonies:     {0}\n" +
+                         "Player colonies:  {1}\n" + 
+                         "CPU barracks:     {2}\n" +
+                         "Player barracks:  {3}\n" +
+                         "CPU drones:       {4}\n" +
+                         "Player drones:    {5}\n" +
+                         "CPU territory:    {6}\n" +
+                         "Player territory: {7}\n" +
+                         "CPU attackers:    {8}\n" +
+                         "Player attackers: {9}\n" +
+                         "CPU score:        {10}\n" +
+                         "Player score:     {11}\n", 
+      OurColonies, EnemyColonies, OurBarracks, EnemyBarracks, OurDrones, EnemyDrones, OurArea, EnemyArea, OurAttackers, EnemyAttackers, OurScore, EnemyScore);
+  }
+};

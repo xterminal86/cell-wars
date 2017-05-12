@@ -52,7 +52,7 @@ public class Bullet : MonoBehaviour
       {
         _enemy.CellInstance.ReceiveDamage(1);
 
-        if (_enemy.CellInstance.Hitpoints <= 0 && _enemy.CellInstance.Type != GlobalConstants.CellType.DRONE)
+        if (_enemy.CellInstance.Hitpoints <= 0 && _enemy.CellInstance.Type != GlobalConstants.CellType.DRONE && !_enemy.IsDestroying)
         {
           LevelLoader.Instance.ScoreCountByOwner[_enemy.CellInstance.EnemyId] += GlobalConstants.CellHitpointsByType[_enemy.CellInstance.Type];
         }

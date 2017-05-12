@@ -5,14 +5,14 @@ using UnityEngine;
 public static class GlobalConstants 
 {
   // Time between new cell is spawned by building
-  public const float DroneSpawnTimeSeconds = 1.0f;
+  public const float DroneSpawnTimeSeconds = 1.5f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
 
   // If there is no base or colony in range, drone dies after this number of seconds passed
   public const float AbandonedDroneLifetimeSeconds = 3.0f;
 
   // Attacker cooldown in seconds
-  public const float SoldierAttackTimeout = 1.5f;
+  public const float SoldierAttackTimeout = 1.0f;
   public const float DefenderAttackTimeout = 2.0f;
 
   // Various game parameters

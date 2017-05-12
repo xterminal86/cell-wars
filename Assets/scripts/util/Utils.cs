@@ -4,6 +4,7 @@ using UnityEngine;
 
 public delegate void Callback();
 public delegate void CallbackO(object o);
+public delegate void CallbackI2(Int2 coords);
 
 public static class Utils
 {

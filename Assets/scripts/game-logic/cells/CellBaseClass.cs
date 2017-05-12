@@ -158,6 +158,26 @@ public abstract class CellBaseClass
     return (cellEmpty ? _emptyCellPos : null);
   }
 
+  float _timer = 0.0f;
+  protected void TryToSpawnDrone()
+  {
+    var res = TryToFindEmptyCell();
+    if (res != null)
+    {
+      _timer += Time.smoothDeltaTime;
+
+      if (_timer > GlobalConstants.DroneSpawnTimeSeconds)
+      {   
+        LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.DRONE, OwnerId);
+        _timer = 0.0f;
+      }
+    }
+    else
+    {
+      _timer = 0.0f;
+    }
+  }
+
   Vector3 _localScale = Vector3.one;
   float _scaleTimer = 0.0f;
   protected void PlayAnimation()

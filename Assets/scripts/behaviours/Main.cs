@@ -34,6 +34,8 @@ public class Main : MonoBehaviour
   // Time of round
   public Text TimerText;
 
+  public Transform TerritoryOverlayHolder;
+
   GameObject _highlighter;
 
   Material _highlighterMaterial;
@@ -167,6 +169,8 @@ public class Main : MonoBehaviour
         Time.timeScale = 0.0f;
       }
     }
+      
+    TerritoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));
   }
 
   IEnumerator WaitRoutine(int framesToWait, Callback cb)
@@ -354,15 +358,14 @@ public class Main : MonoBehaviour
     BuildDefenderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
   }
 
-  // Since we wait for transforming of drones before actual build,
-  // it is possible to order a building and then click on other cell
-  // which will erase old build coordinates.
-  // To prevent this, we remember building position.
-  Int2 _buildPos = Int2.Zero;
-
   GlobalConstants.CellType _buildingType = GlobalConstants.CellType.NONE;
   public void BuildSelectHandler(int buildingIndex)
-  {
+  {    
+    // While colony is being destroyed to transform itself to new building,
+    // it is possible to change _selectedCell to new actual cell by clicking on
+    // another building, for example, which will invalidate "old" ordered building position.
+    // That's why we copy position to wait coroutine and then return it via callback.
+
     switch (buildingIndex)
     {
       case 0:
@@ -373,56 +376,31 @@ public class Main : MonoBehaviour
         break;
 
       case 1:
-        _buildPos.Set(_selectedSpotPos2D);
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.BARRACKS;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellBarracksHitpoints, 0);
         _selectedCell.DestroySelf();
-        StartCoroutine(WaitForDestroyRoutine(() =>
-        {          
-          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
-        }));
+        LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 2:
-        _buildPos.Set(_selectedSpotPos2D);
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.HOLDER;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellHolderHitpoints, 0);
         _selectedCell.DestroySelf();
-        StartCoroutine(WaitForDestroyRoutine(() =>
-        {          
-          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
-        }));
+        LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 3:
-        _buildPos.Set(_selectedSpotPos2D);
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.DEFENDER;
         LevelLoader.Instance.TransformDrones(GlobalConstants.CellDefenderHitpoints, 0);
         _selectedCell.DestroySelf();
-        StartCoroutine(WaitForDestroyRoutine(() =>
-        {          
-          LevelLoader.Instance.PlaceCell(_buildPos, _buildingType, 0);
-        }));
+        LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
     }
 
     _buildMode = false;
-  }
-
-  IEnumerator WaitForDestroyRoutine(Callback cb)
-  {
-    while (_selectedCell != null)
-    {
-      yield return null;
-    }
-
-    if (cb != null)
-      cb();
-
-    yield return null;
   }
 
   public void PrintInfoText(string text)

@@ -22,6 +22,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject BulletPrefab;
 
   public Material CellMaterial;
+  public Material TerritoryOverlayMaterial;
+
+  public GameObject TerritoryOverlayPrefab;
 
   // Holds all objects inside one transform for organizing.
   Transform _gridHolder;
@@ -29,6 +32,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   {
     get { return _gridHolder; }
   }
+
+  Transform _territoryOverlayHolder;
+
+  GameObject[,] _territoryOverlay;
 
   public int MapSize = 32;
 
@@ -84,9 +91,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public override void Initialize()    
   { 
     _gridHolder = GameObject.Find("grid").transform;
+    _territoryOverlayHolder = GameObject.Find("territory-overlay-holder").transform;
 
     _locksMap = new int[MapSize, MapSize];
     _objectsMap = new CellBehaviour[MapSize, MapSize];
+    _territoryOverlay = new GameObject[MapSize, MapSize];
 
     SoldiersMap = new Dictionary<int, CellBehaviour>[MapSize, MapSize];
 
@@ -100,6 +109,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         _objectsMap[x, y] = null;
 
         InstantiateCellPrefab(x, y);
+
+        GameObject go = (GameObject)Instantiate(TerritoryOverlayPrefab, new Vector3(x, y, -2.0f), Quaternion.identity, _territoryOverlayHolder);
+        Material m = new Material(TerritoryOverlayMaterial);
+        m.color = new Color(1.0f, 1.0f, 1.0f, 0.1f);
+        go.GetComponent<Renderer>().material = m;
+        _territoryOverlay[x, y] = go;
       }
     }
 
@@ -412,6 +427,45 @@ public class LevelLoader : MonoSingleton<LevelLoader>
             _dronesCountByOwner[1]++;
           }
         }
+      }
+    }
+
+    RefreshTerritoryOverlay();
+  }
+
+  Int2 _overlayCellPos = Int2.Zero;
+  Color _overlayCellColor = Color.white;
+  void RefreshTerritoryOverlay()
+  {
+    for (int x = 0; x < MapSize; x++)
+    {
+      for (int y = 0; y < MapSize; y++)
+      {        
+        _overlayCellPos.Set(x, y);
+
+        if (CheckLocationToBuild(_overlayCellPos, 0, 1))
+        {
+          _overlayCellColor.r = 0.0f;
+          _overlayCellColor.g = 1.0f;
+          _overlayCellColor.b = 0.0f;
+          _overlayCellColor.a = 0.4f;
+        }
+        else if (CheckLocationToBuild(_overlayCellPos, 1, 0))
+        {
+          _overlayCellColor.r = 1.0f;
+          _overlayCellColor.g = 0.0f;
+          _overlayCellColor.b = 0.0f;
+          _overlayCellColor.a = 0.4f;
+        }
+        else
+        {
+          _overlayCellColor.r = 1.0f;
+          _overlayCellColor.g = 1.0f;
+          _overlayCellColor.b = 1.0f;
+          _overlayCellColor.a = 0.0f;
+        }
+
+        _territoryOverlay[x, y].GetComponent<Renderer>().material.color = _overlayCellColor;
       }
     }
   }

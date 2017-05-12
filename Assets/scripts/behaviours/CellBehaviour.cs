@@ -32,6 +32,11 @@ public class CellBehaviour : MonoBehaviour
 
       transform.localScale = _scale;
 
+      if (_isDestroying)
+      {
+        yield break;
+      }
+    
       yield return null;
     }
 
@@ -82,8 +87,10 @@ public class CellBehaviour : MonoBehaviour
     {
       return;
     }
-    
+
     _isDestroying = true;
+
+    ClearCellObject();
 
     StartCoroutine(DestroyRoutine());
   }
@@ -111,8 +118,13 @@ public class CellBehaviour : MonoBehaviour
     yield return null;
   }
 
-  void DestroyGameObject()
+  void ClearCellObject()
   {
+    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
+    {
+      LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
+    }
+
     switch (CellInstance.Type)
     {
       case GlobalConstants.CellType.SOLDIER:
@@ -131,16 +143,15 @@ public class CellBehaviour : MonoBehaviour
         break;        
     }
 
+  }
+
+  void DestroyGameObject()
+  {    
     Destroy(gameObject);
 
     if (CellInstance.Type == GlobalConstants.CellType.BASE)
     {
       LevelLoader.Instance.GameOver(CellInstance.OwnerId);    
-    }
-
-    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
-    {
-      LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
     CellInstance = null;
