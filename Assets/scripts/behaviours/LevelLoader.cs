@@ -365,9 +365,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public void TransformDrones(int number, int ownerId)
   {
     int transformedCount = 0;
-    for (int x = 0; x < MapSize; x++)
+    for (int x = MapSize - 1; x >= 0; x--)
     {
-      for (int y = 0; y < MapSize; y++)
+      for (int y = MapSize - 1; y >= 0; y--)
       {
         if (_objectsMap[x, y] == null)
         {
@@ -389,7 +389,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       }
     }
 
-    DronesCountByOwner[ownerId] -= number;
+    //DronesCountByOwner[ownerId] -= number;
   }
 
   public void RemoveBuildingFromDictionary(int ownerId, Int2 pos)
@@ -424,6 +424,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     CPUTerritoryText.text = _territoryCountByOwner[1].ToString();
     PlayerScoreText.text = _scoreCountByOwner[0].ToString();
     CPUScoreText.text = _scoreCountByOwner[1].ToString();
+
+    GameOverTitleText.color = (loserId == 0) ? Color.red : Color.white;
+
+    PlayerTerritoryText.color = (_territoryCountByOwner[0] > _territoryCountByOwner[1]) ? Color.green : Color.white;
+    CPUTerritoryText.color = (_territoryCountByOwner[1] > _territoryCountByOwner[0]) ? Color.green : Color.white;
+    PlayerScoreText.color = (_scoreCountByOwner[0] > _scoreCountByOwner[1]) ? Color.green : Color.white;
+    CPUScoreText.color = (_scoreCountByOwner[1] > _scoreCountByOwner[0]) ? Color.green : Color.white;
 
     StartCoroutine(ShowGameOverFormRoutine());
   }

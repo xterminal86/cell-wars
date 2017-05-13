@@ -68,7 +68,9 @@ public class AI : MonoBehaviour
     _heuristic.OurScore = LevelLoader.Instance.ScoreCountByOwner[1];
     _heuristic.EnemyScore = LevelLoader.Instance.ScoreCountByOwner[0];
 
+    #if UNITY_EDITOR
     _debugText.text = _heuristic.ToString();
+    #endif
   }
 
   void FillHeuristic(CellBaseClass cellObject)
