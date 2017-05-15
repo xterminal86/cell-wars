@@ -153,6 +153,36 @@ public class AI : MonoBehaviour
 
   bool TryToBuild(Int2 posToBuild)
   {
+    if (_coloniesBuilt >= 2 && _coloniesBuilt >= _barracksBuilt * 2)
+    {
+      foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[1])
+      {
+        var obj = LevelLoader.Instance.ObjectsMap[item.X, item.Y];
+
+        if (obj != null && obj.CellInstance.Type == GlobalConstants.CellType.COLONY)
+        {
+          if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.BARRACKS])
+          {            
+            posToBuild.Set(obj.CellInstance.Coordinates);
+            LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[GlobalConstants.CellType.BARRACKS], 1);
+            obj.DestroySelf();
+            LevelLoader.Instance.PlaceCell(posToBuild, GlobalConstants.CellType.BARRACKS, 1);
+            return true;
+          }
+        }
+      }
+    }
+    else
+    {
+      if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.COLONY])
+      {      
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[GlobalConstants.CellType.COLONY], 1);
+        LevelLoader.Instance.PlaceCell(posToBuild, GlobalConstants.CellType.COLONY, 1);
+        return true;
+      }    
+    }
+
+    /*
     var buildingType = (_coloniesBuilt > _barracksBuilt) ? GlobalConstants.CellType.BARRACKS : GlobalConstants.CellType.COLONY;
 
     if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
@@ -161,6 +191,7 @@ public class AI : MonoBehaviour
       LevelLoader.Instance.PlaceCell(posToBuild, buildingType, 1);
       return true;
     }    
+    */
 
     return false;
   }
