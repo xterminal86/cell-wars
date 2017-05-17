@@ -130,6 +130,7 @@ public class CellBehaviour : MonoBehaviour
       case GlobalConstants.CellType.SOLDIER:
         (CellInstance as CellSoldier).DelistFromBarracks();
         LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
+        LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
         break;
 
       case GlobalConstants.CellType.BARRACKS:

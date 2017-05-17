@@ -54,6 +54,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     get { return _dronesCountByOwner; }
   }
 
+  Dictionary<int, int> _soldiersCountByOwner = new Dictionary<int, int>();
+  public Dictionary<int, int> SoldiersCountByOwner
+  {
+    get { return _soldiersCountByOwner; }
+  }
+
   Dictionary<int, int> _territoryCountByOwner = new Dictionary<int, int>();
   public Dictionary<int, int> TerritoryCountByOwner
   {
@@ -142,6 +148,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
+
+    _soldiersCountByOwner[0] = 0;
+    _soldiersCountByOwner[1] = 0;
 
     _scoreCountByOwner[0] = 0;
     _scoreCountByOwner[1] = 0;

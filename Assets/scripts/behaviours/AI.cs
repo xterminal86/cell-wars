@@ -52,6 +52,9 @@ public class AI : MonoBehaviour
   {
     _heuristic.Clear();
 
+    _heuristic.EnemyArea = LevelLoader.Instance.TerritoryCountByOwner[0];
+    _heuristic.OurArea = LevelLoader.Instance.TerritoryCountByOwner[1];
+
     for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
@@ -67,6 +70,9 @@ public class AI : MonoBehaviour
 
     _heuristic.OurScore = LevelLoader.Instance.ScoreCountByOwner[1];
     _heuristic.EnemyScore = LevelLoader.Instance.ScoreCountByOwner[0];
+
+    _heuristic.EnemyAttackers = LevelLoader.Instance.SoldiersCountByOwner[0];
+    _heuristic.OurAttackers = LevelLoader.Instance.SoldiersCountByOwner[1];
 
     #if UNITY_EDITOR
     _debugText.text = _heuristic.ToString();
@@ -98,6 +104,17 @@ public class AI : MonoBehaviour
           _heuristic.OurBarracks++;
         }
         break;
+
+      case GlobalConstants.CellType.DRONE:
+        if (cellObject.OwnerId == 0)
+        {
+          _heuristic.EnemyDrones++;
+        }
+        else
+        {
+          _heuristic.OurDrones++;
+        }
+        break;      
     }
   }
 
@@ -181,17 +198,6 @@ public class AI : MonoBehaviour
         return true;
       }    
     }
-
-    /*
-    var buildingType = (_coloniesBuilt > _barracksBuilt) ? GlobalConstants.CellType.BARRACKS : GlobalConstants.CellType.COLONY;
-
-    if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
-    {      
-      LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[buildingType], 1);
-      LevelLoader.Instance.PlaceCell(posToBuild, buildingType, 1);
-      return true;
-    }    
-    */
 
     return false;
   }

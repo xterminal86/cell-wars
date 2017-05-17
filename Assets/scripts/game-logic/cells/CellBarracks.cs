@@ -54,6 +54,8 @@ public class CellBarracks : CellBaseClass
 
           (c as CellSoldier).SpawnID = _spawnId;
           (c as CellSoldier).BarracksRef = this;
+
+          LevelLoader.Instance.SoldiersCountByOwner[OwnerId]++;
         }
       }
     }
