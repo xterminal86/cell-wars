@@ -25,7 +25,9 @@ public class AI : MonoBehaviour
   void Update()
   {
     CalculateHeuristic();
+    MakeDecision();
 
+    /*
     // To simulate pause between actions
 
     if (_buildDone)
@@ -46,6 +48,7 @@ public class AI : MonoBehaviour
     {      
       DecideWhatToBuild();
     }
+    */
   }
 
   void CalculateHeuristic()
@@ -77,6 +80,58 @@ public class AI : MonoBehaviour
     #if UNITY_EDITOR
     _debugText.text = _heuristic.ToString();
     #endif
+  }
+
+  void MakeDecision()
+  {
+  }
+
+  List<KeyValuePair<Int2, int>> _rankedCells = new List<KeyValuePair<Int2, int>>();
+  Int2 _cellCoords = Int2.Zero;
+  void GetCellsForBuilding()
+  {
+    _rankedCells.Clear();
+
+    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    {
+      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
+      {
+        _cellCoords.Set(x, y);
+
+        if (LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 1, 0))
+        {
+          int rank = CalculateRank(_cellCoords);
+          _rankedCells.Add(new KeyValuePair<Int2, int>(_cellCoords, rank));
+        }
+      }
+    }
+  }
+
+  int CalculateRank(Int2 cellCoords)
+  {
+    int rank = 0;
+
+    int lx = cellCoords.X - 1;
+    int ly = cellCoords.Y - 1;
+    int hx = cellCoords.X + 1;
+    int hy = cellCoords.Y + 1;
+
+    for (int x = lx; x <= hx; x++)
+    {
+      for (int y = ly; y <= hy; y++)
+      {
+        if (x >= 0 && x < LevelLoader.Instance.MapSize
+         && y >= 0 && y < LevelLoader.Instance.MapSize)
+        {
+          if (LevelLoader.Instance.ObjectsMap[x, y] == null)
+          {
+            rank++;
+          }
+        }
+      }
+    }
+
+    return rank;
   }
 
   void FillHeuristic(CellBaseClass cellObject)
