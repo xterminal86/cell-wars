@@ -374,9 +374,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public void TransformDrones(int number, int ownerId)
   {
     int transformedCount = 0;
-    for (int x = MapSize - 1; x >= 0; x--)
+
+    int x = 0, y = 0;
+
+    // For player drones are transformed starting from the NE side of the map,
+    // for the CPU it's SW.
+    int sx = (ownerId == 0) ? (MapSize - 1) : 0;
+    int sy = (ownerId == 0) ? (MapSize - 1) : 0;
+
+    for (x = sx; ((ownerId == 0) ? (x >= 0) : (x < MapSize)); x += (ownerId == 0) ? -1 : 1)
     {
-      for (int y = MapSize - 1; y >= 0; y--)
+      for (y = sy; ((ownerId == 0) ? (y >= 0) : (y < MapSize)); y += (ownerId == 0) ? -1 : 1)
       {
         if (_objectsMap[x, y] == null)
         {
@@ -389,7 +397,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         }
 
         if (_objectsMap[x, y].CellInstance.OwnerId == ownerId
-          && _objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE)
+         && _objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE)
         {
           transformedCount++;
 

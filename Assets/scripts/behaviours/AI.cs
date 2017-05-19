@@ -21,19 +21,17 @@ public class AI : MonoBehaviour
     _debugText = GameObject.Find("debug-text").GetComponent<Text>();
   }
 
+  bool _buildDone = false;
   float _actionCooldownTimer = 0.0f;
   void Update()
   {
-    CalculateHeuristic();
-    MakeDecision();
-
-    /*
     // To simulate pause between actions
 
     if (_buildDone)
     {
       if (_actionCooldownTimer > GlobalConstants.CPUActionTimeout)
       {
+        _actionCooldownTimer = 0.0f;
         _buildDone = false;
         return;
       }
@@ -42,13 +40,8 @@ public class AI : MonoBehaviour
       return;
     }
 
-    CountBuildings();
-
-    if (_buildActionsDone < MaxBuildActions)
-    {      
-      DecideWhatToBuild();
-    }
-    */
+    CalculateHeuristic();
+    MakeDecision();
   }
 
   void CalculateHeuristic()
@@ -84,27 +77,111 @@ public class AI : MonoBehaviour
 
   void MakeDecision()
   {
+    TryToBuildColony();
+  }
+
+  /// <summary>
+  /// Looks for an empty cell with 8 empty cells around it with no drones overlapping.
+  /// If there is no such location, try to build on any valid spot with maximum amount of
+  /// empty cells around to maximize number of drones that can be spawned by this colony.
+  /// </summary>
+  void TryToBuildColony()
+  {
+    if (!GetCellsForBuilding(true))
+      GetCellsForBuilding(false);
+    
+    int max = 0;
+    int index = -1;
+    Int2 posToBuild = Int2.Zero;
+
+    // Looking for the best ranked location
+    for (int i = 0; i < _rankedCells.Count; i++)
+    {      
+      if (_rankedCells[i].Value > max)
+      {
+        max = _rankedCells[i].Value;
+        posToBuild.Set(_rankedCells[i].Key);
+        index = i;
+      }
+    }
+
+    if (index != -1)
+    {
+      if (TryToBuild(posToBuild, GlobalConstants.CellType.COLONY))
+      {
+        _buildDone = true;
+      }
+    }
   }
 
   List<KeyValuePair<Int2, int>> _rankedCells = new List<KeyValuePair<Int2, int>>();
-  Int2 _cellCoords = Int2.Zero;
-  void GetCellsForBuilding()
+  bool GetCellsForBuilding(bool optimal)
   {
     _rankedCells.Clear();
 
     for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
-      {
-        _cellCoords.Set(x, y);
-
-        if (LevelLoader.Instance.CheckLocationToBuild(_cellCoords, 1, 0))
+      {  
+        if (LevelLoader.Instance.CheckLocationToBuild(new Int2(x, y), 1, 0))
         {
-          int rank = CalculateRank(_cellCoords);
-          _rankedCells.Add(new KeyValuePair<Int2, int>(_cellCoords, rank));
+          int rank = CalculateRank(new Int2(x, y));
+
+          if (optimal)
+          {            
+            // Excluding cell too close to existing
+            if (CheckForNearbyBuildings(new Int2(x, y)))
+            {
+              _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(x, y), rank));
+            }
+          }
+          else
+          {
+            _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(x, y), rank));
+          }
         }
       }
     }
+
+    return (_rankedCells.Count != 0);
+  }
+
+  bool CheckForNearbyBuildings(Int2 cellCoords)
+  {
+    int lx = cellCoords.X - 2;
+    int ly = cellCoords.Y - 2;
+    int hx = cellCoords.X + 2;
+    int hy = cellCoords.Y + 2;
+
+    // Two vertical lines
+    for (int x = lx; x <= hx; x++)
+    {
+      if (x >= 0 && x < LevelLoader.Instance.MapSize
+       && ly >= 0 && hy < LevelLoader.Instance.MapSize)
+      {
+        if ((LevelLoader.Instance.ObjectsMap[x, ly] != null && LevelLoader.Instance.ObjectsMap[x, ly].CellInstance.Type != GlobalConstants.CellType.DRONE)
+         || (LevelLoader.Instance.ObjectsMap[x, hy] != null && LevelLoader.Instance.ObjectsMap[x, hy].CellInstance.Type != GlobalConstants.CellType.DRONE))
+        {
+          return false;
+        }
+      }
+    }
+
+    // Two horizontal lines (excluding cells previously accounted for)
+    for (int y = ly + 1; y <= hy - 1; y++)
+    {
+      if (y >= 0 && y < LevelLoader.Instance.MapSize
+       && lx >= 0 && hx < LevelLoader.Instance.MapSize)
+      {
+        if ((LevelLoader.Instance.ObjectsMap[lx, y] != null && LevelLoader.Instance.ObjectsMap[lx, y].CellInstance.Type != GlobalConstants.CellType.DRONE)
+         || (LevelLoader.Instance.ObjectsMap[hx, y] != null && LevelLoader.Instance.ObjectsMap[hx, y].CellInstance.Type != GlobalConstants.CellType.DRONE))
+        {
+          return false;
+        }
+      }
+    }
+      
+    return true;
   }
 
   int CalculateRank(Int2 cellCoords)
@@ -173,85 +250,13 @@ public class AI : MonoBehaviour
     }
   }
 
-  int _coloniesBuilt = 0, _barracksBuilt = 0;
-  void CountBuildings()
+  bool TryToBuild(Int2 pos, GlobalConstants.CellType buildingType)
   {
-    _coloniesBuilt = 0;
-    _barracksBuilt = 0;
-
-    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
+    if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
     {
-      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
-      {
-        var obj = LevelLoader.Instance.ObjectsMap[x, y];
-
-        // FIXME: hardcoded AI id
-
-        if (obj != null && obj.CellInstance.OwnerId == 1)
-        {
-          if (obj.CellInstance.Type == GlobalConstants.CellType.BARRACKS)
-          {
-            _barracksBuilt++;
-          }
-          else if (obj.CellInstance.Type == GlobalConstants.CellType.COLONY)
-          {
-            _coloniesBuilt++;
-          }
-        }       
-      }
-    }
-  }
-
-  bool _buildDone = false;
-  Int2 _pos = Int2.Zero;
-  void DecideWhatToBuild()
-  {
-    for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
-    {
-      for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
-      {
-        _pos.Set(x, y);
-
-        if (LevelLoader.Instance.CheckLocationToBuild(_pos, 1, 0) && TryToBuild(_pos))
-        {
-          _buildDone = true;
-          _actionCooldownTimer = 0.0f;
-          _buildActionsDone++;
-          return;
-        }
-      }
-    }
-  }
-
-  bool TryToBuild(Int2 posToBuild)
-  {
-    if (_coloniesBuilt >= 2 && _coloniesBuilt >= _barracksBuilt * 2)
-    {
-      foreach (var item in LevelLoader.Instance.BuildingsCoordinatesByOwner[1])
-      {
-        var obj = LevelLoader.Instance.ObjectsMap[item.X, item.Y];
-
-        if (obj != null && obj.CellInstance.Type == GlobalConstants.CellType.COLONY)
-        {
-          if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.BARRACKS])
-          {            
-            posToBuild.Set(obj.CellInstance.Coordinates);
-            LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[GlobalConstants.CellType.BARRACKS], 1);
-            obj.DestroySelf();
-            LevelLoader.Instance.PlaceCell(posToBuild, GlobalConstants.CellType.BARRACKS, 1);
-            return true;
-          }
-        }
-      }
-    }
-    else
-    {
-      if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.COLONY])
-      {      
-        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[GlobalConstants.CellType.COLONY], 1);
-        LevelLoader.Instance.PlaceCell(posToBuild, GlobalConstants.CellType.COLONY, 1);
-        return true;
-      }    
+      LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[buildingType], 1);
+      LevelLoader.Instance.PlaceCell(pos, buildingType, 1);
+      return true;
     }
 
     return false;

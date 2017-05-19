@@ -9,7 +9,7 @@ public static class GlobalConstants
   public const float SoldierSpawnTimeSeconds = 4.0f;
 
   // If there is no base or colony in range, drone dies after this number of seconds passed
-  public const float AbandonedDroneLifetimeSeconds = 0.1f;  // 2.0f
+  public const float AbandonedDroneLifetimeSeconds = 0.0f;  // 2.0f
 
   // Attacker cooldown in seconds
   public const float SoldierAttackTimeout = 1.0f;
@@ -36,7 +36,7 @@ public static class GlobalConstants
   public const int CellBasePriority = 200;
 
   // Cooldown between build actions for CPU to give player some advantage
-  public const float CPUActionTimeout = 6.0f;
+  public const float CPUActionTimeout = 3.0f;
 
   public const int SoldiersPerBarrack = 2;
 
