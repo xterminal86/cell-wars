@@ -193,7 +193,7 @@ public class Main : MonoBehaviour
   }
 
   bool _buildMenuAnimationWorking = false;
-  float _buttonsMenuScale = 1.5f;
+  float _buttonsMenuScale = 2.0f;
   IEnumerator ShowBuildButtonsRoutine()
   {
     _buildMenuAnimationWorking = true;

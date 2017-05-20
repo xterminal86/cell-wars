@@ -75,6 +75,16 @@ public class AI : MonoBehaviour
     #endif
   }
 
+  // Type 1:
+  // if (cpu_attackers <= player_attackers && cpu_colonies > cpu_barracks * 2) BuildBarracks();
+  // if (player_barracks > cpu_defenders * 2) BuildDefender()
+  // BuildHolderNearDefender()
+  //
+  // Type 2:
+  // if (player_barracks > cpu_defenders * 2) BuildDefender()
+  // BuildHolderNearDefender()
+  // if (cpu_colonies > cpu_barracks * 2) BuildBarracks()
+    
   void MakeDecision()
   {
     TryToBuildColony();
