@@ -15,17 +15,39 @@ public class AI : MonoBehaviour
 
   int _buildActionsDone = 0;
 
+  Queue<BuildAction> _buildActionQueue = new Queue<BuildAction>();
+
   Text _debugText;
+
   void Start()
   {
     _debugText = GameObject.Find("debug-text").GetComponent<Text>();
   }
 
   bool _buildDone = false;
+  bool _intermediateBuildDone = false;
   float _actionCooldownTimer = 0.0f;
+
   void Update()
-  {
+  {    
+    #if UNITY_EDITOR
+    _debugText.text = _heuristic.ToString();
+    #endif
+
     // To simulate pause between actions
+
+    if (_intermediateBuildDone)
+    {
+      if (_actionCooldownTimer > GlobalConstants.CPUIntermediateActionTimeout)
+      {
+        _actionCooldownTimer = 0.0f;
+        _intermediateBuildDone = false;
+        return;
+      }
+
+      _actionCooldownTimer += Time.smoothDeltaTime;
+      return;
+    }
 
     if (_buildDone)
     {
@@ -41,15 +63,26 @@ public class AI : MonoBehaviour
     }
 
     CalculateHeuristic();
-    MakeDecision();
+
+    if (_buildActionQueue.Count != 0)
+    {
+      ProcessBuildActionsQueue();
+    }
+    else
+    {
+      MakeDecision();
+    }
   }
 
+  List<Int2> _enemyBarracks = new List<Int2>();
   void CalculateHeuristic()
   {
     _heuristic.Clear();
 
     _heuristic.EnemyArea = LevelLoader.Instance.TerritoryCountByOwner[0];
     _heuristic.OurArea = LevelLoader.Instance.TerritoryCountByOwner[1];
+
+    _enemyBarracks.Clear();
 
     for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
     {
@@ -69,10 +102,36 @@ public class AI : MonoBehaviour
 
     _heuristic.EnemyAttackers = LevelLoader.Instance.SoldiersCountByOwner[0];
     _heuristic.OurAttackers = LevelLoader.Instance.SoldiersCountByOwner[1];
+  }
 
-    #if UNITY_EDITOR
-    _debugText.text = _heuristic.ToString();
-    #endif
+  void ProcessBuildActionsQueue()
+  {   
+    var action = _buildActionQueue.Peek();
+
+    // If our position invalidated during timeout (colony was destroyed or was occupied by enemy), discard it
+    if (_intermediateBuildDone && 
+        (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] == null
+     || (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] != null
+      && LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y].CellInstance.OwnerId == 0)))
+    {
+      _buildActionQueue.Clear();
+      _buildDone = true;
+      return;
+    }
+
+    if (TryToBuild(action.PosToBuild, action.BuildingType))
+    {      
+      _buildActionQueue.Dequeue();
+
+      if (_buildActionQueue.Count != 0)
+      {
+        _intermediateBuildDone = true;
+      }
+      else
+      {
+        _buildDone = true;
+      }
+    }
   }
 
   // Type 1:
@@ -84,22 +143,50 @@ public class AI : MonoBehaviour
   // if (player_barracks > cpu_defenders * 2) BuildDefender()
   // BuildHolderNearDefender()
   // if (cpu_colonies > cpu_barracks * 2) BuildBarracks()
-    
+
   void MakeDecision()
   {
-    TryToBuildColony();
+    if (_heuristic.OurColonies > _heuristic.OurBarracks * 2)
+    {
+      TryToBuildBarracks();
+    }
+    else if (_heuristic.EnemyBarracks * 2 > _heuristic.OurDefenders)
+    {
+      TryToBuildDefender();
+    }
+    else
+    {
+      TryToBuildColony();
+    }
   }
 
-  /// <summary>
-  /// Looks for an empty cell with 8 empty cells around it with no drones overlapping.
-  /// If there is no such location, try to build on any valid spot with maximum amount of
-  /// empty cells around to maximize number of drones that can be spawned by this colony.
-  /// </summary>
-  void TryToBuildColony()
+  void TryToBuildDefender()
   {
-    if (!GetCellsForBuilding(true))
-      GetCellsForBuilding(false);
-    
+    foreach (var c in _enemyBarracks)
+    {
+      var line = Utils.BresenhamLine(c, LevelLoader.Instance.BaseCoordinatesByOwner[1]);
+      foreach (var p in line)
+      {
+        if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
+        {         
+          _buildActionQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
+          _buildActionQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
+          return;
+        }
+      }
+    }
+  }
+
+  void TryToBuildBarracks()
+  {
+    if (!GetCellsForColonyBuilding(false))
+    {
+      // TODO: if there are no free cells for building, but condition is
+      // fulfilled, transform existing colony into barrack
+
+      return;
+    }
+
     int max = 0;
     int index = -1;
     Int2 posToBuild = Int2.Zero;
@@ -117,15 +204,44 @@ public class AI : MonoBehaviour
 
     if (index != -1)
     {
-      if (TryToBuild(posToBuild, GlobalConstants.CellType.COLONY))
+      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
+      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.BARRACKS));
+    }
+  }
+
+  /// <summary>
+  /// Looks for an empty cell with 8 empty cells around it with no drones overlapping.
+  /// If there is no such location, try to build on any valid spot with maximum amount of
+  /// empty cells around to maximize number of drones that can be spawned by this colony.
+  /// </summary>
+  void TryToBuildColony()
+  {
+    if (!GetCellsForColonyBuilding(true))
+      GetCellsForColonyBuilding(false);
+    
+    int max = 0;
+    int index = -1;
+    Int2 posToBuild = Int2.Zero;
+
+    // Looking for the best ranked location
+    for (int i = 0; i < _rankedCells.Count; i++)
+    {      
+      if (_rankedCells[i].Value > max)
       {
-        _buildDone = true;
+        max = _rankedCells[i].Value;
+        posToBuild.Set(_rankedCells[i].Key);
+        index = i;
       }
+    }
+
+    if (index != -1)
+    {      
+      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
     }
   }
 
   List<KeyValuePair<Int2, int>> _rankedCells = new List<KeyValuePair<Int2, int>>();
-  bool GetCellsForBuilding(bool optimal)
+  bool GetCellsForColonyBuilding(bool optimal)
   {
     _rankedCells.Clear();
 
@@ -221,6 +337,14 @@ public class AI : MonoBehaviour
     return rank;
   }
 
+  List<KeyValuePair<Int2, int>> _cellsByDistanceFromBase = new List<KeyValuePair<Int2, int>>();
+  void FindSpotForDefender()
+  {
+    Int2 pos = Int2.Zero;
+      
+    _cellsByDistanceFromBase.Clear();
+  }
+
   void FillHeuristic(CellBaseClass cellObject)
   {
     switch (cellObject.Type)
@@ -239,6 +363,7 @@ public class AI : MonoBehaviour
       case GlobalConstants.CellType.BARRACKS:
         if (cellObject.OwnerId == 0)
         {
+          _enemyBarracks.Add(cellObject.Coordinates);
           _heuristic.EnemyBarracks++;
         }
         else
@@ -257,6 +382,17 @@ public class AI : MonoBehaviour
           _heuristic.OurDrones++;
         }
         break;      
+
+      case GlobalConstants.CellType.DEFENDER:
+        if (cellObject.OwnerId == 0)
+        {
+          _heuristic.EnemyDefenders++;
+        }
+        else
+        {
+          _heuristic.OurDefenders++;
+        }
+        break;
     }
   }
 
@@ -264,6 +400,12 @@ public class AI : MonoBehaviour
   {
     if (LevelLoader.Instance.DronesCountByOwner[1] >= GlobalConstants.DroneCostByType[buildingType])
     {
+      // It can only be a colony
+      if (LevelLoader.Instance.ObjectsMap[pos.X, pos.Y] != null)
+      {
+        LevelLoader.Instance.ObjectsMap[pos.X, pos.Y].DestroySelf();
+      }
+
       LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[buildingType], 1);
       LevelLoader.Instance.PlaceCell(pos, buildingType, 1);
       return true;
@@ -273,12 +415,26 @@ public class AI : MonoBehaviour
   }
 }
 
+public class BuildAction
+{
+  public Int2 PosToBuild = Int2.Zero;
+  public GlobalConstants.CellType BuildingType = GlobalConstants.CellType.NONE;
+
+  public BuildAction(Int2 posToBuild, GlobalConstants.CellType buildingType)
+  {
+    PosToBuild.Set(posToBuild);
+    BuildingType = buildingType;
+  }
+};
+
 public class Heuristic
 {
   public int OurColonies = 0;
   public int EnemyColonies = 0;
   public int OurBarracks = 0;
   public int EnemyBarracks = 0;
+  public int OurDefenders = 0;
+  public int EnemyDefenders = 0;
   public int OurDrones = 0;
   public int EnemyDrones = 0;
   public int OurArea = 0;
@@ -294,6 +450,8 @@ public class Heuristic
     EnemyColonies = 0;
     OurBarracks = 0;
     EnemyBarracks = 0;
+    OurDefenders = 0;
+    EnemyDefenders = 0;
     OurDrones = 0;
     EnemyDrones = 0;
     OurArea = 0;
@@ -310,14 +468,16 @@ public class Heuristic
                          "Player colonies:  {1}\n" + 
                          "CPU barracks:     {2}\n" +
                          "Player barracks:  {3}\n" +
-                         "CPU drones:       {4}\n" +
-                         "Player drones:    {5}\n" +
-                         "CPU territory:    {6}\n" +
-                         "Player territory: {7}\n" +
-                         "CPU attackers:    {8}\n" +
-                         "Player attackers: {9}\n" +
-                         "CPU score:        {10}\n" +
-                         "Player score:     {11}\n", 
-      OurColonies, EnemyColonies, OurBarracks, EnemyBarracks, OurDrones, EnemyDrones, OurArea, EnemyArea, OurAttackers, EnemyAttackers, OurScore, EnemyScore);
+                         "CPU defenders:    {4}\n" +
+                         "Player defenders: {5}\n" +
+                         "CPU drones:       {6}\n" +
+                         "Player drones:    {7}\n" +
+                         "CPU territory:    {8}\n" +
+                         "Player territory: {9}\n" +
+                         "CPU attackers:    {10}\n" +
+                         "Player attackers: {11}\n" +
+                         "CPU score:        {12}\n" +
+                         "Player score:     {13}\n", 
+      OurColonies, EnemyColonies, OurBarracks, EnemyBarracks, OurDefenders, EnemyDefenders, OurDrones, EnemyDrones, OurArea, EnemyArea, OurAttackers, EnemyAttackers, OurScore, EnemyScore);
   }
 };

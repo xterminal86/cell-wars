@@ -16,7 +16,7 @@ public class TestMain : MonoBehaviour
   TestClass _testClassRef;
 
   void Start()
-  {    
+  {
     _testObjectInstance = (GameObject)Instantiate(TestObjectPrefab);
 
     _reference = _testObjectInstance.GetComponent<TestInstantiated>();
@@ -25,6 +25,15 @@ public class TestMain : MonoBehaviour
 
     // Reference to TestClass inside MonoBehaviour is still present even after MonoBehaviour is destroyed
     _testClassRef = _reference.TestClassRef;
+
+    /*
+    var res = Utils.BresenhamLine(new Int2(15, 15), new Int2(4, 2));
+
+    foreach (var p in res)
+    {
+      Debug.Log(p);
+    }
+    */
   }
 
   float _timer = 0.0f;
