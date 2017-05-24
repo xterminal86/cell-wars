@@ -15,24 +15,42 @@ public class AI : MonoBehaviour
 
   int _buildActionsDone = 0;
 
-  Queue<BuildAction> _buildActionQueue = new Queue<BuildAction>();
+  Queue<BuildAction> _buildActionsQueue = new Queue<BuildAction>();
 
   Text _debugText;
+  Text _buildActionsText;
 
   void Start()
   {
     _debugText = GameObject.Find("debug-text").GetComponent<Text>();
+    _buildActionsText = GameObject.Find("build-actions-text").GetComponent<Text>();
   }
 
   bool _buildDone = false;
   bool _intermediateBuildDone = false;
   float _actionCooldownTimer = 0.0f;
-
+  string _buildActionsString = string.Empty;
   void Update()
   {    
     #if UNITY_EDITOR
     _debugText.text = _heuristic.ToString();
+
+    _buildActionsString = "";
+
+    int counter = 1;
+    foreach (var a in _buildActionsQueue)
+    {
+      _buildActionsString += string.Format("{0}: {1} {2}\n", counter, a.PosToBuild, a.BuildingType);
+      counter++;
+    }
+
+    _buildActionsText.text = _buildActionsString;
     #endif
+
+    if (LevelLoader.Instance.IsGameOver)
+    {
+      return;
+    }
 
     // To simulate pause between actions
 
@@ -42,6 +60,22 @@ public class AI : MonoBehaviour
       {
         _actionCooldownTimer = 0.0f;
         _intermediateBuildDone = false;
+        return;
+      }
+
+      var action = _buildActionsQueue.Peek();
+
+      // If our intermediate build position invalidated during timeout (colony was destroyed or was occupied by enemy),
+      // discard it
+      if (action.BuildingType != GlobalConstants.CellType.COLONY 
+       && (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] == null
+       || (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] != null
+        && LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y].CellInstance.OwnerId == 0)))
+      {        
+        _buildActionsQueue.Clear();
+        _buildDone = true;
+        _intermediateBuildDone = false;
+        _actionCooldownTimer = 0.0f;
         return;
       }
 
@@ -64,7 +98,7 @@ public class AI : MonoBehaviour
 
     CalculateHeuristic();
 
-    if (_buildActionQueue.Count != 0)
+    if (_buildActionsQueue.Count != 0)
     {
       ProcessBuildActionsQueue();
     }
@@ -106,24 +140,13 @@ public class AI : MonoBehaviour
 
   void ProcessBuildActionsQueue()
   {   
-    var action = _buildActionQueue.Peek();
-
-    // If our position invalidated during timeout (colony was destroyed or was occupied by enemy), discard it
-    if (_intermediateBuildDone && 
-        (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] == null
-     || (LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y] != null
-      && LevelLoader.Instance.ObjectsMap[action.PosToBuild.X, action.PosToBuild.Y].CellInstance.OwnerId == 0)))
-    {
-      _buildActionQueue.Clear();
-      _buildDone = true;
-      return;
-    }
+    var action = _buildActionsQueue.Peek();
 
     if (TryToBuild(action.PosToBuild, action.BuildingType))
     {      
-      _buildActionQueue.Dequeue();
+      _buildActionsQueue.Dequeue();
 
-      if (_buildActionQueue.Count != 0)
+      if (_buildActionsQueue.Count != 0)
       {
         _intermediateBuildDone = true;
       }
@@ -136,7 +159,7 @@ public class AI : MonoBehaviour
 
   // Type 1:
   // if (cpu_attackers <= player_attackers && cpu_colonies > cpu_barracks * 2) BuildBarracks();
-  // if (player_barracks > cpu_defenders * 2) BuildDefender()
+  // if (player_barracks * 2 > cpu_defenders) BuildDefender()
   // BuildHolderNearDefender()
   //
   // Type 2:
@@ -146,11 +169,16 @@ public class AI : MonoBehaviour
 
   void MakeDecision()
   {
+    ExecuteStrategy1();
+  }
+
+  void ExecuteStrategy1()
+  {
     if (_heuristic.OurColonies > _heuristic.OurBarracks * 2)
     {
       TryToBuildBarracks();
     }
-    else if (_heuristic.EnemyBarracks * 2 > _heuristic.OurDefenders)
+    else if (_heuristic.EnemyBarracks != 0 && (_heuristic.EnemyBarracks * 2 >= _heuristic.OurDefenders))
     {
       TryToBuildDefender();
     }
@@ -168,10 +196,29 @@ public class AI : MonoBehaviour
       foreach (var p in line)
       {
         if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
-        {         
-          _buildActionQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
-          _buildActionQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
-          return;
+        {  
+          // If we have, for example, 6 barracks and only one valid spot for
+          // defender, it will enqueue same spot 6 times. To prevent this check if
+          // given point is already in the queue.
+
+          bool alreadyAdded = false;
+          foreach (var action in _buildActionsQueue)
+          {
+            if (action.PosToBuild.X == p.X && action.PosToBuild.Y == p.Y)
+            {
+              alreadyAdded = true;
+              break;
+            }
+          }
+
+          if (alreadyAdded)
+          {
+            continue;
+          }
+          
+          _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
+          _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
+          break;
         }
       }
     }
@@ -180,10 +227,7 @@ public class AI : MonoBehaviour
   void TryToBuildBarracks()
   {
     if (!GetCellsForColonyBuilding(false))
-    {
-      // TODO: if there are no free cells for building, but condition is
-      // fulfilled, transform existing colony into barrack
-
+    {      
       return;
     }
 
@@ -204,8 +248,8 @@ public class AI : MonoBehaviour
 
     if (index != -1)
     {
-      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
-      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.BARRACKS));
+      _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
+      _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.BARRACKS));
     }
   }
 
@@ -236,7 +280,7 @@ public class AI : MonoBehaviour
 
     if (index != -1)
     {      
-      _buildActionQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
+      _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
     }
   }
 

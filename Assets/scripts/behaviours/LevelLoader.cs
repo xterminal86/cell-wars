@@ -103,6 +103,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   // Indiced by attacker's class instance hash code.
   public Dictionary<int, CellBehaviour>[,] SoldiersMap;
 
+  [HideInInspector]
   public bool IsGameOver = false;
 
   public override void Initialize()    
@@ -357,7 +358,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     {
       d = Utils.BlockDistance(item, posToCheck);
 
-      if (d <= GlobalConstants.BuildRangeDistance * 2)
+      if (d <= GlobalConstants.DMZRange)
       {
         checkCounterEnemy++;
       }
