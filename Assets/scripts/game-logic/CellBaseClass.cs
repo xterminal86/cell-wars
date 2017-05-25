@@ -42,8 +42,6 @@ public abstract class CellBaseClass
 
   protected float _zRotationSpeed = 10.0f;
 
-  public bool IsDying = false;
-
   protected Vector3 _hitpointsBarSize = new Vector3(0.5f, 0.05f);
   Vector3 _hpBarNewSize = new Vector3(0.5f, 0.05f);
   Color _hitPointsBarColor = Color.green;
@@ -106,6 +104,8 @@ public abstract class CellBaseClass
 
   public void ReceiveDamage(int amount)
   {
+    BehaviourRef.ShowHitpointsBar();
+
     Hitpoints -= amount;
   }
 

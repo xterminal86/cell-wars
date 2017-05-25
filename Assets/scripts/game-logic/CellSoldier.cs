@@ -84,6 +84,8 @@ public class CellSoldier : CellBaseClass
       if (_attackTimer >= GlobalConstants.SoldierAttackTimeout)
       {
         _attackTimer = 0.0f;
+
+        SearchForPriorityTarget();
         AttackCell();
       }
     }
@@ -182,7 +184,7 @@ public class CellSoldier : CellBaseClass
           {           
             if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId)
             {
-              if (kvp.Value.CellInstance.Priority > enemyPriority)
+              if (kvp.Value.CellInstance.Priority > enemyPriority && !kvp.Value.IsDestroying)
               {
                 enemyPriority = kvp.Value.CellInstance.Priority;
                 _enemyPos.Set(kvp.Value.CellInstance.Coordinates);
@@ -195,7 +197,7 @@ public class CellSoldier : CellBaseClass
 
           if (LevelLoader.Instance.ObjectsMap[x, y] != null
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
-            && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsDying)
+            && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
           {
             if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority)
             {
@@ -209,6 +211,49 @@ public class CellSoldier : CellBaseClass
     }
 
     return (enemyPriority != 0);
+  }
+
+  // FIXME: lots of duplicate code
+  void SearchForPriorityTarget()
+  {
+    int lx = Coordinates.X - 1;
+    int ly = Coordinates.Y - 1;
+    int hx = Coordinates.X + 1;
+    int hy = Coordinates.Y + 1;
+
+    int enemyPriority = 0;
+
+    for (int x = lx; x <= hx; x++)
+    {
+      for (int y = ly; y <= hy; y++)
+      {
+        if (x >= 0 && x < LevelLoader.Instance.MapSize
+          && y >= 0 && y < LevelLoader.Instance.MapSize)
+        {
+          // Check soldiers first
+
+          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
+          {           
+            if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId 
+              && _enemy != null && kvp.Value.CellInstance.Priority > _enemy.CellInstance.Priority && !kvp.Value.IsDestroying)
+            {
+              
+              _enemy = kvp.Value;
+            }
+          }
+
+          // Check other cells second
+
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null
+            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
+            && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
+            && _enemy != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority)
+          {            
+            _enemy = LevelLoader.Instance.ObjectsMap[x, y];
+          }
+        }
+      }
+    }
   }
 
   /// <summary>

@@ -8,9 +8,6 @@ public static class GlobalConstants
   public const float DroneSpawnTimeSeconds = 1.5f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
 
-  // If there is no base or colony in range, drone dies after this number of seconds passed
-  public const float AbandonedDroneLifetimeSeconds = 0.0f;  // 2.0f
-
   // Attacker cooldown in seconds
   public const float SoldierAttackTimeout = 1.0f;
   public const float DefenderAttackTimeout = 2.0f;
@@ -27,7 +24,8 @@ public static class GlobalConstants
   public const int RoundTimeSeconds = 300;
 
   // Attacker priorities for targets
-  public const int CellDronePriority = 1;
+  public const int CellWallPriority = 1;
+  public const int CellDronePriority = 2;
   public const int CellColonyPriority = 100;
   public const int CellSoldierPriority = 150;
   public const int CellDefenderPriority = 60;
@@ -56,6 +54,7 @@ public static class GlobalConstants
   public const int CellDroneHitpoints = 1;
   public const int CellHolderHitpoints = 16;
   public const int CellDefenderHitpoints = 8;
+  public const int CellWallHitpoints = 32;
 
   public static Dictionary<CellType, int> CellHitpointsByType = new Dictionary<CellType, int>() 
   {
@@ -65,7 +64,8 @@ public static class GlobalConstants
     { CellType.SOLDIER, CellSoldierHitpoints },
     { CellType.DRONE, CellDroneHitpoints },
     { CellType.HOLDER, CellHolderHitpoints },
-    { CellType.DEFENDER, CellDefenderHitpoints }
+    { CellType.DEFENDER, CellDefenderHitpoints },
+    { CellType.WALL, CellWallHitpoints }
   };
 
   public static Dictionary<CellType, int> DroneCostByType = new Dictionary<CellType, int>()
@@ -118,6 +118,7 @@ public static class GlobalConstants
     SOLDIER,
     HOLDER,
     DEFENDER,
+    WALL,
     NONE
   }
 }

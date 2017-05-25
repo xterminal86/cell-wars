@@ -15,53 +15,24 @@ public class CellDrone : CellBaseClass
     Priority = GlobalConstants.CellDronePriority;
   }
 
-  Color _color = Color.white;
-  Material _m;
   public override void InitBehaviour()
   {
     base.InitBehaviour();
 
     _phaseDuration = 3.0f / 4.0f;
-    _animationSpeed = 0.2f / _phaseDuration;
-
-    _m = BehaviourRef.GetComponentInChildren<Renderer>().material;
-
-    _color.r = _m.color.r;
-    _color.g = _m.color.g;
-    _color.b = _m.color.b;
-    _color.a = _m.color.a;
-
-    _colorDecreaseFactor = 1.0f / GlobalConstants.AbandonedDroneLifetimeSeconds;
+    _animationSpeed = 0.2f / _phaseDuration;  
   }
 
-  float _lifeTimer = 0.0f;
-  float _colorDecreaseFactor = 0.0f;
   public override void Update()
   {
     base.Update();
 
     PlayAnimation();
 
-    if (!FindBaseOrColonyAround())
+    if (!BehaviourRef.IsDestroying && !FindBaseOrColonyAround())
     {
-      _lifeTimer += Time.smoothDeltaTime;
-
-      _color.a -= Time.smoothDeltaTime * _colorDecreaseFactor;
-
-      _color.a = Mathf.Clamp(_color.a, 0.0f, 1.0f);
-
-      if (_lifeTimer > GlobalConstants.AbandonedDroneLifetimeSeconds)
-      {
-        BehaviourRef.DestroySelf();
-      }
+      BehaviourRef.DestroySelf();
     }
-    else
-    {
-      _color.a = 1.0f;
-      _lifeTimer = 0.0f;
-    }
-      
-    _m.color = _color;
   }
 
   bool FindBaseOrColonyAround()
@@ -83,15 +54,11 @@ public class CellDrone : CellBaseClass
               || LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.BASE)
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId == OwnerId)
           {
-            IsDying = false;
-
             return true;
           }
         }
       }
     }
-
-    IsDying = true;
 
     return false;
   }

@@ -47,8 +47,21 @@ public class CellBehaviour : MonoBehaviour
     yield return null;
   }
 
+  float _hitpointsBarTimer = 0.0f;
 	void Update() 
-	{
+	{    
+    if (_showHitpointsBarFlag)
+    {
+      _hitpointsBarTimer += Time.smoothDeltaTime;
+
+      if (_hitpointsBarTimer > 3.0f)
+      {
+        _showHitpointsBarFlag = false;
+        _hitpointsBarTimer = 0.0f;
+        HitpointsBar.gameObject.SetActive(false);
+      }
+    }
+
     if (CellInstance.Type != GlobalConstants.CellType.DRONE)
     { 
       CellInstance.CalculateHitpointsBar(GlobalConstants.CellHitpointsByType[CellInstance.Type]);
@@ -64,6 +77,17 @@ public class CellBehaviour : MonoBehaviour
       DestroySelf();
     }
 	}
+
+  bool _showHitpointsBarFlag = false;
+  public void ShowHitpointsBar()
+  {
+    if (HitpointsBar != null)
+    {
+      HitpointsBar.gameObject.SetActive(true);
+      _showHitpointsBarFlag = true;
+      _hitpointsBarTimer = 0.0f;
+    }
+  }
 
   // Because of cell death animation, it might be possible for
   // an object to "pick up" reference to a cell that just started playing its death animation,
@@ -125,7 +149,7 @@ public class CellBehaviour : MonoBehaviour
       LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
-    if (CellInstance.Type != GlobalConstants.CellType.NONE)
+    if (CellInstance.Type != GlobalConstants.CellType.NONE && CellInstance.Type != GlobalConstants.CellType.WALL)
     {
       LevelLoader.Instance.TerritoryCountByOwner[CellInstance.OwnerId]--;
     }

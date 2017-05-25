@@ -20,6 +20,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellHolderPrefab;
   public GameObject CellDefenderPrefab;
   public GameObject CellSoldierPrefab;
+  public GameObject CellWallPrefab;
 
   public GameObject BulletPrefab;
 
@@ -168,6 +169,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     PlaceCell(_baseCoordinatesByOwner[0], GlobalConstants.CellType.BASE, 0);
     PlaceCell(_baseCoordinatesByOwner[1], GlobalConstants.CellType.BASE, 1);
+
+    PlaceRandomWalls(60);   
   }    
 
   void InstantiateCellPrefab(int x, int y)
@@ -301,7 +304,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         c = new CellDefender();
         go = (GameObject)Instantiate(CellDefenderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
-        break;      
+        break;            
     }
 
     if (c != null)
@@ -336,6 +339,45 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
 
     return c;
+  }
+
+  void PlaceRandomWalls(int tryToPlaceAmount)
+  {    
+    int counter = 0;
+
+    for (int i = 0; i < tryToPlaceAmount; i++)
+    {
+      int x = Random.Range(0, MapSize);
+      int y = Random.Range(0, MapSize);
+
+      // If we already placed wall on this spot or we are too close to the base area - skip.
+      if (((x >= 0 && x <= 5 && y >= 0 && y <= 5) 
+        || (x >= MapSize - 6 && x <= MapSize - 1 && y >= MapSize - 6 && y <= MapSize - 1)) 
+        || _objectsMap[x, y] != null)
+      {
+        continue;
+      }
+
+      CellWall c = new CellWall();
+      var go = (GameObject)Instantiate(CellWallPrefab, new Vector3(x, y, 0.0f), Quaternion.identity, _gridHolder);
+
+      c.OwnerId = -1;
+
+      c.Coordinates.Set(x, y);
+
+      CellBehaviour b = go.GetComponent<CellBehaviour>();
+
+      b.CellInstance = c;
+      b.CellInstance.BehaviourRef = b;
+      b.CellInstance.ModelTransform = b.ModelTransform;
+      b.CellInstance.InitBehaviour();
+
+      _objectsMap[x, y] = b;
+
+      counter++;
+    }
+
+    Debug.Log("Spawned " + counter + " walls for your pleasure");
   }
 
   public bool CheckLocationToBuild(Int2 posToCheck, int ownerId, int enemyId)
@@ -410,8 +452,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         }
       }
     }
-
-    //DronesCountByOwner[ownerId] -= number;
   }
 
   public void RemoveBuildingFromDictionary(int ownerId, Int2 pos)

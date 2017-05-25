@@ -38,15 +38,72 @@ public class CellDefender : CellBaseClass
       FindEnemies();
     }
     else
-    {
+    {      
       if (_timer <= GlobalConstants.DefenderAttackTimeout)
       {
         _timer += Time.smoothDeltaTime;
       }
       else
       {
+        SearchForPriorityTarget();
         _timer = 0.0f;
         LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.CellInstance.WorldCoordinates, _enemyFound, GlobalConstants.DefenderBulletSpeed);
+      }
+    }
+  }
+
+  // FIXME: lots of duplicate code
+  void SearchForPriorityTarget()
+  {
+    _distance = 0.0f;
+
+    int lx = Coordinates.X - Mathf.CeilToInt(GlobalConstants.CellDefenderRange);
+    int ly = Coordinates.Y - Mathf.CeilToInt(GlobalConstants.CellDefenderRange);
+    int hx = Coordinates.X + Mathf.CeilToInt(GlobalConstants.CellDefenderRange);
+    int hy = Coordinates.Y + Mathf.CeilToInt(GlobalConstants.CellDefenderRange);
+
+    for (int x = lx; x <= hx; x++)
+    {
+      for (int y = ly; y <= hy; y++)
+      {
+        if (x >= 0 && x < LevelLoader.Instance.MapSize
+          && y >= 0 && y < LevelLoader.Instance.MapSize)
+        {
+          // Check soldiers first
+
+          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
+          {           
+            if (kvp.Value == null)
+            {
+              continue;
+            }
+
+            _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
+
+            if (kvp.Value.CellInstance.OwnerId != OwnerId && _distance <= GlobalConstants.CellDefenderRange
+              && _enemyFound != null && kvp.Value.CellInstance.Priority > _enemyFound.CellInstance.Priority 
+              && !kvp.Value.IsDestroying)
+            {               
+              _enemyFound = kvp.Value;
+              return;
+            }
+          }
+
+          // Check other cells second
+
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null)
+          {
+            _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
+
+            if (_distance <= GlobalConstants.CellDefenderRange && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
+              && _enemyFound != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemyFound.CellInstance.Priority 
+              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
+            {                      
+              _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
+              return;
+            }
+          }
+        }
       }
     }
   }
@@ -79,8 +136,10 @@ public class CellDefender : CellBaseClass
             
             _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
-            if (kvp.Value.CellInstance.OwnerId != OwnerId && _distance <= GlobalConstants.CellDefenderRange)
-            {              
+            if (kvp.Value.CellInstance.OwnerId != OwnerId 
+              && _distance <= GlobalConstants.CellDefenderRange 
+              && !kvp.Value.IsDestroying)
+            {               
               _enemyFound = kvp.Value;
               return;
             }
@@ -92,7 +151,9 @@ public class CellDefender : CellBaseClass
           {
             _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
 
-            if (_distance <= GlobalConstants.CellDefenderRange && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId)
+            if (_distance <= GlobalConstants.CellDefenderRange 
+              && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId 
+              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
             {                      
               _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
               return;
