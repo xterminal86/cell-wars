@@ -251,7 +251,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     GameObject go = null;
 
     switch (cellType)
-    {
+    {      
       case GlobalConstants.CellType.BASE:
         
         c = new CellBase();
@@ -260,7 +260,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         break;
 
       case GlobalConstants.CellType.DRONE:
-        
+
+        _dronesCountByOwner[ownerId]++;
+
         c = new CellDrone();
         go = (GameObject)Instantiate(CellDronePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
@@ -299,11 +301,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         c = new CellDefender();
         go = (GameObject)Instantiate(CellDefenderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
-        break;
+        break;      
     }
 
     if (c != null)
     { 
+      _territoryCountByOwner[ownerId]++;
+
       Material m = new Material(CellMaterial);
       m.color = GlobalConstants.ColorsList[ownerId][c.Type];
 
@@ -487,8 +491,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   void Update()
   {
-    // FIXME: ownerID magic numbers
-
+    /*
     _dronesCountByOwner[0] = 0;
     _dronesCountByOwner[1] = 0;
 
@@ -514,8 +517,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         }
       }
     }
+    */
 
-    RefreshTerritoryOverlay();
+    if (Input.GetKey(KeyCode.Tab))
+    {
+      RefreshTerritoryOverlay();
+    }
   }
 
   Int2 _overlayCellPos = Int2.Zero;

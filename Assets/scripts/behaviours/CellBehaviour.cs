@@ -125,8 +125,17 @@ public class CellBehaviour : MonoBehaviour
       LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
+    if (CellInstance.Type != GlobalConstants.CellType.NONE)
+    {
+      LevelLoader.Instance.TerritoryCountByOwner[CellInstance.OwnerId]--;
+    }
+
     switch (CellInstance.Type)
     {
+      case GlobalConstants.CellType.DRONE:
+        LevelLoader.Instance.DronesCountByOwner[CellInstance.OwnerId]--;
+        break;
+
       case GlobalConstants.CellType.SOLDIER:
         (CellInstance as CellSoldier).DelistFromBarracks();
         LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
@@ -141,9 +150,8 @@ public class CellBehaviour : MonoBehaviour
       case GlobalConstants.CellType.HOLDER:
         (CellInstance as CellHolder).UnlockCells();
         LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
-        break;        
+        break;
     }
-
   }
 
   void DestroyGameObject()
