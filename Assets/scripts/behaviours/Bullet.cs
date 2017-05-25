@@ -12,9 +12,11 @@ public class Bullet : MonoBehaviour
   CellBehaviour _enemy;
 
   Vector3 _targetPos = Vector3.zero;
+  Vector3 _startingPos = Vector3.zero;
   public void SetTarget(Vector3 targetPos, CellBehaviour enemy, float bulletSpeed)
   {
     _targetPos = targetPos;
+    _startingPos = transform.position;
 
     _gridX = Mathf.Round(_targetPos.x);
     _gridY = Mathf.Round(_targetPos.y);
@@ -23,28 +25,24 @@ public class Bullet : MonoBehaviour
 
     _enemy = enemy;
     _bulletSpeed = bulletSpeed;
+
   }
 
   Vector3 _position = Vector3.zero;
-  Vector3 _heading = Vector3.zero;
-  Vector3 _dir = Vector3.zero;
-  float _magnitude = 0.0f, _gridX = 0.0f, _gridY = 0.0f, _bulletSpeed = 0.0f;
+  float _gridX = 0.0f, _gridY = 0.0f, _bulletSpeed;
   Int2 _gridPos = Int2.Zero;
+  float _interpolant = 0.0f;
 	void Update () 
 	{
-    _position = transform.position;
+    // If FPS drops, bullet can overshoot, so we use lerp and rely on interpolant value
+    // instead of distance magnitude between start and end points.
+    _position = Vector3.Lerp(_startingPos, _targetPos, _interpolant);
 
-    _heading = (_targetPos - _position);
-    _magnitude = _heading.magnitude;
-    _dir = _heading / _magnitude;
+    transform.position = _position;
 
-    if (_magnitude > 0.1f)
-    {
-      _position += (_dir * Time.smoothDeltaTime * _bulletSpeed);
+    _interpolant += Time.smoothDeltaTime * _bulletSpeed;
 
-      transform.position = _position;
-    }
-    else
+    if (_interpolant >= 1.0f)
     {
       Instantiate(BulletHitEffectPrefab, new Vector3(_position.x, _position.y, BulletHitEffectPrefab.transform.position.z), Quaternion.identity, LevelLoader.Instance.GridHolder);
 

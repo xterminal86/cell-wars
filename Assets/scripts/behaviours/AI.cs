@@ -47,7 +47,7 @@ public class AI : MonoBehaviour
     _buildActionsText.text = _buildActionsString;
     #endif
 
-    if (LevelLoader.Instance.IsGameOver)
+    if (_buildActionsDone == MaxBuildActions)
     {
       return;
     }
@@ -143,7 +143,9 @@ public class AI : MonoBehaviour
     var action = _buildActionsQueue.Peek();
 
     if (TryToBuild(action.PosToBuild, action.BuildingType))
-    {      
+    {  
+      _buildActionsDone++;
+
       _buildActionsQueue.Dequeue();
 
       if (_buildActionsQueue.Count != 0)

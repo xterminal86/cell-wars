@@ -16,8 +16,8 @@ public static class GlobalConstants
   public const float DefenderAttackTimeout = 2.0f;
 
   // Various game parameters
-  public const float DefaultBulletSpeed = 2.0f;
-  public const float DefenderBulletSpeed = 8.0f;
+  public const float DefaultBulletSpeed = 1.0f;
+  public const float DefenderBulletSpeed = 2.0f;
   public const float AttackerMoveSpeed = 0.5f;
   public const float HolderSlowFactor = 0.5f;
   public const float CameraZoomSpeed = 1.0f;
