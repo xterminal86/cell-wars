@@ -170,7 +170,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     PlaceCell(_baseCoordinatesByOwner[0], GlobalConstants.CellType.BASE, 0);
     PlaceCell(_baseCoordinatesByOwner[1], GlobalConstants.CellType.BASE, 1);
 
-    PlaceRandomWalls(60);   
+    PlaceRandomWalls(100);   
   }    
 
   void InstantiateCellPrefab(int x, int y)
@@ -342,28 +342,43 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   }
 
   void PlaceRandomWalls(int tryToPlaceAmount)
-  {    
-    int counter = 0;
+  {
+    int[,] wallsMap = new int[MapSize, MapSize];
+    List<Int2> wallsValidPositions = new List<Int2>();
 
-    for (int i = 0; i < tryToPlaceAmount; i++)
+    // Excluding base area of player and CPU (6x6x2)
+    int wallsMax = Mathf.Clamp(tryToPlaceAmount, 1, MapSize * MapSize - 72);
+
+    for (int i = 0; i < wallsMax; i++)
     {
-      int x = Random.Range(0, MapSize);
-      int y = Random.Range(0, MapSize);
+      wallsValidPositions.Clear();
 
-      // If we already placed wall on this spot or we are too close to the base area - skip.
-      if (((x >= 0 && x <= 5 && y >= 0 && y <= 5) 
-        || (x >= MapSize - 6 && x <= MapSize - 1 && y >= MapSize - 6 && y <= MapSize - 1)) 
-        || _objectsMap[x, y] != null)
+      for (int x = 0; x < MapSize; x++)
       {
-        continue;
+        for (int y = 0; y < MapSize; y++)
+        {
+          if ((x >= 0 && x <= 5 && y >= 0 && y <= 5)
+            || (x >= MapSize - 6 && x <= MapSize - 1 && y >= MapSize - 6 && y <= MapSize - 1))
+          {
+            continue;
+          }
+
+          if (wallsMap[x, y] != 1)
+          {
+            wallsValidPositions.Add(new Int2(x, y));
+          }
+        }
       }
 
+      int index = Random.Range(0, wallsValidPositions.Count);
+
+      Int2 pos = wallsValidPositions[index];
       CellWall c = new CellWall();
-      var go = (GameObject)Instantiate(CellWallPrefab, new Vector3(x, y, 0.0f), Quaternion.identity, _gridHolder);
+      var go = (GameObject)Instantiate(CellWallPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
       c.OwnerId = -1;
 
-      c.Coordinates.Set(x, y);
+      c.Coordinates.Set(pos);
 
       CellBehaviour b = go.GetComponent<CellBehaviour>();
 
@@ -372,12 +387,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
-      _objectsMap[x, y] = b;
+      _objectsMap[pos.X, pos.Y] = b;
 
-      counter++;
+      wallsMap[pos.X, pos.Y] = 1;
     }
-
-    Debug.Log("Spawned " + counter + " walls for your pleasure");
   }
 
   public bool CheckLocationToBuild(Int2 posToCheck, int ownerId, int enemyId)
