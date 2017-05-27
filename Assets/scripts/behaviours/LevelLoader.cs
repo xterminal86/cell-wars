@@ -45,7 +45,11 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   Transform _territoryOverlayHolder;
 
-  GameObject[,] _territoryOverlay;
+  Renderer[,] _territoryOverlayRenderers;
+  public Renderer[,] TerritoryOverlayRenderers
+  {
+    get { return _territoryOverlayRenderers; }
+  }
 
   public int MapSize = 32;
 
@@ -120,7 +124,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     _locksMap = new int[MapSize, MapSize];
     _objectsMap = new CellBehaviour[MapSize, MapSize];
-    _territoryOverlay = new GameObject[MapSize, MapSize];
+    _territoryOverlayRenderers = new Renderer[MapSize, MapSize];
 
     SoldiersMap = new Dictionary<int, CellBehaviour>[MapSize, MapSize];
 
@@ -137,9 +141,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         GameObject go = (GameObject)Instantiate(TerritoryOverlayPrefab, new Vector3(x, y, -2.0f), Quaternion.identity, _territoryOverlayHolder);
         Material m = new Material(TerritoryOverlayMaterial);
-        m.color = new Color(1.0f, 1.0f, 1.0f, 0.1f);
+        m.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         go.GetComponent<Renderer>().material = m;
-        _territoryOverlay[x, y] = go;
+        _territoryOverlayRenderers[x, y] = go.GetComponent<Renderer>();
       }
     }
 
@@ -309,7 +313,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     if (c != null)
     { 
-      _territoryCountByOwner[ownerId]++;
+      if (c.Type != GlobalConstants.CellType.SOLDIER)
+      {
+        _territoryCountByOwner[ownerId]++;
+      }
 
       Material m = new Material(CellMaterial);
       m.color = GlobalConstants.ColorsList[ownerId][c.Type];
@@ -572,49 +579,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
     */
 
-    if (Input.GetKey(KeyCode.Tab))
+    if (_territoryOverlayHolder != null)
     {
-      RefreshTerritoryOverlay();
-    }
-  }
-
-  Int2 _overlayCellPos = Int2.Zero;
-  Color _overlayCellColor = Color.white;
-  void RefreshTerritoryOverlay()
-  {
-    for (int x = 0; x < MapSize; x++)
-    {
-      for (int y = 0; y < MapSize; y++)
-      {        
-        _overlayCellPos.Set(x, y);
-
-        if (CheckLocationToBuild(_overlayCellPos, 0, 1))
-        {
-          _overlayCellColor.r = 0.0f;
-          _overlayCellColor.g = 1.0f;
-          _overlayCellColor.b = 0.0f;
-          _overlayCellColor.a = 0.4f;
-        }
-        else if (CheckLocationToBuild(_overlayCellPos, 1, 0))
-        {
-          _overlayCellColor.r = 1.0f;
-          _overlayCellColor.g = 0.0f;
-          _overlayCellColor.b = 0.0f;
-          _overlayCellColor.a = 0.4f;
-        }
-        else
-        {
-          _overlayCellColor.r = 1.0f;
-          _overlayCellColor.g = 1.0f;
-          _overlayCellColor.b = 1.0f;
-          _overlayCellColor.a = 0.0f;
-        }
-
-        if (_territoryOverlay[x, y] != null)
-        {
-          _territoryOverlay[x, y].GetComponent<Renderer>().material.color = _overlayCellColor;
-        }
-      }
+      _territoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));  
     }
   }
 

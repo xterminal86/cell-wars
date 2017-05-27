@@ -228,8 +228,6 @@ public class CellSoldier : CellBaseClass
     int hx = Coordinates.X + 1;
     int hy = Coordinates.Y + 1;
 
-    int enemyPriority = 0;
-
     for (int x = lx; x <= hx; x++)
     {
       for (int y = ly; y <= hy; y++)

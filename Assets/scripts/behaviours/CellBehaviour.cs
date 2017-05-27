@@ -73,10 +73,92 @@ public class CellBehaviour : MonoBehaviour
     }
 
     if (CellInstance.Hitpoints <= 0)
-    {     
+    {
+      UncolorCells();
       DestroySelf();
     }
+    else
+    {
+      RefreshTerritoryOverlay();
+    }
 	}
+
+  Int2 _positionToCheck = Int2.Zero;
+  Color _overlayCellColor = Color.white;
+  void RefreshTerritoryOverlay()
+  {
+    if (CellInstance.OwnerId == 0 && CellInstance.Type != GlobalConstants.CellType.DRONE)
+    {
+      int lx = CellInstance.Coordinates.X - 3;
+      int ly = CellInstance.Coordinates.Y - 3;
+      int hx = CellInstance.Coordinates.X + 3;
+      int hy = CellInstance.Coordinates.Y + 3;
+
+      for (int x = lx; x <= hx; x++)
+      {
+        for (int y = ly; y <= hy; y++)
+        {
+          if (x >= 0 && x < LevelLoader.Instance.MapSize
+              && y >= 0 && y < LevelLoader.Instance.MapSize)
+          {
+            _positionToCheck.Set(x, y);
+
+            if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+            {
+              _overlayCellColor.r = 0.0f;
+              _overlayCellColor.g = 1.0f;
+              _overlayCellColor.b = 0.0f;
+              _overlayCellColor.a = 0.4f;
+
+              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+            }
+            else
+            {
+              _overlayCellColor.r = 0.0f;
+              _overlayCellColor.g = 1.0f;
+              _overlayCellColor.b = 0.0f;
+              _overlayCellColor.a = 0.0f;
+
+              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void UncolorCells()
+  {
+    if (CellInstance.OwnerId == 0 && CellInstance.Type != GlobalConstants.CellType.DRONE)
+    {
+      int lx = CellInstance.Coordinates.X - 3;
+      int ly = CellInstance.Coordinates.Y - 3;
+      int hx = CellInstance.Coordinates.X + 3;
+      int hy = CellInstance.Coordinates.Y + 3;
+
+      for (int x = lx; x <= hx; x++)
+      {
+        for (int y = ly; y <= hy; y++)
+        {
+          if (x >= 0 && x < LevelLoader.Instance.MapSize
+            && y >= 0 && y < LevelLoader.Instance.MapSize)
+          {
+            _positionToCheck.Set(x, y);
+
+            if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+            {
+              _overlayCellColor.r = 0.0f;
+              _overlayCellColor.g = 1.0f;
+              _overlayCellColor.b = 0.0f;
+              _overlayCellColor.a = 0.0f;
+
+              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+            }
+          }
+        }
+      }
+    }
+  }
 
   bool _showHitpointsBarFlag = false;
   public void ShowHitpointsBar()
@@ -149,7 +231,7 @@ public class CellBehaviour : MonoBehaviour
       LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
-    if (CellInstance.Type != GlobalConstants.CellType.NONE && CellInstance.Type != GlobalConstants.CellType.WALL)
+    if (CellInstance.Type != GlobalConstants.CellType.NONE && CellInstance.Type != GlobalConstants.CellType.WALL && CellInstance.Type != GlobalConstants.CellType.SOLDIER)
     {
       LevelLoader.Instance.TerritoryCountByOwner[CellInstance.OwnerId]--;
     }
