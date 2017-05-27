@@ -162,6 +162,7 @@ public class CellSoldier : CellBaseClass
 
   CellBehaviour _enemy;
   Int2 _enemyPos = Int2.Zero;
+  float _distance = 0.0f;
   bool FindEnemies()
   {
     int lx = Coordinates.X - 1;
@@ -170,6 +171,8 @@ public class CellSoldier : CellBaseClass
     int hy = Coordinates.Y + 1;
 
     int enemyPriority = 0;
+
+    _distance = 0.0f;
 
     for (int x = lx; x <= hx; x++)
     {
@@ -184,7 +187,9 @@ public class CellSoldier : CellBaseClass
           {           
             if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId)
             {
-              if (kvp.Value.CellInstance.Priority > enemyPriority && !kvp.Value.IsDestroying)
+              _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
+
+              if (kvp.Value.CellInstance.Priority > enemyPriority && !kvp.Value.IsDestroying && _distance < 1.0f)
               {
                 enemyPriority = kvp.Value.CellInstance.Priority;
                 _enemyPos.Set(kvp.Value.CellInstance.Coordinates);
@@ -199,7 +204,9 @@ public class CellSoldier : CellBaseClass
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
             && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
           {
-            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority)
+            _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
+
+            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority && _distance < 1.0f)
             {
               enemyPriority = LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority;
               _enemyPos.Set(x, y);
@@ -234,11 +241,16 @@ public class CellSoldier : CellBaseClass
 
           foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
           {           
-            if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId 
+            if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId
               && _enemy != null && kvp.Value.CellInstance.Priority > _enemy.CellInstance.Priority && !kvp.Value.IsDestroying)
-            {
-              
-              _enemy = kvp.Value;
+            {              
+              _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
+
+              if (_distance < 1.0f)
+              {
+                _enemy = kvp.Value;
+                return;
+              }
             }
           }
 
@@ -249,7 +261,13 @@ public class CellSoldier : CellBaseClass
             && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
             && _enemy != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority)
           {            
-            _enemy = LevelLoader.Instance.ObjectsMap[x, y];
+            _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
+
+            if (_distance < 1.0f)
+            {
+              _enemy = LevelLoader.Instance.ObjectsMap[x, y];
+              return;
+            }
           }
         }
       }
