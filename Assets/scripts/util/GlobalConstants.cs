@@ -21,6 +21,7 @@ public static class GlobalConstants
   public const float CameraMoveSpeed = 10.0f;
   public const float CellHolderRange = 3.0f;
   public const float CellDefenderRange = 4.0f;
+  public const float CellSoldierRange = 1.5f;
   public const int RoundTimeSeconds = 300;
 
   // Attacker priorities for targets
@@ -34,9 +35,9 @@ public static class GlobalConstants
   public const int CellBasePriority = 200;
 
   // Cooldown between build actions for CPU to give player some advantage
-  public const float CPUActionTimeout = 1.0f;
+  public const float CPUActionTimeout = 3.0f;
   // CPU timeout for building from colony
-  public const float CPUIntermediateActionTimeout = 0.5f;
+  public const float CPUIntermediateActionTimeout = 1.0f;
 
   public const int SoldiersPerBarrack = 2;
 

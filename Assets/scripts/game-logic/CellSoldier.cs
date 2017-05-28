@@ -165,10 +165,10 @@ public class CellSoldier : CellBaseClass
   float _distance = 0.0f;
   bool FindEnemies()
   {
-    int lx = Coordinates.X - 1;
-    int ly = Coordinates.Y - 1;
-    int hx = Coordinates.X + 1;
-    int hy = Coordinates.Y + 1;
+    int lx = Coordinates.X - Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int ly = Coordinates.Y - Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int hx = Coordinates.X + Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int hy = Coordinates.Y + Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
 
     int enemyPriority = 0;
 
@@ -189,7 +189,7 @@ public class CellSoldier : CellBaseClass
             {
               _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
-              if (kvp.Value.CellInstance.Priority > enemyPriority && !kvp.Value.IsDestroying && _distance < 1.0f)
+              if (kvp.Value.CellInstance.Priority > enemyPriority && !kvp.Value.IsDestroying && _distance < GlobalConstants.CellSoldierRange)
               {
                 enemyPriority = kvp.Value.CellInstance.Priority;
                 _enemyPos.Set(kvp.Value.CellInstance.Coordinates);
@@ -206,7 +206,7 @@ public class CellSoldier : CellBaseClass
           {
             _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
 
-            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority && _distance < 1.0f)
+            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority && _distance < GlobalConstants.CellSoldierRange)
             {
               enemyPriority = LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority;
               _enemyPos.Set(x, y);
@@ -223,10 +223,10 @@ public class CellSoldier : CellBaseClass
   // FIXME: lots of duplicate code
   void SearchForPriorityTarget()
   {
-    int lx = Coordinates.X - 1;
-    int ly = Coordinates.Y - 1;
-    int hx = Coordinates.X + 1;
-    int hy = Coordinates.Y + 1;
+    int lx = Coordinates.X - Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int ly = Coordinates.Y - Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int hx = Coordinates.X + Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
+    int hy = Coordinates.Y + Mathf.CeilToInt(GlobalConstants.CellSoldierRange);
 
     for (int x = lx; x <= hx; x++)
     {
@@ -244,7 +244,7 @@ public class CellSoldier : CellBaseClass
             {              
               _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
-              if (_distance < 1.0f)
+              if (_distance < GlobalConstants.CellSoldierRange)
               {
                 _enemy = kvp.Value;
                 return;

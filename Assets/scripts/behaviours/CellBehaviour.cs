@@ -17,6 +17,7 @@ public class CellBehaviour : MonoBehaviour
 
   void Start()
   {
+    RefreshTerritoryOverlay();
     StartCoroutine(GrowRoutine());
   }
 
@@ -74,12 +75,7 @@ public class CellBehaviour : MonoBehaviour
 
     if (CellInstance.Hitpoints <= 0)
     {
-      UncolorCells();
       DestroySelf();
-    }
-    else
-    {
-      RefreshTerritoryOverlay();
     }
 	}
 
@@ -87,75 +83,99 @@ public class CellBehaviour : MonoBehaviour
   Color _overlayCellColor = Color.white;
   void RefreshTerritoryOverlay()
   {
-    if (CellInstance.OwnerId == 0 && CellInstance.Type != GlobalConstants.CellType.DRONE)
+    if (CellInstance.OwnerId == 0)
     {
-      int lx = CellInstance.Coordinates.X - 3;
-      int ly = CellInstance.Coordinates.Y - 3;
-      int hx = CellInstance.Coordinates.X + 3;
-      int hy = CellInstance.Coordinates.Y + 3;
-
-      for (int x = lx; x <= hx; x++)
+      if (CellInstance.Type != GlobalConstants.CellType.DRONE)
       {
-        for (int y = ly; y <= hy; y++)
+        int lx = CellInstance.Coordinates.X - 3;
+        int ly = CellInstance.Coordinates.Y - 3;
+        int hx = CellInstance.Coordinates.X + 3;
+        int hy = CellInstance.Coordinates.Y + 3;
+
+        for (int x = lx; x <= hx; x++)
         {
-          if (x >= 0 && x < LevelLoader.Instance.MapSize
-              && y >= 0 && y < LevelLoader.Instance.MapSize)
+          for (int y = ly; y <= hy; y++)
           {
-            _positionToCheck.Set(x, y);
-
-            if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+            if (x >= 0 && x < LevelLoader.Instance.MapSize
+              && y >= 0 && y < LevelLoader.Instance.MapSize)
             {
-              _overlayCellColor.r = 0.0f;
-              _overlayCellColor.g = 1.0f;
-              _overlayCellColor.b = 0.0f;
-              _overlayCellColor.a = 0.4f;
+              _positionToCheck.Set(x, y);
 
-              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
-            }
-            else
-            {
-              _overlayCellColor.r = 0.0f;
-              _overlayCellColor.g = 1.0f;
-              _overlayCellColor.b = 0.0f;
-              _overlayCellColor.a = 0.0f;
+              if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+              {
+                _overlayCellColor.r = 0.0f;
+                _overlayCellColor.g = 1.0f;
+                _overlayCellColor.b = 0.0f;
+                _overlayCellColor.a = 0.4f;
 
-              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+              }
+              else
+              {
+                _overlayCellColor.r = 0.0f;
+                _overlayCellColor.g = 1.0f;
+                _overlayCellColor.b = 0.0f;
+                _overlayCellColor.a = 0.0f;
+
+                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+              }
             }
           }
         }
+      }
+      else
+      {
+        _overlayCellColor.r = 0.0f;
+        _overlayCellColor.g = 1.0f;
+        _overlayCellColor.b = 0.0f;
+        _overlayCellColor.a = 0.0f;
+
+        LevelLoader.Instance.TerritoryOverlayRenderers[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].material.color = _overlayCellColor;
       }
     }
   }
 
   void UncolorCells()
   {
-    if (CellInstance.OwnerId == 0 && CellInstance.Type != GlobalConstants.CellType.DRONE)
+    if (CellInstance.OwnerId == 0)
     {
-      int lx = CellInstance.Coordinates.X - 3;
-      int ly = CellInstance.Coordinates.Y - 3;
-      int hx = CellInstance.Coordinates.X + 3;
-      int hy = CellInstance.Coordinates.Y + 3;
-
-      for (int x = lx; x <= hx; x++)
+      if (CellInstance.Type != GlobalConstants.CellType.DRONE)
       {
-        for (int y = ly; y <= hy; y++)
+        int lx = CellInstance.Coordinates.X - 3;
+        int ly = CellInstance.Coordinates.Y - 3;
+        int hx = CellInstance.Coordinates.X + 3;
+        int hy = CellInstance.Coordinates.Y + 3;
+
+        for (int x = lx; x <= hx; x++)
         {
-          if (x >= 0 && x < LevelLoader.Instance.MapSize
-            && y >= 0 && y < LevelLoader.Instance.MapSize)
+          for (int y = ly; y <= hy; y++)
           {
-            _positionToCheck.Set(x, y);
-
-            if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+            if (x >= 0 && x < LevelLoader.Instance.MapSize
+                && y >= 0 && y < LevelLoader.Instance.MapSize)
             {
-              _overlayCellColor.r = 0.0f;
-              _overlayCellColor.g = 1.0f;
-              _overlayCellColor.b = 0.0f;
-              _overlayCellColor.a = 0.0f;
+              _positionToCheck.Set(x, y);
 
-              LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+              if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
+              {
+                _overlayCellColor.r = 0.0f;
+                _overlayCellColor.g = 1.0f;
+                _overlayCellColor.b = 0.0f;
+                _overlayCellColor.a = 0.0f;
+
+                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
+              }
             }
           }
         }
+      }
+      else
+      {
+        _overlayCellColor.r = 0.0f;
+        _overlayCellColor.g = 1.0f;
+        _overlayCellColor.b = 0.0f;
+        _overlayCellColor.a = 0.4f;
+
+        LevelLoader.Instance.TerritoryOverlayRenderers[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].material.color = _overlayCellColor;
       }
     }
   }
@@ -195,6 +215,8 @@ public class CellBehaviour : MonoBehaviour
     }
 
     _isDestroying = true;
+
+    UncolorCells();
 
     ClearCellObject();
 
