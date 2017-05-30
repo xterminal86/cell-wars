@@ -58,6 +58,11 @@ public class CellSoldier : CellBaseClass
 
     PlayAnimation();
 
+    if (LevelLoader.Instance.IsGameOver)
+    {
+      return;
+    }
+    
     // Check if destination target is still there
     CheckTargetStatus();
 

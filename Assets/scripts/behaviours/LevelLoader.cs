@@ -23,6 +23,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellWallPrefab;
 
   public GameObject BulletPrefab;
+  public GameObject GameOverExplosionPrefab;
 
   public Material CellMaterial;
   public Material TerritoryOverlayMaterial;
@@ -490,7 +491,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public void GameOver(int loserId, string message)
   {
     IsGameOver = true;
-    Time.timeScale = 0.0f;
 
     // Time's up
     if (loserId == -1)
@@ -514,7 +514,61 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     PlayerScoreText.color = (_scoreCountByOwner[0] > _scoreCountByOwner[1]) ? Color.green : Color.white;
     CPUScoreText.color = (_scoreCountByOwner[1] > _scoreCountByOwner[0]) ? Color.green : Color.white;
 
-    StartCoroutine(ShowGameOverFormRoutine());
+    StartCoroutine(GameOverRoutine(loserId));
+  }
+
+  IEnumerator GameOverRoutine(int loserId)
+  {    
+    // Show some explosions
+    // FIXME: show them immediately, not after object has shrunk and destroyed
+    if (loserId != -1)
+    {
+      Vector3 basePosition = Vector3.zero;
+
+      if (loserId == 0)
+      {
+        basePosition.Set(1, 1, 0.0f);
+      }
+      else
+      {
+        basePosition.Set(MapSize - 2, MapSize - 2, 0.0f);
+      }
+        
+      int explosionsCounter = 0;
+      int explosionsNumber = 5;
+      float timer = 0.0f;
+      while (explosionsCounter < explosionsNumber)
+      {
+        timer += Time.smoothDeltaTime;
+
+        if (timer > 0.1f)
+        {
+          float randX = Random.Range(-1.0f, 1.0f);
+          float randY = Random.Range(-1.0f, 1.0f);
+
+          Vector3 position = new Vector3(basePosition.x + randX, basePosition.y + randY, basePosition.z);
+
+          Instantiate(GameOverExplosionPrefab, position, Quaternion.identity, _gridHolder);
+
+          explosionsCounter++;
+          timer = 0.0f;
+        }
+
+        yield return null;
+      }
+
+      // Wait for last animation to finish
+      while (timer < 1.0f)
+      {
+        timer += Time.smoothDeltaTime;
+
+        yield return null;
+      }
+    }
+
+    Time.timeScale = 0.0f;
+
+    yield return StartCoroutine(ShowGameOverFormRoutine());
   }
 
   IEnumerator ShowGameOverFormRoutine()
