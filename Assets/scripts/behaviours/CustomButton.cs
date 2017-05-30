@@ -26,6 +26,7 @@ public class CustomButton : MonoBehaviour
 
   public GameObject TextNormal;
   public GameObject TextPressed;
+  public GameObject TextDisabled;
 
   public AudioSource SoundDown;
   public AudioSource SoundUp;
@@ -56,12 +57,16 @@ public class CustomButton : MonoBehaviour
       SpriteNormal.SetActive(true);
       SpritePressed.SetActive(false);
       SpriteDisabled.SetActive(false);
+      TextNormal.SetActive(true);
+      TextDisabled.SetActive(false);
     }
     else
-    {
+    {      
       SpriteNormal.SetActive(false);
       SpritePressed.SetActive(false);
       SpriteDisabled.SetActive(true);
+      TextNormal.SetActive(false);
+      TextDisabled.SetActive(true);
     }
   }
 
