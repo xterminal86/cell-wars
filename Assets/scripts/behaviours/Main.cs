@@ -173,6 +173,13 @@ public class Main : MonoBehaviour
         Time.timeScale = 0.0f;
       }
     }
+
+    #if UNITY_EDITOR
+    if (Input.GetMouseButtonDown(2))
+    {
+      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
+    }
+    #endif
       
     TerritoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));
   }
