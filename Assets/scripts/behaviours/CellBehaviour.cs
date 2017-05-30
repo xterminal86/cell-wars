@@ -112,6 +112,7 @@ public class CellBehaviour : MonoBehaviour
               }
               else
               {
+                // FIXME: overlay is not updated after wall in range gets destroyed
                 _overlayCellColor.r = 0.0f;
                 _overlayCellColor.g = 1.0f;
                 _overlayCellColor.b = 0.0f;
@@ -137,6 +138,8 @@ public class CellBehaviour : MonoBehaviour
 
   void UncolorCells()
   {
+    // FIXME: if we have two colonies without drones and one of them gets destroyed
+    // it will uncolor cells that belong to the other colony.
     if (CellInstance.OwnerId == 0)
     {
       if (CellInstance.Type != GlobalConstants.CellType.DRONE)
@@ -207,6 +210,8 @@ public class CellBehaviour : MonoBehaviour
     get { return _isDestroying; }
   }
 
+  // TODO: destroy game object immediately and play death animation via
+  // instantiating special temporary prefab with death animation.
   public void DestroySelf()
   { 
     if (_isDestroying)

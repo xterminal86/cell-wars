@@ -37,7 +37,7 @@ public static class GlobalConstants
   // Cooldown between build actions for CPU to give player some advantage
   public const float CPUActionTimeout = 3.0f;
   // CPU timeout for building from colony
-  public const float CPUIntermediateActionTimeout = 1.0f;
+  public const float CPUIntermediateActionTimeout = 2.0f;
 
   public const int SoldiersPerBarrack = 2;
 
