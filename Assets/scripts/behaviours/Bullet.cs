@@ -46,7 +46,8 @@ public class Bullet : MonoBehaviour
     {
       Instantiate(BulletHitEffectPrefab, new Vector3(_position.x, _position.y, BulletHitEffectPrefab.transform.position.z), Quaternion.identity, LevelLoader.Instance.GridHolder);
 
-      if (_enemy != null)
+      // For some reason there may be a null reference exception for CellInstance
+      if (_enemy != null && _enemy.CellInstance != null)
       {
         _enemy.CellInstance.ReceiveDamage(1);
 

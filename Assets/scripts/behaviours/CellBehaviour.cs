@@ -17,7 +17,6 @@ public class CellBehaviour : MonoBehaviour
 
   void Start()
   {
-    RefreshTerritoryOverlay();
     StartCoroutine(GrowRoutine());
   }
 
@@ -48,151 +47,13 @@ public class CellBehaviour : MonoBehaviour
     yield return null;
   }
 
-  float _hitpointsBarTimer = 0.0f;
-	void Update() 
-	{    
-    if (_showHitpointsBarFlag)
-    {
-      _hitpointsBarTimer += Time.smoothDeltaTime;
-
-      if (_hitpointsBarTimer > 3.0f)
-      {
-        _showHitpointsBarFlag = false;
-        _hitpointsBarTimer = 0.0f;
-        HitpointsBar.gameObject.SetActive(false);
-      }
-    }
-
-    if (CellInstance.Type != GlobalConstants.CellType.DRONE)
-    { 
-      CellInstance.CalculateHitpointsBar(GlobalConstants.CellHitpointsByType[CellInstance.Type]);
-    }
-
-    if (!_isDestroying)
+  void Update() 
+	{ 
+    if (CellInstance != null)
     {
       CellInstance.Update();
     }
-
-    if (CellInstance.Hitpoints <= 0)
-    {
-      DestroySelf();
-    }
 	}
-
-  Int2 _positionToCheck = Int2.Zero;
-  Color _overlayCellColor = Color.white;
-  void RefreshTerritoryOverlay()
-  {
-    if (CellInstance.OwnerId == 0)
-    {
-      if (CellInstance.Type != GlobalConstants.CellType.DRONE)
-      {
-        int lx = CellInstance.Coordinates.X - 3;
-        int ly = CellInstance.Coordinates.Y - 3;
-        int hx = CellInstance.Coordinates.X + 3;
-        int hy = CellInstance.Coordinates.Y + 3;
-
-        for (int x = lx; x <= hx; x++)
-        {
-          for (int y = ly; y <= hy; y++)
-          {
-            if (x >= 0 && x < LevelLoader.Instance.MapSize
-              && y >= 0 && y < LevelLoader.Instance.MapSize)
-            {
-              _positionToCheck.Set(x, y);
-
-              if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
-              {
-                _overlayCellColor.r = 0.0f;
-                _overlayCellColor.g = 1.0f;
-                _overlayCellColor.b = 0.0f;
-                _overlayCellColor.a = 0.4f;
-
-                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
-              }
-              else
-              {
-                // FIXME: overlay is not updated after wall in range gets destroyed
-                _overlayCellColor.r = 0.0f;
-                _overlayCellColor.g = 1.0f;
-                _overlayCellColor.b = 0.0f;
-                _overlayCellColor.a = 0.0f;
-
-                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
-              }
-            }
-          }
-        }
-      }
-      else
-      {
-        _overlayCellColor.r = 0.0f;
-        _overlayCellColor.g = 1.0f;
-        _overlayCellColor.b = 0.0f;
-        _overlayCellColor.a = 0.0f;
-
-        LevelLoader.Instance.TerritoryOverlayRenderers[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].material.color = _overlayCellColor;
-      }
-    }
-  }
-
-  void UncolorCells()
-  {
-    // FIXME: if we have two colonies without drones and one of them gets destroyed
-    // it will uncolor cells that belong to the other colony.
-    if (CellInstance.OwnerId == 0)
-    {
-      if (CellInstance.Type != GlobalConstants.CellType.DRONE)
-      {
-        int lx = CellInstance.Coordinates.X - 3;
-        int ly = CellInstance.Coordinates.Y - 3;
-        int hx = CellInstance.Coordinates.X + 3;
-        int hy = CellInstance.Coordinates.Y + 3;
-
-        for (int x = lx; x <= hx; x++)
-        {
-          for (int y = ly; y <= hy; y++)
-          {
-            if (x >= 0 && x < LevelLoader.Instance.MapSize
-                && y >= 0 && y < LevelLoader.Instance.MapSize)
-            {
-              _positionToCheck.Set(x, y);
-
-              if (LevelLoader.Instance.CheckLocationToBuild(_positionToCheck, 0, 1))
-              {
-                _overlayCellColor.r = 0.0f;
-                _overlayCellColor.g = 1.0f;
-                _overlayCellColor.b = 0.0f;
-                _overlayCellColor.a = 0.0f;
-
-                LevelLoader.Instance.TerritoryOverlayRenderers[x, y].material.color = _overlayCellColor;
-              }
-            }
-          }
-        }
-      }
-      else
-      {
-        _overlayCellColor.r = 0.0f;
-        _overlayCellColor.g = 1.0f;
-        _overlayCellColor.b = 0.0f;
-        _overlayCellColor.a = 0.4f;
-
-        LevelLoader.Instance.TerritoryOverlayRenderers[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].material.color = _overlayCellColor;
-      }
-    }
-  }
-
-  bool _showHitpointsBarFlag = false;
-  public void ShowHitpointsBar()
-  {
-    if (HitpointsBar != null)
-    {
-      HitpointsBar.gameObject.SetActive(true);
-      _showHitpointsBarFlag = true;
-      _hitpointsBarTimer = 0.0f;
-    }
-  }
 
   // Because of cell death animation, it might be possible for
   // an object to "pick up" reference to a cell that just started playing its death animation,
@@ -202,7 +63,7 @@ public class CellBehaviour : MonoBehaviour
   // by holder, because previous destroy only started the animation and hasn't set reference to null yet.
   // When it happens, second destroy call (issued by holder) will crash. 
   //
-  // TLDR: basically, the problem is in duplicate start of coroutine.
+  // TLDR: basically, the problem is in double delete.
   // To prevent this we introduce this flag.
   bool _isDestroying = false;
   public bool IsDestroying
@@ -210,8 +71,10 @@ public class CellBehaviour : MonoBehaviour
     get { return _isDestroying; }
   }
 
-  // TODO: destroy game object immediately and play death animation via
-  // instantiating special temporary prefab with death animation.
+  /// <summary>
+  /// Current object gets destroyed, instantiating temporary animation prefab in its place.
+  /// Different objects may need different death prefabs (like wall).
+  /// </summary>
   public void DestroySelf()
   { 
     if (_isDestroying)
@@ -221,34 +84,10 @@ public class CellBehaviour : MonoBehaviour
 
     _isDestroying = true;
 
-    UncolorCells();
+    LevelLoader.Instance.InstantiateDeathAnimationPrefab(this);
 
     ClearCellObject();
-
-    StartCoroutine(DestroyRoutine());
-  }
-
-  IEnumerator DestroyRoutine()
-  {
-    float timer = 1.0f;
-    while (timer > 0.0f)
-    {
-      timer -= Time.smoothDeltaTime * 2.0f;
-
-      _scale.Set(timer, timer, timer);
-
-      transform.localScale = _scale;
-
-      yield return null;
-    }
-
-    _scale.Set(0, 0, 0);
-
-    transform.localScale = _scale;
-
     DestroyGameObject();
-
-    yield return null;
   }
 
   void ClearCellObject()

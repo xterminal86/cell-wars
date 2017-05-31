@@ -25,6 +25,8 @@ public class CellBase : CellBaseClass
 
   public override void Update()
   {
+    base.Update();
+
     PlayAnimation();
     TryToSpawnDrone();   
   }

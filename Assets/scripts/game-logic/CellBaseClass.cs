@@ -62,11 +62,45 @@ public abstract class CellBaseClass
     BehaviourRef.HitpointsBar.color = _hitPointsBarColor;
   }
 
+  float _hitpointsBarTimer = 0.0f;
   public virtual void Update()
-  {
+  {    
     if (BehaviourRef != null)
     {
       WorldCoordinates.Set(BehaviourRef.transform.position.x, BehaviourRef.transform.position.y, 0.0f);
+
+      if (_showHitpointsBarFlag)
+      {
+        _hitpointsBarTimer += Time.smoothDeltaTime;
+
+        if (_hitpointsBarTimer > 3.0f)
+        {
+          _showHitpointsBarFlag = false;
+          _hitpointsBarTimer = 0.0f;
+          BehaviourRef.HitpointsBar.gameObject.SetActive(false);
+        }
+      }
+
+      if (Type != GlobalConstants.CellType.DRONE)
+      { 
+        CalculateHitpointsBar(GlobalConstants.CellHitpointsByType[Type]);
+      }
+
+      if (Hitpoints <= 0)
+      {
+        BehaviourRef.DestroySelf();
+      }
+    }
+  }
+
+  bool _showHitpointsBarFlag = false;
+  public void ShowHitpointsBar()
+  {
+    if (BehaviourRef.HitpointsBar != null)
+    {
+      BehaviourRef.HitpointsBar.gameObject.SetActive(true);
+      _showHitpointsBarFlag = true;
+      _hitpointsBarTimer = 0.0f;
     }
   }
 
@@ -104,7 +138,7 @@ public abstract class CellBaseClass
 
   public void ReceiveDamage(int amount)
   {
-    BehaviourRef.ShowHitpointsBar();
+    ShowHitpointsBar();
 
     Hitpoints -= amount;
   }

@@ -30,7 +30,7 @@ public class CellDrone : CellBaseClass
     PlayAnimation();
 
     if (!BehaviourRef.IsDestroying && !FindBaseOrColonyAround())
-    {
+    {      
       BehaviourRef.DestroySelf();
     }
   }

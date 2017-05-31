@@ -36,6 +36,8 @@ public class CellBarracks : CellBaseClass
   float _timer = 0.0f;
   public override void Update()
   {
+    base.Update();
+
     PlayAnimation();
 
     if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)

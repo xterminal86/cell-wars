@@ -357,9 +357,9 @@ public class Main : MonoBehaviour
   }
 
   void EnableButtons()
-  {
+  {    
     int dronesPlayer = LevelLoader.Instance.DronesCountByOwner[0];
-    bool colonySelected = (_selectedCell != null 
+    bool colonySelected = (_selectedCell != null && _selectedCell.CellInstance != null
       && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY 
       && _selectedCell.CellInstance.OwnerId == 0);
 

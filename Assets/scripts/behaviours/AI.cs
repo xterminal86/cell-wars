@@ -510,7 +510,8 @@ public class Heuristic
 
   public override string ToString()
   {
-    return string.Format("CPU colonies:     {0}\n" +
+    return string.Format("AI data:\n" +
+                         "CPU colonies:     {0}\n" +
                          "Player colonies:  {1}\n" + 
                          "CPU barracks:     {2}\n" +
                          "Player barracks:  {3}\n" +

@@ -21,6 +21,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellDefenderPrefab;
   public GameObject CellSoldierPrefab;
   public GameObject CellWallPrefab;
+  public GameObject CellDestroyAnimationPrefab;
+  public GameObject WallDestroyAnimationPrefab;
 
   public GameObject BulletPrefab;
   public GameObject GameOverExplosionPrefab;
@@ -140,7 +142,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         InstantiateCellPrefab(x, y);
 
-        GameObject go = (GameObject)Instantiate(TerritoryOverlayPrefab, new Vector3(x, y, -2.0f), Quaternion.identity, _territoryOverlayHolder);
+        GameObject go = Instantiate(TerritoryOverlayPrefab, new Vector3(x, y, -2.0f), Quaternion.identity, _territoryOverlayHolder);
         Material m = new Material(TerritoryOverlayMaterial);
         m.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         go.GetComponent<Renderer>().material = m;
@@ -263,7 +265,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       case GlobalConstants.CellType.BASE:
         
         c = new CellBase();
-        go = (GameObject)Instantiate(CellBasePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellBasePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
@@ -272,42 +274,42 @@ public class LevelLoader : MonoSingleton<LevelLoader>
         _dronesCountByOwner[ownerId]++;
 
         c = new CellDrone();
-        go = (GameObject)Instantiate(CellDronePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellDronePrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.COLONY:
         
         c = new CellColony();
-        go = (GameObject)Instantiate(CellColonyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellColonyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.BARRACKS:
         
         c = new CellBarracks();
-        go = (GameObject)Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.SOLDIER:
         
         c = new CellSoldier();
-        go = (GameObject)Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.HOLDER:
         
         c = new CellHolder();
-        go = (GameObject)Instantiate(CellHolderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellHolderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
       case GlobalConstants.CellType.DEFENDER:
       
         c = new CellDefender();
-        go = (GameObject)Instantiate(CellDefenderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+        go = Instantiate(CellDefenderPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;            
     }
@@ -382,7 +384,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
       Int2 pos = wallsValidPositions[index];
       CellWall c = new CellWall();
-      var go = (GameObject)Instantiate(CellWallPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+      var go = Instantiate(CellWallPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
       c.OwnerId = -1;
 
@@ -520,7 +522,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   IEnumerator GameOverRoutine(int loserId)
   {    
     // Show some explosions
-    // FIXME: show them immediately, not after object has shrunk and destroyed
     if (loserId != -1)
     {
       Vector3 basePosition = Vector3.zero;
@@ -535,7 +536,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       }
         
       int explosionsCounter = 0;
-      int explosionsNumber = 5;
+      int explosionsNumber = 7;
       float timer = 0.0f;
       while (explosionsCounter < explosionsNumber)
       {
@@ -543,8 +544,8 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         if (timer > 0.1f)
         {
-          float randX = Random.Range(-1.0f, 1.0f);
-          float randY = Random.Range(-1.0f, 1.0f);
+          float randX = Random.Range(-0.5f, 0.5f);
+          float randY = Random.Range(-0.5f, 0.5f);
 
           Vector3 position = new Vector3(basePosition.x + randX, basePosition.y + randY, basePosition.z);
 
@@ -599,43 +600,55 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
   public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
   {
-    GameObject bullet = (GameObject)Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
+    GameObject bullet = Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
     bullet.GetComponent<Bullet>().SetTarget(targetPos, enemy, bulletSpeed);
+  }
+
+  public void InstantiateDeathAnimationPrefab(CellBehaviour cellToBeDestroyed)
+  {
+    var go = Instantiate(cellToBeDestroyed.CellInstance.Type == GlobalConstants.CellType.WALL ? WallDestroyAnimationPrefab : CellDestroyAnimationPrefab, cellToBeDestroyed.CellInstance.WorldCoordinates, Quaternion.identity, _gridHolder);
+    go.GetComponentInChildren<Renderer>().material = cellToBeDestroyed.GetComponentInChildren<Renderer>().material;
+    go.GetComponent<CellDestroyAnimation>().ShrinkObject();
   }
 
   void Update()
   {
-    /*
-    _dronesCountByOwner[0] = 0;
-    _dronesCountByOwner[1] = 0;
+    // If we press "Return to Title" reference to object is no longed present (new scene was loaded)
+    if (_territoryOverlayHolder != null)
+    {
+      RefreshTerritoryOverlay();
 
-    _territoryCountByOwner[0] = 0;
-    _territoryCountByOwner[1] = 0;
+      _territoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));  
+    }
+  }
+
+  Color _overlayColor = Color.green;
+  void RefreshTerritoryOverlay()
+  {
+    // Couldn't make it optimal, so fuck it.
 
     for (int x = 0; x < MapSize; x++)
     {
       for (int y = 0; y < MapSize; y++)
       {
-        if (_objectsMap[x, y] != null)
-        {          
-          _territoryCountByOwner[_objectsMap[x, y].CellInstance.OwnerId]++;
-
-          if (_objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE && _objectsMap[x, y].CellInstance.OwnerId == 0)
+        if (_objectsMap[x, y] == null)
+        {
+          if (CheckLocationToBuild(new Int2(x, y), 0, 1))
           {
-            _dronesCountByOwner[0]++;
+            _overlayColor.a = 0.4f;
           }
-          else if (_objectsMap[x, y].CellInstance.Type == GlobalConstants.CellType.DRONE && _objectsMap[x, y].CellInstance.OwnerId == 1)
+          else
           {
-            _dronesCountByOwner[1]++;
+            _overlayColor.a = 0.0f;
           }
         }
-      }
-    }
-    */
+        else
+        {
+          _overlayColor.a = 0.0f;
+        }
 
-    if (_territoryOverlayHolder != null)
-    {
-      _territoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));  
+        _territoryOverlayRenderers[x, y].material.color = _overlayColor;
+      }
     }
   }
 
