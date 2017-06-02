@@ -625,7 +625,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   Color _overlayColor = Color.green;
   void RefreshTerritoryOverlay()
   {
-    // Couldn't make it optimal, so fuck it.
+    // Couldn't optimize it, so fuck it.
 
     for (int x = 0; x < MapSize; x++)
     {
