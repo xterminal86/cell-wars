@@ -17,6 +17,7 @@ public class CellBehaviour : MonoBehaviour
 
   void Start()
   {
+    LevelLoader.Instance.RefreshTerritoryOverlay();
     StartCoroutine(GrowRoutine());
   }
 
@@ -88,6 +89,8 @@ public class CellBehaviour : MonoBehaviour
 
     ClearCellObject();
     DestroyGameObject();
+
+    LevelLoader.Instance.RefreshTerritoryOverlay();
   }
 
   void ClearCellObject()

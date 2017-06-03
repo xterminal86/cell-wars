@@ -616,14 +616,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     // If we press "Return to Title" reference to object is no longed present (new scene was loaded)
     if (_territoryOverlayHolder != null)
     {
-      RefreshTerritoryOverlay();
-
       _territoryOverlayHolder.gameObject.SetActive(Input.GetKey(KeyCode.Tab));  
     }
   }
 
   Color _overlayColor = Color.green;
-  void RefreshTerritoryOverlay()
+  public void RefreshTerritoryOverlay()
   {
     // Couldn't optimize it, so fuck it.
 
