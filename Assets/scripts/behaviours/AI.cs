@@ -148,7 +148,7 @@ public class AI : MonoBehaviour
 
       _buildActionsQueue.Dequeue();
 
-      if (_buildActionsQueue.Count != 0)
+      if (_buildActionsQueue.Count != 0 && _buildActionsQueue.Peek().BuildingType != GlobalConstants.CellType.COLONY)
       {
         _intermediateBuildDone = true;
       }
@@ -176,49 +176,60 @@ public class AI : MonoBehaviour
 
   void ExecuteStrategy1()
   {
-    if (_heuristic.OurColonies > _heuristic.OurBarracks * 2)
+    if (_heuristic.OurColonies > _heuristic.OurBarracks * 2 
+      && _heuristic.OurDrones > 8)
     {
-      TryToBuildBarracks();
+      TryToPlanBarracks();
     }
-    else if (_heuristic.EnemyBarracks != 0 && (_heuristic.EnemyBarracks * 2 >= _heuristic.OurDefenders))
+    else if (_heuristic.EnemyBarracks != 0 
+      && (_heuristic.EnemyBarracks * 2 > _heuristic.OurDefenders))
     {
-      TryToBuildDefender();
+      TryToPlanDefender();
     }
     else
     {
-      TryToBuildColony();
+      TryToPlanColony();
     }
   }
 
-  void TryToBuildDefender()
+  void TryToPlanDefender()
   {
     foreach (var c in _enemyBarracks)
     {
       var line = Utils.BresenhamLine(c, LevelLoader.Instance.BaseCoordinatesByOwner[1]);
       foreach (var p in line)
-      {
-        if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
-        {  
-          // If we have, for example, 6 barracks and only one valid spot for
-          // defender, it will enqueue same spot 6 times. To prevent this check if
-          // given point is already in the queue.
+      {        
+        // If we have, for example, 6 enemy barracks and only one valid spot for
+        // our defender, it will enqueue same spot 6 times. To prevent this, check if
+        // given point is already in the queue.
 
-          bool alreadyAdded = false;
-          foreach (var action in _buildActionsQueue)
-          {
-            if (action.PosToBuild.X == p.X && action.PosToBuild.Y == p.Y)
-            {
-              alreadyAdded = true;
-              break;
-            }
-          }
+        if (IsPositionAlreadyEnqueued(p))
+        {
+          continue;
+        }
 
-          if (alreadyAdded)
-          {
-            continue;
-          }
-          
+        // Prioritize compact defender building
+        if (LevelLoader.Instance.ObjectsMap[p.X, p.Y] != null
+          && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.Type == GlobalConstants.CellType.DEFENDER
+          && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.OwnerId == 1
+          && FindSpotAroundDefender(p))
+        {          
+          _buildActionsQueue.Enqueue(new BuildAction(_defenderCompactPosition, GlobalConstants.CellType.COLONY));
+          _buildActionsQueue.Enqueue(new BuildAction(_defenderCompactPosition, GlobalConstants.CellType.DEFENDER));
+          break;        
+        }
+        // Build on first empty spot on the line otherwise
+        else if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
+        { 
           _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
+          _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
+          break;
+        }
+        // If there is a colony on the line, transform it
+        else if (LevelLoader.Instance.ObjectsMap[p.X, p.Y] != null
+          && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.Type == GlobalConstants.CellType.COLONY
+          && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.OwnerId == 1)
+        {   
           _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
           break;
         }
@@ -226,7 +237,49 @@ public class AI : MonoBehaviour
     }
   }
 
-  void TryToBuildBarracks()
+  Int2 _defenderCompactPosition = Int2.Zero;
+  bool FindSpotAroundDefender(Int2 pos)
+  {
+    for (int x = pos.X - 1; x <= pos.X + 1; x++)
+    {
+      for (int y = pos.Y - 1; y <= pos.Y + 1; y++)
+      {
+        if (x >= 0 && x < LevelLoader.Instance.MapSize
+         && y >= 0 && y < LevelLoader.Instance.MapSize)
+        {
+          _defenderCompactPosition.Set(x, y);
+
+          // If i position has already been enqueued in previous iteration
+          if (IsPositionAlreadyEnqueued(_defenderCompactPosition))
+          {
+            continue;
+          }
+
+          if (LevelLoader.Instance.CheckLocationToBuild(_defenderCompactPosition, 1, 0))
+          {            
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool IsPositionAlreadyEnqueued(Int2 pos)
+  {
+    foreach (var action in _buildActionsQueue)
+    {
+      if (action.PosToBuild.X == pos.X && action.PosToBuild.Y == pos.Y)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void TryToPlanBarracks()
   {
     if (!GetCellsForColonyBuilding(false))
     {      
@@ -260,7 +313,7 @@ public class AI : MonoBehaviour
   /// If there is no such location, try to build on any valid spot with maximum amount of
   /// empty cells around to maximize number of drones that can be spawned by this colony.
   /// </summary>
-  void TryToBuildColony()
+  void TryToPlanColony()
   {
     if (!GetCellsForColonyBuilding(true))
       GetCellsForColonyBuilding(false);
@@ -301,8 +354,7 @@ public class AI : MonoBehaviour
 
           if (optimal)
           {            
-            // Excluding cell too close to existing
-            if (CheckForNearbyBuildings(new Int2(x, y)))
+            if (rank == 9)
             {
               _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(x, y), rank));
             }
@@ -316,44 +368,6 @@ public class AI : MonoBehaviour
     }
 
     return (_rankedCells.Count != 0);
-  }
-
-  bool CheckForNearbyBuildings(Int2 cellCoords)
-  {
-    int lx = cellCoords.X - 2;
-    int ly = cellCoords.Y - 2;
-    int hx = cellCoords.X + 2;
-    int hy = cellCoords.Y + 2;
-
-    // Two vertical lines
-    for (int x = lx; x <= hx; x++)
-    {
-      if (x >= 0 && x < LevelLoader.Instance.MapSize
-       && ly >= 0 && hy < LevelLoader.Instance.MapSize)
-      {
-        if ((LevelLoader.Instance.ObjectsMap[x, ly] != null && LevelLoader.Instance.ObjectsMap[x, ly].CellInstance.Type != GlobalConstants.CellType.DRONE)
-         || (LevelLoader.Instance.ObjectsMap[x, hy] != null && LevelLoader.Instance.ObjectsMap[x, hy].CellInstance.Type != GlobalConstants.CellType.DRONE))
-        {
-          return false;
-        }
-      }
-    }
-
-    // Two horizontal lines (excluding cells previously accounted for)
-    for (int y = ly + 1; y <= hy - 1; y++)
-    {
-      if (y >= 0 && y < LevelLoader.Instance.MapSize
-       && lx >= 0 && hx < LevelLoader.Instance.MapSize)
-      {
-        if ((LevelLoader.Instance.ObjectsMap[lx, y] != null && LevelLoader.Instance.ObjectsMap[lx, y].CellInstance.Type != GlobalConstants.CellType.DRONE)
-         || (LevelLoader.Instance.ObjectsMap[hx, y] != null && LevelLoader.Instance.ObjectsMap[hx, y].CellInstance.Type != GlobalConstants.CellType.DRONE))
-        {
-          return false;
-        }
-      }
-    }
-      
-    return true;
   }
 
   int CalculateRank(Int2 cellCoords)
@@ -381,14 +395,6 @@ public class AI : MonoBehaviour
     }
 
     return rank;
-  }
-
-  List<KeyValuePair<Int2, int>> _cellsByDistanceFromBase = new List<KeyValuePair<Int2, int>>();
-  void FindSpotForDefender()
-  {
-    Int2 pos = Int2.Zero;
-      
-    _cellsByDistanceFromBase.Clear();
   }
 
   void FillHeuristic(CellBaseClass cellObject)

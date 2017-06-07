@@ -177,7 +177,8 @@ public class Main : MonoBehaviour
     #if UNITY_EDITOR
     if (Input.GetMouseButtonDown(2))
     {
-      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
+      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.BARRACKS, 0);
     }
     #endif
       
