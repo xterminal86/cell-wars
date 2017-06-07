@@ -179,6 +179,7 @@ public class Main : MonoBehaviour
     {
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
       LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.BARRACKS, 0);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.DEFENDER, 1);
     }
     #endif
       

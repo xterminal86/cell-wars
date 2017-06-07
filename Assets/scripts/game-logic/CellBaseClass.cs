@@ -10,6 +10,7 @@ public abstract class CellBaseClass
   public int Hitpoints = 3;
   public int OwnerId = -1;
   public int Priority = 1;
+  public bool IsBeingAttacked = false;
 
   public Int2 Coordinates = Int2.Zero;
   public Vector3 WorldCoordinates = Vector3.zero;

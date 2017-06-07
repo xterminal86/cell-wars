@@ -5,7 +5,7 @@ using UnityEngine;
 public static class GlobalConstants 
 {
   // Time between new cell is spawned by building
-  public const float DroneSpawnTimeSeconds = 0.5f; //1.5f;
+  public const float DroneSpawnTimeSeconds = 1.5f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
 
   // Attacker cooldown in seconds

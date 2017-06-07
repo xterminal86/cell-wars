@@ -17,7 +17,13 @@ public class CellBehaviour : MonoBehaviour
 
   void Start()
   {
-    LevelLoader.Instance.RefreshTerritoryOverlay();
+    // Kinda hackish way, since we assume that this call is made 
+    // after CellInstance gets assigned in LevelLoader::PlaceCell()
+    if (CellInstance != null && CellInstance.OwnerId == 0)
+    {
+      LevelLoader.Instance.RefreshTerritoryOverlay();
+    }
+
     StartCoroutine(GrowRoutine());
   }
 
@@ -85,12 +91,15 @@ public class CellBehaviour : MonoBehaviour
 
     _isDestroying = true;
 
+    if (CellInstance.OwnerId == 0)
+    {
+      LevelLoader.Instance.RefreshTerritoryOverlay();
+    }
+
     LevelLoader.Instance.InstantiateDeathAnimationPrefab(this);
 
     ClearCellObject();
     DestroyGameObject();
-
-    LevelLoader.Instance.RefreshTerritoryOverlay();
   }
 
   void ClearCellObject()

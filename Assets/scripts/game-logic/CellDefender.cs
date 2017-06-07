@@ -99,7 +99,8 @@ public class CellDefender : CellBaseClass
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type != GlobalConstants.CellType.WALL
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
               && _enemyFound != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemyFound.CellInstance.Priority 
-              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
+              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
+              && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
             {                      
               _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
               return;
@@ -156,7 +157,8 @@ public class CellDefender : CellBaseClass
             if (_distance <= GlobalConstants.CellDefenderRange 
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type != GlobalConstants.CellType.WALL
               && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId 
-              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
+              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
+              && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
             {                      
               _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
               return;

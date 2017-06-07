@@ -211,7 +211,9 @@ public class CellSoldier : CellBaseClass
           {
             _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
 
-            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority && _distance < GlobalConstants.CellSoldierRange)
+            if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > enemyPriority 
+              && _distance < GlobalConstants.CellSoldierRange
+              && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
             {
               enemyPriority = LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority;
               _enemyPos.Set(x, y);
@@ -262,11 +264,12 @@ public class CellSoldier : CellBaseClass
           if (LevelLoader.Instance.ObjectsMap[x, y] != null
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
             && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
-            && _enemy != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority)
+            && _enemy != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority
+            && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
           {            
             _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
 
-            if (_distance < 1.0f)
+            if (_distance < GlobalConstants.CellSoldierRange)
             {
               _enemy = LevelLoader.Instance.ObjectsMap[x, y];
               return;
@@ -341,6 +344,11 @@ public class CellSoldier : CellBaseClass
     //Debug.Log("Attacking " + _enemy + " at " + posTmp + " " + _enemy.Coordinates); 
 
     _enemyPosition3D.Set(posTmp.x, posTmp.y, posTmp.z);
+
+    if (_enemy.CellInstance.Type == GlobalConstants.CellType.DRONE)
+    {
+      _enemy.CellInstance.IsBeingAttacked = true;
+    }
 
     LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, _enemy);
   }
