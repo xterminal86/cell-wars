@@ -189,8 +189,9 @@ public class AI : MonoBehaviour
   {
     if (_heuristic.EnemyBarracks != 0 && (_heuristic.EnemyBarracks * 2 > _heuristic.OurDefenders))
     {
+      // Check for already built defender and build near it if true
       foreach (var c in _enemyBarracks)
-      {
+      {        
         bool defenderPresent = false;
 
         var line = Utils.BresenhamLine(c, LevelLoader.Instance.BaseCoordinatesByOwner[1]);
