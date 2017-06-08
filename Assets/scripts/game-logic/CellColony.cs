@@ -26,6 +26,11 @@ public class CellColony : CellBaseClass
   {    
     base.Update();
 
+    if (LevelLoader.Instance.IsGameOver)
+    {
+      return;
+    }
+
     PlayAnimation();
     TryToSpawnDrone();
   }

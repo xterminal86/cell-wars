@@ -190,7 +190,7 @@ public class CellSoldier : CellBaseClass
 
           foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
           {           
-            if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId)
+            if (kvp.Value != null && kvp.Value.CellInstance != null && kvp.Value.CellInstance.OwnerId != OwnerId)
             {
               _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
@@ -206,6 +206,7 @@ public class CellSoldier : CellBaseClass
           // Check other cells second
 
           if (LevelLoader.Instance.ObjectsMap[x, y] != null
+            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance != null
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
             && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
           {
@@ -246,8 +247,9 @@ public class CellSoldier : CellBaseClass
 
           foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
           {           
-            if (kvp.Value != null && kvp.Value.CellInstance.OwnerId != OwnerId
-              && _enemy != null && kvp.Value.CellInstance.Priority > _enemy.CellInstance.Priority && !kvp.Value.IsDestroying)
+            if (kvp.Value != null && kvp.Value.CellInstance != null &&  kvp.Value.CellInstance.OwnerId != OwnerId
+              && _enemy != null && _enemy.CellInstance != null 
+              && kvp.Value.CellInstance.Priority > _enemy.CellInstance.Priority && !kvp.Value.IsDestroying)
             {              
               _distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
 
@@ -264,7 +266,8 @@ public class CellSoldier : CellBaseClass
           if (LevelLoader.Instance.ObjectsMap[x, y] != null
             && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId
             && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
-            && _enemy != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority
+            && _enemy != null && _enemy.CellInstance != null 
+            && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemy.CellInstance.Priority
             && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
           {            
             _distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);

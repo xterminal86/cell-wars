@@ -191,51 +191,61 @@ public class AI : MonoBehaviour
     {
       foreach (var c in _enemyBarracks)
       {
+        bool defenderPresent = false;
+
         var line = Utils.BresenhamLine(c, LevelLoader.Instance.BaseCoordinatesByOwner[1]);
         foreach (var p in line)
-        {        
-          // If we have, for example, 6 enemy barracks and only one valid spot for
-          // our defender, it will enqueue same spot 6 times. To prevent this, check if
-          // given point is already in the queue.
-
-          if (IsPositionAlreadyEnqueued(p))
-          {
-            continue;
-          }
-
-          // Prioritize compact defender building
-          if (LevelLoader.Instance.ObjectsMap[p.X, p.Y] != null
+        {          
+          if (((LevelLoader.Instance.ObjectsMap[p.X, p.Y] != null
             && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.Type == GlobalConstants.CellType.DEFENDER
-            && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.OwnerId == 1
+            && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.OwnerId == 1) || IsDefenderPlanned(p))
             && FindSpotAroundDefender(p))
           { 
-            Debug.Log("1");
+            defenderPresent = true;
+
             _buildActionsQueue.Enqueue(new BuildAction(_defenderCompactPosition, GlobalConstants.CellType.COLONY));
             _buildActionsQueue.Enqueue(new BuildAction(_defenderCompactPosition, GlobalConstants.CellType.DEFENDER));
+
             break;        
           }
-          // Build on first empty spot on the line otherwise
-          else if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
-          { 
-            Debug.Log("2");
-            _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
-            _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
-            break;
-          }
-          // If there is a colony on the line, transform it
-          else if (LevelLoader.Instance.ObjectsMap[p.X, p.Y] != null
-                 && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.Type == GlobalConstants.CellType.COLONY
-                 && LevelLoader.Instance.ObjectsMap[p.X, p.Y].CellInstance.OwnerId == 1)
-          {   
-            Debug.Log("3");
-            _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
-            break;
+        }
+
+        if (!defenderPresent)
+        {
+          foreach (var p in line)
+          {
+            if (IsPositionAlreadyEnqueued(p))
+            {
+              continue;
+            }
+
+            if (LevelLoader.Instance.CheckLocationToBuild(p, 1, 0))
+            { 
+              _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.COLONY));
+              _buildActionsQueue.Enqueue(new BuildAction(p, GlobalConstants.CellType.DEFENDER));
+              break;
+            }
           }
         }
       }
     }
 
     return (_buildActionsQueue.Count != 0);
+  }
+
+  bool IsDefenderPlanned(Int2 pos)
+  {
+    foreach (var action in _buildActionsQueue)
+    {
+      if (action.PosToBuild.X == pos.X 
+       && action.PosToBuild.Y == pos.Y 
+       && action.BuildingType == GlobalConstants.CellType.DEFENDER)
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   Int2 _defenderCompactPosition = Int2.Zero;
@@ -250,13 +260,12 @@ public class AI : MonoBehaviour
         {
           _defenderCompactPosition.Set(x, y);
 
-          // If i position has already been enqueued in previous iteration
           if (IsPositionAlreadyEnqueued(_defenderCompactPosition))
           {
             continue;
           }
 
-          if (LevelLoader.Instance.CheckLocationToBuild(_defenderCompactPosition, 1, 0))
+          if (x != pos.X && y != pos.Y && LevelLoader.Instance.CheckLocationToBuild(_defenderCompactPosition, 1, 0))
           {            
             return true;
           }
@@ -290,25 +299,12 @@ public class AI : MonoBehaviour
         return false;
       }
 
-      int max = 0;
-      int index = -1;
-      Int2 posToBuild = Int2.Zero;
+      Int2 coords = FindBestRankedCell();
 
-      // Looking for the best ranked location
-      for (int i = 0; i < _rankedCells.Count; i++)
-      {      
-        if (_rankedCells[i].Value > max)
-        {
-          max = _rankedCells[i].Value;
-          posToBuild.Set(_rankedCells[i].Key);
-          index = i;
-        }
-      }
-
-      if (index != -1)
+      if (coords != null)
       {
-        _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
-        _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.BARRACKS));
+        _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.COLONY));
+        _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.BARRACKS));
       }
     }
 
@@ -324,12 +320,23 @@ public class AI : MonoBehaviour
   {
     if (!GetCellsForColonyBuilding(true))
       GetCellsForColonyBuilding(false);
-    
+
+    Int2 coords = FindBestRankedCell();
+
+    if (coords != null)
+    {      
+      _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.COLONY));
+    }
+
+    return (_buildActionsQueue.Count != 0);
+  }
+
+  Int2 FindBestRankedCell()
+  {
     int max = 0;
     int index = -1;
     Int2 posToBuild = Int2.Zero;
 
-    // Looking for the best ranked location
     for (int i = 0; i < _rankedCells.Count; i++)
     {      
       if (_rankedCells[i].Value > max)
@@ -340,43 +347,81 @@ public class AI : MonoBehaviour
       }
     }
 
-    if (index != -1)
-    {      
-      _buildActionsQueue.Enqueue(new BuildAction(posToBuild, GlobalConstants.CellType.COLONY));
-    }
-
-    return (_buildActionsQueue.Count != 0);
+    return ((index != -1) ? posToBuild : null);
   }
 
   List<KeyValuePair<Int2, int>> _rankedCells = new List<KeyValuePair<Int2, int>>();
   bool GetCellsForColonyBuilding(bool optimal)
   {
+    Int2 pos = Int2.Zero;
+
     _rankedCells.Clear();
 
     for (int x = 0; x < LevelLoader.Instance.MapSize; x++)
     {
       for (int y = 0; y < LevelLoader.Instance.MapSize; y++)
       {  
-        if (LevelLoader.Instance.CheckLocationToBuild(new Int2(x, y), 1, 0))
-        {
-          int rank = CalculateRank(new Int2(x, y));
+        pos.Set(x, y);
 
-          if (optimal)
-          {            
+        if (!LevelLoader.Instance.CheckLocationToBuild(pos, 1, 0))
+        {
+          continue;
+        }
+
+        if (optimal)
+        {
+          if (!IsAnotherColonyNearby(pos))
+          {
+            int rank = CalculateRank(pos);
+
             if (rank == 9)
             {
-              _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(x, y), rank));
+              _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(pos), rank));
             }
           }
-          else
-          {
-            _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(x, y), rank));
-          }
+        }
+        else
+        {
+          int rank = CalculateRank(pos);
+
+          _rankedCells.Add(new KeyValuePair<Int2, int>(new Int2(pos), rank));
         }
       }
     }
 
     return (_rankedCells.Count != 0);
+  }
+
+  bool IsAnotherColonyNearby(Int2 pos)
+  {
+    int lx = pos.X - 2;
+    int ly = pos.Y - 2;
+    int hx = pos.X + 2;
+    int hy = pos.Y + 2;
+
+    if (lx >= 0 && hx < LevelLoader.Instance.MapSize
+     && ly >= 0 && hy < LevelLoader.Instance.MapSize)
+    {
+      for (int x = lx; x <= hx; x++)
+      { 
+        if ((LevelLoader.Instance.ObjectsMap[x, ly] != null && LevelLoader.Instance.ObjectsMap[x, ly].CellInstance.Type == GlobalConstants.CellType.COLONY)
+         || (LevelLoader.Instance.ObjectsMap[x, hy] != null && LevelLoader.Instance.ObjectsMap[x, hy].CellInstance.Type == GlobalConstants.CellType.COLONY))
+        {
+          return true;
+        }
+      }
+
+      for (int y = ly + 1; y <= hy - 1; y++)
+      {
+        if ((LevelLoader.Instance.ObjectsMap[lx, y] != null && LevelLoader.Instance.ObjectsMap[lx, y].CellInstance.Type == GlobalConstants.CellType.COLONY)
+          || (LevelLoader.Instance.ObjectsMap[hx, y] != null && LevelLoader.Instance.ObjectsMap[hx, y].CellInstance.Type == GlobalConstants.CellType.COLONY))
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   int CalculateRank(Int2 cellCoords)

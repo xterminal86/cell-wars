@@ -40,6 +40,11 @@ public class CellBarracks : CellBaseClass
 
     PlayAnimation();
 
+    if (LevelLoader.Instance.IsGameOver)
+    {
+      return;
+    }
+
     if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)
     {   
       _timer = 0.0f;
