@@ -118,13 +118,16 @@ public class Bullet : MonoBehaviour
       // If during bullet flight target moved outside bullet "range", don't damage it
       float d = Vector3.Distance(transform.position, _enemy.transform.position);
 
-      if (d < 0.1f)
+      if (d < 0.3f)
       {
         _enemy.CellInstance.ReceiveDamage(1);
 
-        if (_enemy.CellInstance.Hitpoints <= 0 && _enemy.CellInstance.Type != GlobalConstants.CellType.DRONE && _enemy.CellInstance.Type != GlobalConstants.CellType.WALL && !_enemy.IsDestroying)
+        if (_enemy.CellInstance.Hitpoints <= 0 
+         && _enemy.CellInstance.Type != GlobalConstants.CellType.DRONE 
+         && _enemy.CellInstance.Type != GlobalConstants.CellType.WALL 
+         && !_enemy.IsDestroying)
         {
-          LevelLoader.Instance.ScoreCountByOwner[_enemy.CellInstance.EnemyId] += GlobalConstants.CellHitpointsByType[_enemy.CellInstance.Type];
+          LevelLoader.Instance.ScoreCountByOwner[_enemy.CellInstance.EnemyId] += GlobalConstants.DroneCostByType[_enemy.CellInstance.Type];
         }
       }
     }
@@ -159,11 +162,17 @@ public class Bullet : MonoBehaviour
 
               int damageInflicted = _baseDamage - Mathf.RoundToInt(((distance / _splashRadius) * _baseDamage));
 
-              //Debug.Log(damageInflicted + " " + ((distance / _splashRadius) * _baseDamage));
-
               if (damageInflicted > 0)
               {                
                 kvp.Value.CellInstance.ReceiveDamage(damageInflicted);
+
+                if (kvp.Value.CellInstance.Hitpoints <= 0 
+                 && kvp.Value.CellInstance.Type != GlobalConstants.CellType.DRONE 
+                 && kvp.Value.CellInstance.Type != GlobalConstants.CellType.WALL 
+                 && !kvp.Value.IsDestroying)
+                {
+                  LevelLoader.Instance.ScoreCountByOwner[kvp.Value.CellInstance.EnemyId] += GlobalConstants.DroneCostByType[kvp.Value.CellInstance.Type];
+                }
               }
             }
           }
@@ -179,11 +188,17 @@ public class Bullet : MonoBehaviour
 
             int damageInflicted = _baseDamage - Mathf.RoundToInt(((distance / _splashRadius) * _baseDamage));
 
-            //Debug.Log(damageInflicted + " " + ((distance / _splashRadius) * _baseDamage));
-
             if (damageInflicted > 0)
             {
               LevelLoader.Instance.ObjectsMap[x, y].CellInstance.ReceiveDamage(damageInflicted);
+
+              if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Hitpoints <= 0 
+                && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type != GlobalConstants.CellType.DRONE 
+                && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type != GlobalConstants.CellType.WALL 
+                && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying)
+              {
+                LevelLoader.Instance.ScoreCountByOwner[LevelLoader.Instance.ObjectsMap[x, y].CellInstance.EnemyId] += GlobalConstants.DroneCostByType[LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type];
+              }
             }
           }
         }

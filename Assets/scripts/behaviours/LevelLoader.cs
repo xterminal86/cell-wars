@@ -17,10 +17,12 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellColonyPrefab;
   public GameObject CellDronePrefab;
   public GameObject CellBarracksPrefab;
+  public GameObject CellAcademyPrefab;
   public GameObject CellArsenalPrefab;
   public GameObject CellHolderPrefab;
   public GameObject CellDefenderPrefab;
   public GameObject CellSoldierPrefab;
+  public GameObject CellSniperPrefab;
   public GameObject CellHeavyPrefab;
   public GameObject CellWallPrefab;
   public GameObject CellDestroyAnimationPrefab;
@@ -288,10 +290,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         break;
 
-      case GlobalConstants.CellType.BARRACKS:
+      case GlobalConstants.CellType.SPAWNER:
         
-        c = new CellBarracks();
+        c = new CellSpawner();
         go = Instantiate(CellBarracksPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
+      case GlobalConstants.CellType.ACADEMY:
+
+        c = new CellAcademy();
+        go = Instantiate(CellAcademyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
@@ -302,10 +311,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         break;
 
-      case GlobalConstants.CellType.SOLDIER:
+      case GlobalConstants.CellType.ATTACKER:
         
-        c = new CellSoldier();
+        c = new CellAttacker();
         go = Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
+      case GlobalConstants.CellType.SNIPER:
+
+        c = new CellSniper();
+        go = Instantiate(CellSniperPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
@@ -611,10 +627,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     yield return null;
   }
 
-  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour owner, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour owner, CellBehaviour enemy, int baseDamage = 1, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
   {
     GameObject bullet = Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
-    bullet.GetComponent<Bullet>().SetTarget(targetPos, owner, enemy, bulletSpeed, 1);
+    bullet.GetComponent<Bullet>().SetTarget(targetPos, owner, enemy, bulletSpeed, baseDamage);
   }
 
   public void SpawnSplashBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour owner, CellBehaviour enemy, int baseDamage, float splashRadius, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)

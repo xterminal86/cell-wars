@@ -124,21 +124,16 @@ public class CellBehaviour : MonoBehaviour
         LevelLoader.Instance.DronesCountByOwner[CellInstance.OwnerId]--;
         break;
 
-      case GlobalConstants.CellType.HEAVY:        
-      case GlobalConstants.CellType.SOLDIER:
-        if (CellInstance is CellSoldier)
-        {
-          (CellInstance as CellSoldier).DelistFromBarracks();
-        }
-        else
-        {
-          (CellInstance as CellHeavy).DelistFromBarracks();
-        }
+      case GlobalConstants.CellType.ATTACKER:
+      case GlobalConstants.CellType.HEAVY:
+      case GlobalConstants.CellType.SNIPER:
+        (CellInstance as CellSoldier).DelistFromBarracks();
         LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
         LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
         break;
 
-      case GlobalConstants.CellType.BARRACKS:
+      case GlobalConstants.CellType.SPAWNER:
+      case GlobalConstants.CellType.ACADEMY:
       case GlobalConstants.CellType.COLONY:
       case GlobalConstants.CellType.DEFENDER:
       case GlobalConstants.CellType.ARSENAL:        

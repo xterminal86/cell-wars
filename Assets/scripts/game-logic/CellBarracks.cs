@@ -3,27 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Spawner - spawns attackers.
+/// Base class for assault unit producers
 /// </summary>
 public class CellBarracks : CellBaseClass 
 {  
-  Dictionary<int, CellSoldier> _spawnedSoldiersById = new Dictionary<int, CellSoldier>();
+  protected Dictionary<int, CellSoldier> _spawnedSoldiersById = new Dictionary<int, CellSoldier>();
   public Dictionary<int, CellSoldier> SpawnedSoldiersById
   {
     get { return _spawnedSoldiersById; }
   }
 
-  public CellBarracks()
-  {
-    Type = GlobalConstants.CellType.BARRACKS;
-    Hitpoints = GlobalConstants.CellBarracksHitpoints;
-    Priority = GlobalConstants.CellBarracksPriority;
-
-    for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)
-    {
-      _spawnedSoldiersById[i] = null;
-    }
-  }
+  protected int _soldiersLimit = 0;
 
   public override void InitBehaviour()
   {
@@ -32,52 +22,14 @@ public class CellBarracks : CellBaseClass
     _phaseDuration = 1.0f;
     _animationSpeed = 0.1f;
   }
-
-  float _timer = 0.0f;
-  public override void Update()
-  {
-    base.Update();
-
-    PlayAnimation();
-
-    if (LevelLoader.Instance.IsGameOver)
-    {
-      return;
-    }
-
-    if (_timer > GlobalConstants.SoldierSpawnTimeSeconds)
-    {   
-      _timer = 0.0f;
-
-      if (CanSpawnSoldier())
-      {          
-        var res = TryToFindEmptyCell();
-        if (res != null)
-        {          
-          LevelLoader.Instance.TransformDrones(GlobalConstants.CellSoldierHitpoints, OwnerId);
-          var c = LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.SOLDIER, OwnerId);
-
-          _spawnedSoldiersById[_spawnId] = (c as CellSoldier);
-
-          (c as CellSoldier).SpawnID = _spawnId;
-          (c as CellSoldier).BarracksRef = this;
-
-          LevelLoader.Instance.SoldiersCountByOwner[OwnerId]++;
-        }
-      }
-    }
-
-    _timer += Time.smoothDeltaTime;
-  }
-    
-  int _spawnId = 0;
-  bool CanSpawnSoldier()
+      
+  protected int _spawnId = 0;
+  protected bool CanSpawnCell(GlobalConstants.CellType cellToSpawn)
   {
     _spawnId = -1;
 
     // Check for vacant slots
-
-    for (int i = 0; i < GlobalConstants.SoldiersPerBarrack; i++)
+    for (int i = 0; i < _soldiersLimit; i++)
     {
       if (_spawnedSoldiersById[i] == null)
       {
@@ -85,6 +37,6 @@ public class CellBarracks : CellBaseClass
       }
     }
 
-    return (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellSoldierHitpoints && _spawnId != -1);    
+    return (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.DroneCostByType[cellToSpawn] && _spawnId != -1);    
   }
 }

@@ -3,40 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Attacker - moves towards nearest enemy building, attacking everything it encounters.
+/// Base class for assault units
 /// </summary>
 public class CellSoldier : CellBaseClass 
 { 
-  Vector3 _heading = Vector3.zero;
-  Vector3 _dir = Vector3.zero;
-  Vector3 _destination = Vector3.zero;
+  protected Vector3 _heading = Vector3.zero;
+  protected Vector3 _dir = Vector3.zero;
+  protected Vector3 _destination = Vector3.zero;
 
-  float _moveSpeedModifier = 1.0f;
+  protected float _moveSpeedModifier = 1.0f;
 
-  float _attackTimer = 0.0f;
-  float _magnitude = 1.0f;
-  float _gridX = 0.0f, _gridY = 0.0f;
+  protected float _attackTimer = 0.0f;
+  protected float _magnitude = 1.0f;
+  protected float _gridX = 0.0f, _gridY = 0.0f;
 
-  Int2 _previousPos = Int2.Zero;
+  protected Int2 _previousPos = Int2.Zero;
 
   public int SpawnID = -1;
   public CellBarracks BarracksRef;
 
   public CellSoldier()
   {    
-    Type = GlobalConstants.CellType.SOLDIER;
-    Hitpoints = GlobalConstants.CellSoldierHitpoints;
-    Priority = GlobalConstants.CellSoldierPriority;
     IsStationary = false;
   }
 
   public override void InitBehaviour()
   {
     base.InitBehaviour();
-
-    _phaseDuration = 2.0f / 4.0f;
-    _animationSpeed = 0.2f / _phaseDuration;
-    _zRotationSpeed = 20.0f;
 
     _position = BehaviourRef.transform.position;
 
@@ -51,63 +44,19 @@ public class CellSoldier : CellBaseClass
     FindDestination();
   }
 
-  float _resMoveSpeed = 0.0f;
   Vector3 _position = Vector3.zero;
   public override void Update()
   {
     base.Update();
 
-    PlayAnimation();
-
-    if (LevelLoader.Instance.IsGameOver)
-    {
-      return;
-    }
-    
     // Check if destination target is still there
     CheckTargetStatus();
 
     // Make adjustments if there are holders nearby
     CheckHolders();
 
-    _position = BehaviourRef.transform.position;
-
-    _heading = (_destination - BehaviourRef.transform.position);
-    _magnitude = _heading.magnitude;
-    _dir = _heading / _magnitude;
-
     // If this soldier changed its map coordinates, adjust references accordingly
     GridPositionChanged();
-
-    // Try to find enemies nearby
-    FindEnemies(0.0f, GlobalConstants.CellSoldierRange);
-
-    if (_enemyFound == null)
-    { 
-      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.AttackerMoveSpeed * _moveSpeedModifier);
-      _position += (_dir * _resMoveSpeed);
-    }
-    else
-    {
-      if (_attackTimer >= GlobalConstants.SoldierAttackTimeout)
-      {
-        _attackTimer = 0.0f;
-
-        AttackCell();
-      }
-    }
-
-    if (_attackTimer < GlobalConstants.SoldierAttackTimeout)
-    {
-      _attackTimer += Time.smoothDeltaTime;
-    }
-
-    _gridX = Mathf.Round(_position.x);
-    _gridY = Mathf.Round(_position.y);
-
-    Coordinates.Set(_gridX, _gridY);
-
-    BehaviourRef.transform.position = _position;
   }
 
   void CheckHolders()
@@ -214,8 +163,8 @@ public class CellSoldier : CellBaseClass
     _destination.y = pos.Y;
   }
 
-  Vector3 _enemyPosition3D = Vector3.zero;
-  void AttackCell()
+  protected Vector3 _enemyPosition3D = Vector3.zero;
+  protected void LockTarget(Callback cb)
   {
     if (_enemyFound != null && _enemyFound.CellInstance == null)
     {
@@ -229,7 +178,8 @@ public class CellSoldier : CellBaseClass
       _enemyFound.CellInstance.IsBeingAttacked = true;
     }
 
-    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound);
+    if (cb != null)
+      cb();
   }
 
   public void DelistFromBarracks()

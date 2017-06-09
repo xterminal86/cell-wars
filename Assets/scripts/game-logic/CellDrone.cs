@@ -27,8 +27,6 @@ public class CellDrone : CellBaseClass
   {
     base.Update();
 
-    PlayAnimation();
-
     if (!BehaviourRef.IsDestroying && !FindBaseOrColonyAround())
     {      
       BehaviourRef.DestroySelf();

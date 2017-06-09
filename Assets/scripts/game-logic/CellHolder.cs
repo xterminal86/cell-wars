@@ -49,8 +49,6 @@ public class CellHolder : CellBaseClass
   public override void Update()
   {
     base.Update();
-
-    PlayAnimation();
   }
 
   public void UnlockCells()

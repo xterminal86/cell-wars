@@ -27,7 +27,26 @@ public class CellBase : CellBaseClass
   {
     base.Update();
 
-    PlayAnimation();
     TryToSpawnDrone();   
+  }
+
+  float _timer = 0.0f;
+  void TryToSpawnDrone()
+  {
+    var res = TryToFindEmptyCell();
+    if (res != null)
+    {
+      _timer += Time.smoothDeltaTime;
+
+      if (_timer > GlobalConstants.DroneSpawnTimeout)
+      {   
+        LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.DRONE, OwnerId);
+        _timer = 0.0f;
+      }
+    }
+    else
+    {
+      _timer = 0.0f;
+    }
   }
 }

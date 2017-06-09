@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CellHeavy : CellSoldier
-{ 
-  public CellHeavy()
-  {    
-    Type = GlobalConstants.CellType.HEAVY;
-    Hitpoints = GlobalConstants.CellHeavyHitpoints;
-    Priority = GlobalConstants.CellHeavyPriority;
-    IsStationary = false;
+public class CellAttacker : CellSoldier
+{  
+  public CellAttacker() : base()
+  { 
+    Type = GlobalConstants.CellType.ATTACKER;
+    Hitpoints = GlobalConstants.CellAttackerHitpoints;
+    Priority = GlobalConstants.CellAttackerPriority;
   }
 
   public override void InitBehaviour()
@@ -17,7 +16,7 @@ public class CellHeavy : CellSoldier
     base.InitBehaviour();
 
     _phaseDuration = 2.0f / 4.0f;
-    _animationSpeed = 0.1f / _phaseDuration;
+    _animationSpeed = 0.2f / _phaseDuration;
     _zRotationSpeed = 20.0f;
   }
 
@@ -38,27 +37,27 @@ public class CellHeavy : CellSoldier
     _magnitude = _heading.magnitude;
     _dir = _heading / _magnitude;
 
-    FindEnemies(GlobalConstants.CellHeavyMinRange, GlobalConstants.CellHeavyMaxRange);
+    FindEnemies(0.0f, GlobalConstants.CellAttackerRange);
 
     if (_enemyFound == null)
     { 
-      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.HeavyMoveSpeed * _moveSpeedModifier);
+      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.AttackerMoveSpeed * _moveSpeedModifier);
       _position += (_dir * _resMoveSpeed);
     }
     else
     {
-      if (_attackTimer >= GlobalConstants.HeavyAttackTimeout)
+      if (_attackTimer >= GlobalConstants.AttackerAttackTimeout)
       {
         _attackTimer = 0.0f;
 
-        LockTarget(()=>
+        LockTarget(() =>
         {
-          LevelLoader.Instance.SpawnSplashBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound, GlobalConstants.CellHeavyDamage, GlobalConstants.CellHeavySplashRadius);
+          LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound);
         });
       }
     }
 
-    if (_attackTimer < GlobalConstants.HeavyAttackTimeout)
+    if (_attackTimer < GlobalConstants.AttackerAttackTimeout)
     {
       _attackTimer += Time.smoothDeltaTime;
     }

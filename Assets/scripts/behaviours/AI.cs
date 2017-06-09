@@ -305,7 +305,7 @@ public class AI : MonoBehaviour
       if (coords != null)
       {
         _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.COLONY));
-        _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.BARRACKS));
+        _buildActionsQueue.Enqueue(new BuildAction(coords, GlobalConstants.CellType.SPAWNER));
       }
     }
 
@@ -467,7 +467,7 @@ public class AI : MonoBehaviour
         }
         break;      
 
-      case GlobalConstants.CellType.BARRACKS:
+      case GlobalConstants.CellType.SPAWNER:
         if (cellObject.OwnerId == 0)
         {
           _enemyBarracks.Add(cellObject.Coordinates);

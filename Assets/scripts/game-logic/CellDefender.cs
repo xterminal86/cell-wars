@@ -28,8 +28,6 @@ public class CellDefender : CellBaseClass
   {
     base.Update();
 
-    PlayAnimation();
-
     if (LevelLoader.Instance.IsGameOver)
     {
       return;
@@ -51,7 +49,7 @@ public class CellDefender : CellBaseClass
       {
         FindEnemies(0.0f, GlobalConstants.CellDefenderRange, GlobalConstants.CellType.WALL);
         _timer = 0.0f;
-        LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.CellInstance.WorldCoordinates, BehaviourRef, _enemyFound, GlobalConstants.DefenderBulletSpeed);
+        LevelLoader.Instance.SpawnBullet(WorldCoordinates, _enemyFound.CellInstance.WorldCoordinates, BehaviourRef, _enemyFound, 1, GlobalConstants.DefenderBulletSpeed);
       }
     }
   }

@@ -9,5 +9,5 @@ public class CellWall : CellBaseClass
     Type = GlobalConstants.CellType.WALL;
     Hitpoints = GlobalConstants.CellWallHitpoints;
     Priority = GlobalConstants.CellWallPriority;
-  }	
+  }
 }

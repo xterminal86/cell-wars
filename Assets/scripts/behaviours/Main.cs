@@ -21,6 +21,7 @@ public class Main : MonoBehaviour
   public CustomButton BuildHolderButton;
   public CustomButton BuildDefenderButton;
   public CustomButton BuildArsenalButton;
+  public CustomButton BuildAcademyButton;
 
   // For various information text
   public Text InfoText;
@@ -178,11 +179,12 @@ public class Main : MonoBehaviour
     #if UNITY_EDITOR
     if (Input.GetMouseButtonDown(2))
     {
-      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.BARRACKS, 0);
-      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.DEFENDER, 1);
+      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.DEFENDER, 1);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.HEAVY, 0);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.ARSENAL, 0);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SNIPER, 0);
     }
     #endif
       
@@ -367,12 +369,13 @@ public class Main : MonoBehaviour
     bool colonySelected = (_selectedCell != null && _selectedCell.CellInstance != null
       && _selectedCell.CellInstance.Type == GlobalConstants.CellType.COLONY 
       && _selectedCell.CellInstance.OwnerId == 0);
-
-    BuildColonyButton.Interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.CellColonyHitpoints);
-    BuildBarracksButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellBarracksHitpoints);
-    BuildHolderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellHolderHitpoints);
-    BuildDefenderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellDefenderHitpoints);
-    BuildArsenalButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.CellArsenalHitpoints);
+    
+    BuildColonyButton.Interactable = (_buildMode && _validSpot && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.COLONY]);
+    BuildBarracksButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.SPAWNER]);
+    BuildHolderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.HOLDER]);
+    BuildDefenderButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.DEFENDER]);
+    BuildArsenalButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.ARSENAL]);
+    BuildAcademyButton.Interactable = (_buildMode && colonySelected && dronesPlayer >= GlobalConstants.DroneCostByType[GlobalConstants.CellType.ACADEMY]);
   }
 
   GlobalConstants.CellType _buildingType = GlobalConstants.CellType.NONE;
@@ -388,14 +391,14 @@ public class Main : MonoBehaviour
       case 0:
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.COLONY;
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellColonyHitpoints, 0);
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
 
       case 1:
         StartCoroutine(HideBuildButtonsRoutine());
-        _buildingType = GlobalConstants.CellType.BARRACKS;
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellBarracksHitpoints, 0);
+        _buildingType = GlobalConstants.CellType.SPAWNER;
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
         _selectedCell.DestroySelf();
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
@@ -403,7 +406,7 @@ public class Main : MonoBehaviour
       case 2:
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.HOLDER;
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellHolderHitpoints, 0);
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
         _selectedCell.DestroySelf();
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
@@ -411,7 +414,7 @@ public class Main : MonoBehaviour
       case 3:
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.DEFENDER;
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellDefenderHitpoints, 0);
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
         _selectedCell.DestroySelf();
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;
@@ -419,7 +422,15 @@ public class Main : MonoBehaviour
       case 4:
         StartCoroutine(HideBuildButtonsRoutine());
         _buildingType = GlobalConstants.CellType.ARSENAL;
-        LevelLoader.Instance.TransformDrones(GlobalConstants.CellArsenalHitpoints, 0);
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
+        _selectedCell.DestroySelf();
+        LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
+        break;
+
+      case 5:
+        StartCoroutine(HideBuildButtonsRoutine());
+        _buildingType = GlobalConstants.CellType.ACADEMY;
+        LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[_buildingType], 0);
         _selectedCell.DestroySelf();
         LevelLoader.Instance.PlaceCell(_selectedSpotPos2D, _buildingType, 0);
         break;

@@ -2,21 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CellArsenal : CellBaseClass 
-{
-  Dictionary<int, CellHeavy> _spawnedSoldiersById = new Dictionary<int, CellHeavy>();
-  public Dictionary<int, CellHeavy> SpawnedSoldiersById
-  {
-    get { return _spawnedSoldiersById; }
-  }
-
+public class CellArsenal : CellBarracks 
+{  
   public CellArsenal()
   {
     Type = GlobalConstants.CellType.ARSENAL;
     Hitpoints = GlobalConstants.CellArsenalHitpoints;
     Priority = GlobalConstants.CellArsenalPriority;
 
-    for (int i = 0; i < GlobalConstants.SoldiersPerArsenal; i++)
+    _soldiersLimit = GlobalConstants.SoldiersPerArsenal;
+
+    for (int i = 0; i < _soldiersLimit; i++)
     {
       _spawnedSoldiersById[i] = null;
     }
@@ -35,23 +31,21 @@ public class CellArsenal : CellBaseClass
   {
     base.Update();
 
-    PlayAnimation();
-
     if (LevelLoader.Instance.IsGameOver)
     {
       return;
     }
 
-    if (_timer > GlobalConstants.HeavySpawnTimeSeconds)
+    if (_timer > GlobalConstants.HeavySpawnTimeout)
     {   
       _timer = 0.0f;
 
-      if (CanSpawnSoldier())
+      if (CanSpawnCell(GlobalConstants.CellType.HEAVY))
       {          
         var res = TryToFindEmptyCell();
         if (res != null)
         {          
-          LevelLoader.Instance.TransformDrones(GlobalConstants.CellHeavyHitpoints, OwnerId);
+          LevelLoader.Instance.TransformDrones(GlobalConstants.DroneCostByType[GlobalConstants.CellType.HEAVY], OwnerId);
           var c = LevelLoader.Instance.PlaceCell(res, GlobalConstants.CellType.HEAVY, OwnerId);
 
           _spawnedSoldiersById[_spawnId] = (c as CellHeavy);
@@ -65,23 +59,5 @@ public class CellArsenal : CellBaseClass
     }
 
     _timer += Time.smoothDeltaTime;
-  }
-
-  int _spawnId = 0;
-  bool CanSpawnSoldier()
-  {
-    _spawnId = -1;
-
-    // Check for vacant slots
-
-    for (int i = 0; i < GlobalConstants.SoldiersPerArsenal; i++)
-    {
-      if (_spawnedSoldiersById[i] == null)
-      {
-        _spawnId = i;
-      }
-    }
-
-    return (LevelLoader.Instance.DronesCountByOwner[OwnerId] >= GlobalConstants.CellHeavyHitpoints && _spawnId != -1);    
   }
 }

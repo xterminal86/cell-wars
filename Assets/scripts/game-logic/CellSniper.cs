@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CellHeavy : CellSoldier
-{ 
-  public CellHeavy()
+public class CellSniper : CellSoldier
+{
+  public CellSniper() : base()
   {    
-    Type = GlobalConstants.CellType.HEAVY;
-    Hitpoints = GlobalConstants.CellHeavyHitpoints;
-    Priority = GlobalConstants.CellHeavyPriority;
+    Type = GlobalConstants.CellType.SNIPER;
+    Hitpoints = GlobalConstants.CellSniperHitpoints;
+    Priority = GlobalConstants.CellSniperPriority;
     IsStationary = false;
   }
 
@@ -17,7 +17,7 @@ public class CellHeavy : CellSoldier
     base.InitBehaviour();
 
     _phaseDuration = 2.0f / 4.0f;
-    _animationSpeed = 0.1f / _phaseDuration;
+    _animationSpeed = 0.3f / _phaseDuration;
     _zRotationSpeed = 20.0f;
   }
 
@@ -38,27 +38,27 @@ public class CellHeavy : CellSoldier
     _magnitude = _heading.magnitude;
     _dir = _heading / _magnitude;
 
-    FindEnemies(GlobalConstants.CellHeavyMinRange, GlobalConstants.CellHeavyMaxRange);
+    FindEnemies(0.0f, GlobalConstants.CellSniperRange);
 
     if (_enemyFound == null)
     { 
-      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.HeavyMoveSpeed * _moveSpeedModifier);
+      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.SniperMoveSpeed * _moveSpeedModifier);
       _position += (_dir * _resMoveSpeed);
     }
     else
-    {
-      if (_attackTimer >= GlobalConstants.HeavyAttackTimeout)
+    {      
+      if (_attackTimer >= GlobalConstants.SniperAttackTimeout)
       {
         _attackTimer = 0.0f;
 
         LockTarget(()=>
         {
-          LevelLoader.Instance.SpawnSplashBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound, GlobalConstants.CellHeavyDamage, GlobalConstants.CellHeavySplashRadius);
+          LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound, GlobalConstants.CellSniperDamage, GlobalConstants.SniperBulletSpeed);
         });
       }
     }
 
-    if (_attackTimer < GlobalConstants.HeavyAttackTimeout)
+    if (_attackTimer < GlobalConstants.SniperAttackTimeout)
     {
       _attackTimer += Time.smoothDeltaTime;
     }
