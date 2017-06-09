@@ -106,15 +106,14 @@ public class CellBehaviour : MonoBehaviour
 
   void ClearCellObject()
   {
-    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER && CellInstance.Type != GlobalConstants.CellType.HEAVY)
+    if (CellInstance.IsStationary)
     {
       LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
     if (CellInstance.Type != GlobalConstants.CellType.NONE 
      && CellInstance.Type != GlobalConstants.CellType.WALL 
-     && CellInstance.Type != GlobalConstants.CellType.SOLDIER
-     && CellInstance.Type != GlobalConstants.CellType.HEAVY)
+     && CellInstance.IsStationary)
     {
       LevelLoader.Instance.TerritoryCountByOwner[CellInstance.OwnerId]--;
     }
@@ -142,6 +141,7 @@ public class CellBehaviour : MonoBehaviour
       case GlobalConstants.CellType.BARRACKS:
       case GlobalConstants.CellType.COLONY:
       case GlobalConstants.CellType.DEFENDER:
+      case GlobalConstants.CellType.ARSENAL:        
         LevelLoader.Instance.RemoveBuildingFromDictionary(CellInstance.OwnerId, CellInstance.Coordinates);
         break;
       case GlobalConstants.CellType.HOLDER:

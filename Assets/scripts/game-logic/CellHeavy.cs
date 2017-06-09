@@ -25,6 +25,7 @@ public class CellHeavy : CellBaseClass
     Type = GlobalConstants.CellType.HEAVY;
     Hitpoints = GlobalConstants.CellHeavyHitpoints;
     Priority = GlobalConstants.CellHeavyPriority;
+    IsStationary = false;
   }
 
   public override void InitBehaviour()

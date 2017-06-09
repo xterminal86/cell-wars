@@ -161,7 +161,7 @@ public class Bullet : MonoBehaviour
 
               //Debug.Log(damageInflicted + " " + ((distance / _splashRadius) * _baseDamage));
 
-              if (damageInflicted >= 0)
+              if (damageInflicted > 0)
               {                
                 kvp.Value.CellInstance.ReceiveDamage(damageInflicted);
               }
@@ -181,7 +181,7 @@ public class Bullet : MonoBehaviour
 
             //Debug.Log(damageInflicted + " " + ((distance / _splashRadius) * _baseDamage));
 
-            if (damageInflicted >= 0)
+            if (damageInflicted > 0)
             {
               LevelLoader.Instance.ObjectsMap[x, y].CellInstance.ReceiveDamage(damageInflicted);
             }

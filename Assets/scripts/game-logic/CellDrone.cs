@@ -9,7 +9,7 @@ using UnityEngine;
 public class CellDrone : CellBaseClass 
 {
   public CellDrone()
-  {
+  {    
     Type = GlobalConstants.CellType.DRONE;
     Hitpoints = GlobalConstants.CellDroneHitpoints;
     Priority = GlobalConstants.CellDronePriority;

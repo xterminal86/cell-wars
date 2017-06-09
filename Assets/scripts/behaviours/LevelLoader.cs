@@ -332,20 +332,13 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     }
 
     if (c != null)
-    { 
-      if (c.Type != GlobalConstants.CellType.SOLDIER && c.Type != GlobalConstants.CellType.HEAVY)
-      {
-        _territoryCountByOwner[ownerId]++;
-      }
-
+    {       
       Material m = new Material(CellMaterial);
       m.color = GlobalConstants.ColorsList[ownerId][c.Type];
 
       go.GetComponentInChildren<Renderer>().material = m;
 
-      if (c.Type != GlobalConstants.CellType.DRONE 
-       && c.Type != GlobalConstants.CellType.SOLDIER 
-       && c.Type != GlobalConstants.CellType.HEAVY)
+      if (c.Type != GlobalConstants.CellType.DRONE && c.IsStationary)
       {        
         _buildingsCoordinatesByOwner[ownerId].Add(new Int2(pos));
       }
@@ -361,9 +354,10 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
-      if (c.Type != GlobalConstants.CellType.SOLDIER && c.Type != GlobalConstants.CellType.HEAVY)
+      if (c.IsStationary)
       {        
         _objectsMap[pos.X, pos.Y] = b;
+        _territoryCountByOwner[ownerId]++;
       }
     }
 

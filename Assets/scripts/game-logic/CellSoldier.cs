@@ -27,6 +27,7 @@ public class CellSoldier : CellBaseClass
     Type = GlobalConstants.CellType.SOLDIER;
     Hitpoints = GlobalConstants.CellSoldierHitpoints;
     Priority = GlobalConstants.CellSoldierPriority;
+    IsStationary = false;
   }
 
   public override void InitBehaviour()

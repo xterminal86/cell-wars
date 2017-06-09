@@ -11,6 +11,7 @@ public abstract class CellBaseClass
   public int OwnerId = -1;
   public int Priority = 1;
   public bool IsBeingAttacked = false;
+  public bool IsStationary = true;
 
   public Int2 Coordinates = Int2.Zero;
   public Vector3 WorldCoordinates = Vector3.zero;
