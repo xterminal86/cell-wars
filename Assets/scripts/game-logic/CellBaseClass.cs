@@ -213,6 +213,96 @@ public abstract class CellBaseClass
     }
   }
 
+  protected CellBehaviour _enemyFound;
+  protected void FindEnemies(float minRange, float maxRange, params GlobalConstants.CellType[] objectsToIgnore)
+  {
+    float distance = 0.0f;
+
+    int lx = Coordinates.X - Mathf.CeilToInt(maxRange);
+    int ly = Coordinates.Y - Mathf.CeilToInt(maxRange);
+    int hx = Coordinates.X + Mathf.CeilToInt(maxRange);
+    int hy = Coordinates.Y + Mathf.CeilToInt(maxRange);
+
+    for (int x = lx; x <= hx; x++)
+    {
+      for (int y = ly; y <= hy; y++)
+      {
+        if (x >= 0 && x < LevelLoader.Instance.MapSize
+          && y >= 0 && y < LevelLoader.Instance.MapSize)
+        {
+          // Check soldiers first
+
+          foreach (var kvp in LevelLoader.Instance.SoldiersMap[x, y])
+          {           
+            if (kvp.Value == null)
+            {
+              continue;
+            }
+
+            distance = Vector3.Distance(WorldCoordinates, kvp.Value.CellInstance.WorldCoordinates);
+
+            if (kvp.Value.CellInstance != null && kvp.Value.CellInstance.OwnerId != OwnerId 
+              && distance >= minRange && distance <= maxRange 
+              && !kvp.Value.IsDestroying)
+            {               
+              if (_enemyFound != null && _enemyFound.CellInstance != null
+                && kvp.Value.CellInstance.Priority > _enemyFound.CellInstance.Priority)
+              {
+                _enemyFound = kvp.Value;
+                return;
+              }
+              else if (_enemyFound == null)
+              {
+                _enemyFound = kvp.Value;
+                return;
+              }
+            }
+          }
+
+          // Check other cells second
+
+          if (LevelLoader.Instance.ObjectsMap[x, y] != null && LevelLoader.Instance.ObjectsMap[x, y].CellInstance != null)
+          {
+            bool found = false;
+            foreach (var p in objectsToIgnore)
+            {
+              if (LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Type == p)
+              {
+                found = true;
+                break;
+              }
+            }
+
+            if (found)
+            {
+              continue;
+            }
+
+            distance = Vector3.Distance(WorldCoordinates, LevelLoader.Instance.ObjectsMap[x, y].CellInstance.WorldCoordinates);
+
+            if (distance >= minRange && distance <= maxRange
+              && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.OwnerId != OwnerId 
+              && !LevelLoader.Instance.ObjectsMap[x, y].IsDestroying
+              && !LevelLoader.Instance.ObjectsMap[x, y].CellInstance.IsBeingAttacked)
+            {                 
+              if (_enemyFound != null && _enemyFound.CellInstance != null
+                  && LevelLoader.Instance.ObjectsMap[x, y].CellInstance.Priority > _enemyFound.CellInstance.Priority)
+              {
+                _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
+                return;
+              }
+              else if (_enemyFound == null)
+              {
+                _enemyFound = LevelLoader.Instance.ObjectsMap[x, y];
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   Vector3 _localScale = Vector3.one;
   float _scaleTimer = 0.0f;
   protected void PlayAnimation()

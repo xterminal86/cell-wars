@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Attacker - moves towards nearest enemy building, attacking everything it encounters.
-/// </summary>
-public class CellSoldier : CellBaseClass 
-{ 
+// FIXME: almost the same as CellSoldier.cs
+public class CellHeavy : CellBaseClass
+{
   Vector3 _heading = Vector3.zero;
   Vector3 _dir = Vector3.zero;
   Vector3 _destination = Vector3.zero;
@@ -20,13 +18,13 @@ public class CellSoldier : CellBaseClass
   Int2 _previousPos = Int2.Zero;
 
   public int SpawnID = -1;
-  public CellBarracks BarracksRef;
+  public CellArsenal BarracksRef;
 
-  public CellSoldier()
+  public CellHeavy()
   {    
-    Type = GlobalConstants.CellType.SOLDIER;
-    Hitpoints = GlobalConstants.CellSoldierHitpoints;
-    Priority = GlobalConstants.CellSoldierPriority;
+    Type = GlobalConstants.CellType.HEAVY;
+    Hitpoints = GlobalConstants.CellHeavyHitpoints;
+    Priority = GlobalConstants.CellHeavyPriority;
   }
 
   public override void InitBehaviour()
@@ -62,7 +60,7 @@ public class CellSoldier : CellBaseClass
     {
       return;
     }
-    
+
     // Check if destination target is still there
     CheckTargetStatus();
 
@@ -79,16 +77,16 @@ public class CellSoldier : CellBaseClass
     GridPositionChanged();
 
     // Try to find enemies nearby
-    FindEnemies(0.0f, GlobalConstants.CellSoldierRange);
+    FindEnemies(GlobalConstants.CellHeavyMinRange, GlobalConstants.CellHeavyMaxRange);
 
     if (_enemyFound == null)
     { 
-      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.AttackerMoveSpeed * _moveSpeedModifier);
+      _resMoveSpeed = Time.smoothDeltaTime * (GlobalConstants.HeavyMoveSpeed * _moveSpeedModifier);
       _position += (_dir * _resMoveSpeed);
     }
     else
     {
-      if (_attackTimer >= GlobalConstants.SoldierAttackTimeout)
+      if (_attackTimer >= GlobalConstants.HeavyAttackTimeout)
       {
         _attackTimer = 0.0f;
 
@@ -96,7 +94,7 @@ public class CellSoldier : CellBaseClass
       }
     }
 
-    if (_attackTimer < GlobalConstants.SoldierAttackTimeout)
+    if (_attackTimer < GlobalConstants.HeavyAttackTimeout)
     {
       _attackTimer += Time.smoothDeltaTime;
     }
@@ -228,7 +226,8 @@ public class CellSoldier : CellBaseClass
       _enemyFound.CellInstance.IsBeingAttacked = true;
     }
 
-    LevelLoader.Instance.SpawnBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound);
+    LevelLoader.Instance.SpawnSplashBullet(_position, _enemyPosition3D, BehaviourRef, _enemyFound, 
+      GlobalConstants.CellHeavyDamage, GlobalConstants.CellHeavySplashRadius);
   }
 
   public void DelistFromBarracks()

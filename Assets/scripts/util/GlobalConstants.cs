@@ -7,21 +7,27 @@ public static class GlobalConstants
   // Time between new cell is spawned by building
   public const float DroneSpawnTimeSeconds = 0.5f; //1.5f;
   public const float SoldierSpawnTimeSeconds = 4.0f;
+  public const float HeavySpawnTimeSeconds = 10.0f;
 
   // Attacker cooldown in seconds
   public const float SoldierAttackTimeout = 1.0f;
+  public const float HeavyAttackTimeout = 10.0f;
   public const float DefenderAttackTimeout = 2.0f;
 
   // Various game parameters
   public const float DefaultBulletSpeed = 1.0f;
   public const float DefenderBulletSpeed = 2.0f;
   public const float AttackerMoveSpeed = 0.5f;
+  public const float HeavyMoveSpeed = 0.2f;
   public const float HolderSlowFactor = 0.5f;
   public const float CameraZoomSpeed = 1.0f;
   public const float CameraMoveSpeed = 10.0f;
   public const float CellHolderRange = 3.0f;
   public const float CellDefenderRange = 4.0f;
   public const float CellSoldierRange = 1.5f;
+  public const float CellHeavyMinRange = 3.0f;
+  public const float CellHeavyMaxRange = 5.0f;
+  public const float CellHeavySplashRadius = 2.5f;
   public const int RoundTimeSeconds = 300;
 
   // Attacker priorities for targets
@@ -29,8 +35,10 @@ public static class GlobalConstants
   public const int CellDronePriority = 2;
   public const int CellColonyPriority = 100;
   public const int CellSoldierPriority = 150;
+  public const int CellHeavyPriority = 160;
   public const int CellDefenderPriority = 60;
   public const int CellBarracksPriority = 60;
+  public const int CellArsenalPriority = 70;
   public const int CellHolderPriority = 50;
   public const int CellBasePriority = 200;
 
@@ -40,6 +48,8 @@ public static class GlobalConstants
   public const float CPUIntermediateActionTimeout = 2.0f;
 
   public const int SoldiersPerBarrack = 2;
+  public const int SoldiersPerArsenal = 1;
+  public const int CellHeavyDamage = 8;
 
   // Maximum block distance between already built building 
   // and new spot for a new building.
@@ -51,7 +61,9 @@ public static class GlobalConstants
   public const int CellBaseHitpoints = 32;
   public const int CellColonyHitpoints = 8;
   public const int CellBarracksHitpoints = 8;
+  public const int CellArsenalHitpoints = 16;
   public const int CellSoldierHitpoints = 4;
+  public const int CellHeavyHitpoints = 8;
   public const int CellDroneHitpoints = 1;
   public const int CellHolderHitpoints = 16;
   public const int CellDefenderHitpoints = 8;
@@ -62,7 +74,9 @@ public static class GlobalConstants
     { CellType.BASE, CellBaseHitpoints },
     { CellType.COLONY, CellColonyHitpoints },
     { CellType.BARRACKS, CellBarracksHitpoints },
+    { CellType.ARSENAL, CellArsenalHitpoints },
     { CellType.SOLDIER, CellSoldierHitpoints },
+    { CellType.HEAVY, CellHeavyHitpoints },
     { CellType.DRONE, CellDroneHitpoints },
     { CellType.HOLDER, CellHolderHitpoints },
     { CellType.DEFENDER, CellDefenderHitpoints },
@@ -73,6 +87,7 @@ public static class GlobalConstants
   {
     { CellType.COLONY, CellColonyHitpoints },
     { CellType.BARRACKS, CellBarracksHitpoints },
+    { CellType.ARSENAL, CellArsenalHitpoints },
     { CellType.HOLDER, CellHolderHitpoints },
     { CellType.DEFENDER, CellDefenderHitpoints }
   };
@@ -83,9 +98,11 @@ public static class GlobalConstants
     { CellType.COLONY, Color.green },
     { CellType.DRONE, Color.green },
     { CellType.BARRACKS, Color.red },
+    { CellType.ARSENAL, Color.red },
     { CellType.HOLDER, Color.blue },
     { CellType.DEFENDER, Color.red },
-    { CellType.SOLDIER, Color.red }
+    { CellType.SOLDIER, Color.red },
+    { CellType.HEAVY, Color.red }
   };
 
   public static Dictionary<CellType, Color> CPUColors = new Dictionary<CellType, Color>()
@@ -94,9 +111,11 @@ public static class GlobalConstants
     { CellType.COLONY, Color.cyan },
     { CellType.DRONE, Color.cyan },
     { CellType.BARRACKS, Color.magenta },
+    { CellType.ARSENAL, Color.magenta },
     { CellType.HOLDER, Color.yellow },
     { CellType.DEFENDER, Color.magenta },
-    { CellType.SOLDIER, Color.magenta }
+    { CellType.SOLDIER, Color.magenta },
+    { CellType.HEAVY, Color.magenta }
   };
 
   public static List<Dictionary<CellType, Color>> ColorsList = new List<Dictionary<CellType, Color>>()
@@ -116,7 +135,9 @@ public static class GlobalConstants
     COLONY,
     DRONE,
     BARRACKS,
+    ARSENAL,
     SOLDIER,
+    HEAVY,
     HOLDER,
     DEFENDER,
     WALL,

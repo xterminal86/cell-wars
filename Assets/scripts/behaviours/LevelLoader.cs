@@ -17,14 +17,17 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   public GameObject CellColonyPrefab;
   public GameObject CellDronePrefab;
   public GameObject CellBarracksPrefab;
+  public GameObject CellArsenalPrefab;
   public GameObject CellHolderPrefab;
   public GameObject CellDefenderPrefab;
   public GameObject CellSoldierPrefab;
+  public GameObject CellHeavyPrefab;
   public GameObject CellWallPrefab;
   public GameObject CellDestroyAnimationPrefab;
   public GameObject WallDestroyAnimationPrefab;
 
   public GameObject BulletPrefab;
+  public GameObject BulletSplashPrefab;
   public GameObject GameOverExplosionPrefab;
 
   public Material CellMaterial;
@@ -292,10 +295,24 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
         break;
 
+      case GlobalConstants.CellType.ARSENAL:
+
+        c = new CellArsenal();
+        go = Instantiate(CellArsenalPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
       case GlobalConstants.CellType.SOLDIER:
         
         c = new CellSoldier();
         go = Instantiate(CellSoldierPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
+
+        break;
+
+      case GlobalConstants.CellType.HEAVY:
+
+        c = new CellHeavy();
+        go = Instantiate(CellHeavyPrefab, new Vector3(pos.X, pos.Y, 0.0f), Quaternion.identity, _gridHolder);
 
         break;
 
@@ -316,7 +333,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
     if (c != null)
     { 
-      if (c.Type != GlobalConstants.CellType.SOLDIER)
+      if (c.Type != GlobalConstants.CellType.SOLDIER && c.Type != GlobalConstants.CellType.HEAVY)
       {
         _territoryCountByOwner[ownerId]++;
       }
@@ -326,7 +343,9 @@ public class LevelLoader : MonoSingleton<LevelLoader>
 
       go.GetComponentInChildren<Renderer>().material = m;
 
-      if (c.Type != GlobalConstants.CellType.DRONE && c.Type != GlobalConstants.CellType.SOLDIER)
+      if (c.Type != GlobalConstants.CellType.DRONE 
+       && c.Type != GlobalConstants.CellType.SOLDIER 
+       && c.Type != GlobalConstants.CellType.HEAVY)
       {        
         _buildingsCoordinatesByOwner[ownerId].Add(new Int2(pos));
       }
@@ -342,7 +361,7 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       b.CellInstance.ModelTransform = b.ModelTransform;
       b.CellInstance.InitBehaviour();
 
-      if (c.Type != GlobalConstants.CellType.SOLDIER)
+      if (c.Type != GlobalConstants.CellType.SOLDIER && c.Type != GlobalConstants.CellType.HEAVY)
       {        
         _objectsMap[pos.X, pos.Y] = b;
       }
@@ -494,28 +513,6 @@ public class LevelLoader : MonoSingleton<LevelLoader>
   {
     IsGameOver = true;
 
-    // Time's up
-    if (loserId == -1)
-    {
-      GameOverTitleText.text = "TIME'S UP!";
-    }
-    else
-    {
-      GameOverTitleText.text = (loserId == 0) ? "YOU LOST!" : "YOU WON!";
-    }
-
-    PlayerTerritoryText.text = _territoryCountByOwner[0].ToString();
-    CPUTerritoryText.text = _territoryCountByOwner[1].ToString();
-    PlayerScoreText.text = _scoreCountByOwner[0].ToString();
-    CPUScoreText.text = _scoreCountByOwner[1].ToString();
-
-    GameOverTitleText.color = (loserId == 0) ? Color.red : Color.white;
-
-    PlayerTerritoryText.color = (_territoryCountByOwner[0] > _territoryCountByOwner[1]) ? Color.green : Color.white;
-    CPUTerritoryText.color = (_territoryCountByOwner[1] > _territoryCountByOwner[0]) ? Color.green : Color.white;
-    PlayerScoreText.color = (_scoreCountByOwner[0] > _scoreCountByOwner[1]) ? Color.green : Color.white;
-    CPUScoreText.color = (_scoreCountByOwner[1] > _scoreCountByOwner[0]) ? Color.green : Color.white;
-
     StartCoroutine(GameOverRoutine(loserId));
   }
 
@@ -567,6 +564,28 @@ public class LevelLoader : MonoSingleton<LevelLoader>
       }
     }
 
+    // Time's up
+    if (loserId == -1)
+    {
+      GameOverTitleText.text = "TIME'S UP!";
+    }
+    else
+    {
+      GameOverTitleText.text = (loserId == 0) ? "YOU LOST!" : "YOU WON!";
+    }
+
+    PlayerTerritoryText.text = _territoryCountByOwner[0].ToString();
+    CPUTerritoryText.text = _territoryCountByOwner[1].ToString();
+    PlayerScoreText.text = _scoreCountByOwner[0].ToString();
+    CPUScoreText.text = _scoreCountByOwner[1].ToString();
+
+    GameOverTitleText.color = (loserId == 0) ? Color.red : Color.white;
+
+    PlayerTerritoryText.color = (_territoryCountByOwner[0] > _territoryCountByOwner[1]) ? Color.green : Color.white;
+    CPUTerritoryText.color = (_territoryCountByOwner[1] > _territoryCountByOwner[0]) ? Color.green : Color.white;
+    PlayerScoreText.color = (_scoreCountByOwner[0] > _scoreCountByOwner[1]) ? Color.green : Color.white;
+    CPUScoreText.color = (_scoreCountByOwner[1] > _scoreCountByOwner[0]) ? Color.green : Color.white;
+
     Time.timeScale = 0.0f;
 
     yield return StartCoroutine(ShowGameOverFormRoutine());
@@ -598,10 +617,16 @@ public class LevelLoader : MonoSingleton<LevelLoader>
     yield return null;
   }
 
-  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
+  public void SpawnBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour owner, CellBehaviour enemy, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
   {
     GameObject bullet = Instantiate(BulletPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
-    bullet.GetComponent<Bullet>().SetTarget(targetPos, enemy, bulletSpeed);
+    bullet.GetComponent<Bullet>().SetTarget(targetPos, owner, enemy, bulletSpeed, 1);
+  }
+
+  public void SpawnSplashBullet(Vector3 posToSpawn, Vector3 targetPos, CellBehaviour owner, CellBehaviour enemy, int baseDamage, float splashRadius, float bulletSpeed = GlobalConstants.DefaultBulletSpeed)
+  {
+    GameObject bullet = Instantiate(BulletSplashPrefab, new Vector3(posToSpawn.x, posToSpawn.y, posToSpawn.z), Quaternion.identity, _gridHolder);
+    bullet.GetComponent<Bullet>().SetTargetSplash(targetPos, owner, enemy, bulletSpeed, baseDamage, splashRadius);
   }
 
   public void InstantiateDeathAnimationPrefab(CellBehaviour cellToBeDestroyed)

@@ -91,25 +91,30 @@ public class CellBehaviour : MonoBehaviour
 
     _isDestroying = true;
 
-    if (CellInstance.OwnerId == 0)
+    LevelLoader.Instance.InstantiateDeathAnimationPrefab(this);
+
+    ClearCellObject();
+
+    // If wall on valid range was destroyed we need to refresh overlay too
+    if (CellInstance.OwnerId == 0 || CellInstance.Type == GlobalConstants.CellType.WALL)
     {
       LevelLoader.Instance.RefreshTerritoryOverlay();
     }
 
-    LevelLoader.Instance.InstantiateDeathAnimationPrefab(this);
-
-    ClearCellObject();
     DestroyGameObject();
   }
 
   void ClearCellObject()
   {
-    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER)
+    if (CellInstance.Type != GlobalConstants.CellType.SOLDIER && CellInstance.Type != GlobalConstants.CellType.HEAVY)
     {
       LevelLoader.Instance.ObjectsMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y] = null;
     }
 
-    if (CellInstance.Type != GlobalConstants.CellType.NONE && CellInstance.Type != GlobalConstants.CellType.WALL && CellInstance.Type != GlobalConstants.CellType.SOLDIER)
+    if (CellInstance.Type != GlobalConstants.CellType.NONE 
+     && CellInstance.Type != GlobalConstants.CellType.WALL 
+     && CellInstance.Type != GlobalConstants.CellType.SOLDIER
+     && CellInstance.Type != GlobalConstants.CellType.HEAVY)
     {
       LevelLoader.Instance.TerritoryCountByOwner[CellInstance.OwnerId]--;
     }
@@ -120,8 +125,16 @@ public class CellBehaviour : MonoBehaviour
         LevelLoader.Instance.DronesCountByOwner[CellInstance.OwnerId]--;
         break;
 
+      case GlobalConstants.CellType.HEAVY:        
       case GlobalConstants.CellType.SOLDIER:
-        (CellInstance as CellSoldier).DelistFromBarracks();
+        if (CellInstance is CellSoldier)
+        {
+          (CellInstance as CellSoldier).DelistFromBarracks();
+        }
+        else
+        {
+          (CellInstance as CellHeavy).DelistFromBarracks();
+        }
         LevelLoader.Instance.SoldiersMap[CellInstance.Coordinates.X, CellInstance.Coordinates.Y].Remove(CellInstance.GetHashCode());
         LevelLoader.Instance.SoldiersCountByOwner[CellInstance.OwnerId]--;
         break;
