@@ -46,7 +46,7 @@ public class Pathfinding : MonoBehaviour
 
     RefreshMap();
 
-    PlaceActor(0, 0);
+    PlaceActor(0, 3);
   }
 
   void PlaceActor(int x, int y)
@@ -68,7 +68,7 @@ public class Pathfinding : MonoBehaviour
 
       Int2 newPos = FindNextCell(currentPos, currentWeight);
       if (newPos != null)
-      {   
+      {  
         Vector3 pos = new Vector3(newPos.X, newPos.Y, 0.0f);
         Actor.transform.position = pos;
 

@@ -99,6 +99,7 @@ public static class GlobalConstants
 
   public static Dictionary<CellType, int> DroneCostByType = new Dictionary<CellType, int>()
   {
+    { CellType.BASE, CellBaseHitpoints },
     { CellType.COLONY, CellColonyHitpoints },
     { CellType.SPAWNER, CellSpawnerHitpoints },
     { CellType.ACADEMY, CellAcademyHitpoints },
