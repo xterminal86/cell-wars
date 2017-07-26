@@ -180,8 +180,9 @@ public class Main : MonoBehaviour
     if (Input.GetMouseButtonDown(2))
     {
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SOLDIER, 1);
-      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.BARRACKS, 0);
-      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.DEFENDER, 1);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SPAWNER, 0);
+      LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SPAWNER, 1);
+      //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.DEFENDER, 1);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.HEAVY, 0);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.ARSENAL, 0);
       //LevelLoader.Instance.PlaceCell(_cellCoords, GlobalConstants.CellType.SNIPER, 0);

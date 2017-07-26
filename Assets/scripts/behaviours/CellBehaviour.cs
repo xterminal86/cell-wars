@@ -154,7 +154,5 @@ public class CellBehaviour : MonoBehaviour
     {
       LevelLoader.Instance.GameOver(CellInstance.OwnerId, (CellInstance.OwnerId == 0) ? "CPU WON!" : "YOU WON!");    
     }
-
-    CellInstance = null;
   }
 }

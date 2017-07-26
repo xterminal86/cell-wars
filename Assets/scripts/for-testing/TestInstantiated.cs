@@ -13,8 +13,10 @@ public class TestInstantiated : MonoBehaviour
 		
     if (_timer > 10.0f)
     {
-      Debug.Log("Destroying");
+      Debug.Log(string.Format("Destroying (before Destroy()), behaviour: [{0}], inner reference: [{1}]", this, TestClassRef));
       Destroy(gameObject);
+      TestClassRef = null;
+      Debug.Log(string.Format("Destroying (after Destroy()), behaviour: [{0}], inner reference: [{1}]", this, TestClassRef));
     }
 	}
 }
