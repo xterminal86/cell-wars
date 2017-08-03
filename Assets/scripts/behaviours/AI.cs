@@ -7,9 +7,41 @@ using UnityEngine.UI;
 /// Crude implementation of AI
 /// </summary>
 public class AI : MonoBehaviour 
-{  
-  Heuristic _heuristic = new Heuristic();
+{ 
+  ControlStateBase _state;
 
+  ControlStateIdle _idleState;
+
+  void Awake()
+  {
+    _idleState = new ControlStateIdle(this);
+
+    ChangeState(_idleState);
+  }
+
+  Text _debugText;
+  void Start()
+  {
+    _debugText = GameObject.Find("debug-text").GetComponent<Text>();
+  }
+
+  void ChangeState(ControlStateBase newState)
+  {
+    Debug.Log(string.Format("[{0}] => [{1}]", _state, newState));
+
+    _state = newState;
+  }
+
+  void Update()
+  {
+    #if UNITY_EDITOR
+    _debugText.text = _state.HeuristicProperty.ToString();
+    #endif
+
+    _state.Run();
+  }
+
+  /*
   // Limit of build actions performed by CPU
   public int MaxBuildActions = int.MaxValue;
 
@@ -532,60 +564,7 @@ public class BuildAction
     PosToBuild.Set(posToBuild);
     BuildingType = buildingType;
   }
+  */
 };
 
-public class Heuristic
-{
-  public int OurColonies = 0;
-  public int EnemyColonies = 0;
-  public int OurBarracks = 0;
-  public int EnemyBarracks = 0;
-  public int OurDefenders = 0;
-  public int EnemyDefenders = 0;
-  public int OurDrones = 0;
-  public int EnemyDrones = 0;
-  public int OurArea = 0;
-  public int EnemyArea = 0;
-  public int OurAttackers = 0;
-  public int EnemyAttackers = 0;
-  public int OurScore = 0;
-  public int EnemyScore = 0;
 
-  public void Clear()
-  {
-    OurColonies = 0;
-    EnemyColonies = 0;
-    OurBarracks = 0;
-    EnemyBarracks = 0;
-    OurDefenders = 0;
-    EnemyDefenders = 0;
-    OurDrones = 0;
-    EnemyDrones = 0;
-    OurArea = 0;
-    EnemyArea = 0;
-    OurAttackers = 0;
-    EnemyAttackers = 0;
-    OurScore = 0;
-    EnemyScore = 0;
-  }
-
-  public override string ToString()
-  {
-    return string.Format("AI data:\n" +
-                         "CPU colonies:     {0}\n" +
-                         "Player colonies:  {1}\n" + 
-                         "CPU barracks:     {2}\n" +
-                         "Player barracks:  {3}\n" +
-                         "CPU defenders:    {4}\n" +
-                         "Player defenders: {5}\n" +
-                         "CPU drones:       {6}\n" +
-                         "Player drones:    {7}\n" +
-                         "CPU territory:    {8}\n" +
-                         "Player territory: {9}\n" +
-                         "CPU attackers:    {10}\n" +
-                         "Player attackers: {11}\n" +
-                         "CPU score:        {12}\n" +
-                         "Player score:     {13}\n", 
-      OurColonies, EnemyColonies, OurBarracks, EnemyBarracks, OurDefenders, EnemyDefenders, OurDrones, EnemyDrones, OurArea, EnemyArea, OurAttackers, EnemyAttackers, OurScore, EnemyScore);
-  }
-};
