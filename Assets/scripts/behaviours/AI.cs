@@ -8,15 +8,17 @@ using UnityEngine.UI;
 /// </summary>
 public class AI : MonoBehaviour 
 { 
+  public Text CurrentStateText;
+
   ControlStateBase _state;
 
-  ControlStateIdle _idleState;
+  public ControlStateIdle IdleState;
 
   void Awake()
   {
-    _idleState = new ControlStateIdle(this);
+    IdleState = new ControlStateIdle(this);
 
-    ChangeState(_idleState);
+    ChangeState(IdleState);
   }
 
   Text _debugText;
@@ -36,6 +38,7 @@ public class AI : MonoBehaviour
   {
     #if UNITY_EDITOR
     _debugText.text = _state.HeuristicProperty.ToString();
+    CurrentStateText.text = string.Format("[{0}]", _state);
     #endif
 
     _state.Run();
