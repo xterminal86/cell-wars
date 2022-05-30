@@ -1,21 +1,21 @@
 fileFormatVersion: 2
-guid: e37c3c5683f5c6644b6274ec692d5cd9
-timeCreated: 1493157250
-licenseType: Free
+guid: b660a4c5190ff514cb9721c3847c47ba
 TrueTypeFontImporter:
+  externalObjects: {}
   serializedVersion: 4
-  fontSize: 16
+  fontSize: 128
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Old_Terminal
   fontNames:
   - Old_Terminal
   fallbackFontReferences: []
   customCharacters: 
-  fontRenderingMode: 0
+  fontRenderingMode: 3
   ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 
